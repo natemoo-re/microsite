@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Nate Moore",
     "email": "nate@natemoo.re",
@@ -12,6 +12,7 @@
   "bin": "./index.js",
   "types": "./index.d.ts",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc -p ."
   },
   "files": [
