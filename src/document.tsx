@@ -1,11 +1,12 @@
-import { h, createContext, FunctionalComponent } from 'preact';
+import { h, createContext, FunctionalComponent, Fragment } from 'preact';
 import { useRef } from 'preact/hooks';
+import render from 'preact-render-to-string';
 
 export const __DocContext = createContext({ head: { current: [] }});
 
 export const Document: FunctionalComponent<{ styles?: string[], hasScripts?: boolean }> = ({ styles = [], hasScripts = false, children }) => {
     const head = useRef([]);
-    console.log(head.current);
+    const subtree = render(<__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>, {}, {});
 
     return (
         <html>
@@ -13,12 +14,11 @@ export const Document: FunctionalComponent<{ styles?: string[], hasScripts?: boo
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width" />
 
+                <Fragment>{head.current}</Fragment>
                 {styles.map(style => <style dangerouslySetInnerHTML={{ __html: style }} />)}
             </head>
             <body>
-                <div id="__crooked">
-                    <__DocContext.Provider value={{ head }} children={children} />
-                </div>
+                <div id="__crooked" dangerouslySetInnerHTML={{ __html: subtree }} />
 
                 {hasScripts ? (
                     <>
