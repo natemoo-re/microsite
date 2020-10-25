@@ -1,0 +1,4 @@
+node_modules
+**/*.js
+types/
+.DS_Store
