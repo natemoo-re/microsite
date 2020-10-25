@@ -38,7 +38,7 @@ const createPagePlugins = () => [
     }),
 ]
 
-const OUTPUT_DIR = './.tmp/crooked';
+const OUTPUT_DIR = './.tmp/microsite';
 
 const outputOptions: OutputOptions = {
     format: 'esm',
@@ -90,7 +90,7 @@ async function readDir(dir) {
 }
 
 async function prepare() {
-    const paths = ['./dist', './.tmp/crooked'];
+    const paths = ['./dist', './.tmp/microsite'];
     await Promise.all(paths.map(p => rmdir(p, { recursive: true })));
     await Promise.all(paths.map(p => mkdir(p, { recursive: true })));
 
@@ -101,7 +101,7 @@ async function prepare() {
 }
 
 async function cleanup() {
-    const paths = ['./.tmp/crooked'];
+    const paths = ['./.tmp/microsite'];
     await Promise.all(paths.map(p => rmdir(p, { recursive: true })));
     if ((await readDir('./.tmp')).length === 0) {
         await rmdir('./.tmp');
@@ -112,17 +112,17 @@ export async function build() {
     await prepare();
     await Promise.all([writeGlobal(), writePages()]);
 
-    const globalStyle = await readFile('./.tmp/crooked/global.css').then(v => v.toString());
-    const hasGlobalScript = await readFile('./.tmp/crooked/global.js').then(v => !!v.toString().trim());
+    const globalStyle = await readFile('./.tmp/microsite/global.css').then(v => v.toString());
+    const hasGlobalScript = await readFile('./.tmp/microsite/global.js').then(v => !!v.toString().trim());
 
     if (hasGlobalScript) {
         await Promise.all([
-            copyFile(resolve('./.tmp/crooked/global.js'), 'dist/index.js'),
-            copyFile(resolve('./.tmp/crooked/global.legacy.js'), 'dist/index.legacy.js'),
+            copyFile(resolve('./.tmp/microsite/global.js'), 'dist/index.js'),
+            copyFile(resolve('./.tmp/microsite/global.legacy.js'), 'dist/index.legacy.js'),
         ])
     }
 
-    const files = await readDir('./.tmp/crooked/pages');
+    const files = await readDir('./.tmp/microsite/pages');
     const getName = f => f.slice(f.indexOf('pages/') + 'pages/'.length - 1, extname(f).length * -1);
     const styles: any[] = await Promise.all(files.filter(f => f.endsWith('.css')).map(f => readFile(f).then(buff => ({ __name: getName(f), content: buff.toString() }) )));
     const pages: any[] = await Promise.all(files.filter(f => f.endsWith('.js')).map(f => import(join(process.cwd(), f)).then(mod => ({ ...mod, __name: getName(f) }))));

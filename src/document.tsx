@@ -18,7 +18,7 @@ export const Document: FunctionalComponent<{ styles?: string[], hasScripts?: boo
                 {styles.map(style => <style dangerouslySetInnerHTML={{ __html: style }} />)}
             </head>
             <body>
-                <div id="__crooked" dangerouslySetInnerHTML={{ __html: subtree }} />
+                <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
 
                 {hasScripts ? (
                     <>
