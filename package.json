@@ -9,7 +9,7 @@
   "type": "module",
   "main": "./index.js",
   "bin": "./index.js",
-  "types": "./d/index.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "build": "tsc -p ."
   },
