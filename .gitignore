@@ -1,4 +1,4 @@
 node_modules
 **/*.js
-types/
+**/*.d.ts
 .DS_Store

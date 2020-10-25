@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "declaration": true,
-    "declarationDir": "./types",
+    "declarationDir": "./",
     "experimentalDecorators": true,
     "lib": [
       "dom",
