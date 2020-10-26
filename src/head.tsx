@@ -1,8 +1,8 @@
-import { useContext } from 'preact/hooks';
-import { __DocContext } from './document'
+import { useContext } from "preact/compat";
+import { __DocContext } from "./document";
 
 export function Head({ children }) {
-    const { head } = useContext(__DocContext);
-    head.current.push(children);
-    return null;
+  const { head } = useContext(__DocContext);
+  head.current.push(children);
+  return null;
 }
