@@ -11,7 +11,7 @@ export const Document: FC<{
   const subtree = render(
     <__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>,
     {},
-    {}
+    { pretty: true }
   );
 
   return (
@@ -26,10 +26,7 @@ export const Document: FC<{
         ))}
       </head>
       <body>
-        <div
-          id="__microsite"
-          dangerouslySetInnerHTML={{ __html: subtree }}
-        ></div>
+        <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
 
         {hasScripts ? (
           <>
