@@ -26,7 +26,10 @@ export const Document: FC<{
         ))}
       </head>
       <body>
-        <div id="__microsite">{subtree}</div>
+        <div
+          id="__microsite"
+          dangerouslySetInnerHTML={{ __html: subtree }}
+        ></div>
 
         {hasScripts ? (
           <>
