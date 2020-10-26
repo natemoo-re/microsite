@@ -77,6 +77,7 @@ const internalRollupConfig = {
   external: [
     "microsite/head",
     "microsite/document",
+    "microsite/hydrate",
     "microsite",
     "preact/compat",
     "preact/jsx-runtime",
