@@ -3,7 +3,7 @@ import React from "preact/compat";
 const isServer = typeof window === "undefined";
 let id = 0;
 
-const hydrate = (Component: React.FC) => (props: any) => {
+export const hydrate = (Component: React.FC) => (props: any) => {
   id += 1;
 
   const scriptSrc = `
@@ -24,5 +24,3 @@ const hydrate = (Component: React.FC) => (props: any) => {
     </>
   );
 };
-
-export default hydrate;
