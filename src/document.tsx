@@ -1,5 +1,5 @@
 import React, { createContext, useRef, FC } from "preact/compat";
-import { renderToString } from "preact-render-to-string";
+import render from "preact-render-to-string";
 
 export const __DocContext = createContext({ head: { current: [] } });
 
@@ -9,7 +9,7 @@ export const Document: FC<{
   hasScripts?: boolean;
 }> = ({ styles = [], hasScripts = false, children }) => {
   const head = useRef([]);
-  const subtree = renderToString(
+  const subtree = render(
     <__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>,
     {},
     { pretty: true }
