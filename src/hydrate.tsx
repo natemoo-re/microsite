@@ -1,9 +1,9 @@
-import React, { FC } from "preact/compat";
+import React from "preact/compat";
 
 const isServer = typeof window === "undefined";
 let id = 0;
 
-export default (Component: FC) => (props: any) => {
+const hydrate = (Component: React.FC) => (props: any) => {
   id += 1;
 
   const scriptSrc = `
@@ -24,3 +24,5 @@ export default (Component: FC) => (props: any) => {
     </>
   );
 };
+
+export default hydrate;
