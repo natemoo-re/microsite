@@ -73,7 +73,7 @@ const outputOptions: OutputOptions = {
 };
 
 const internalRollupConfig = {
-  context: {},
+  context: () => ({}),
   external: [
     "microsite/head",
     "microsite/document",
