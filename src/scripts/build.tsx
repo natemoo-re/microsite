@@ -1,10 +1,11 @@
 require = require("esm")(module);
 
-import { join, resolve, sep, extname, dirname } from "path";
-import { OutputOptions, rollup } from "rollup";
-import glob from "globby";
+import { join, resolve, extname, dirname } from "path";
+import { AcornNode, OutputOptions, rollup, RollupOptions } from "rollup";
+import { walk } from "estree-walker";
 
-import { default as postcss } from "rollup-plugin-postcss";
+import { default as multi } from "rollup-plugin-multi-input";
+import { default as styles } from "rollup-plugin-styles";
 import { default as typescript } from "@rollup/plugin-typescript";
 import { default as nodeResolve } from "@rollup/plugin-node-resolve";
 import { default as alias } from "@rollup/plugin-alias";
@@ -13,6 +14,7 @@ import { Document } from "../document";
 import React from "preact/compat";
 import render from "preact-render-to-string";
 import { promises as fsp } from "fs";
+import inject from "@rollup/plugin-inject";
 const { readdir, readFile, rmdir, writeFile, mkdir, copyFile, stat } = fsp;
 
 const ROOT_DIR = join(process.cwd(), "src");
@@ -28,10 +30,12 @@ const ROOT_DIR = join(process.cwd(), "src");
 // }
 
 const requiredPlugins = [
+  inject({
+    React: "preact/compat",
+  }),
   alias({
     entries: [
       { find: /^@\/(.*)/, replacement: join(ROOT_DIR, "$1.js") },
-      { find: "react/jsx-runtime", replacement: "preact/jsx-runtime" },
       { find: "react", replacement: "preact/compat" },
       { find: "react-dom", replacement: "preact/compat" },
     ],
@@ -43,23 +47,23 @@ const requiredPlugins = [
 ];
 
 const globalPlugins = [
-  postcss({
+  styles({
     config: true,
-    inject: false,
-    extract: true,
+    mode: "extract",
+    autoModules: true,
     minimize: true,
     sourceMap: false,
   }),
 ];
 
 const createPagePlugins = () => [
-  postcss({
+  styles({
     config: true,
-    inject: false,
-    extract: true,
+    mode: "extract",
     minimize: true,
+    autoModules: true,
     modules: {
-      generateScopedName: "[hash:base64:5]",
+      generateScopedName: "[hash:6]",
     },
     sourceMap: false,
   }),
@@ -72,21 +76,99 @@ const outputOptions: OutputOptions = {
   sourcemap: false,
 };
 
-const internalRollupConfig = {
+/**
+ * Catch all identifiers that begin with "use" followed by an uppercase Latin
+ * character to exclude identifiers like "user".
+ */
+
+function isHookName(s) {
+  return /^use[A-Z0-9].*$/.test(s);
+}
+
+/**
+ * We consider hooks to be a hook name identifier or a member expression
+ * containing a hook name.
+ */
+function isHook(node) {
+  if (node.type === "Identifier") {
+    return isHookName(node.name);
+  } else if (
+    node.type === "MemberExpression" &&
+    !node.computed &&
+    isHook(node.property)
+  ) {
+    const obj = node.object;
+    const isPascalCaseNameSpace = /^[A-Z].*/;
+    return obj.type === "Identifier" && isPascalCaseNameSpace.test(obj.name);
+  } else {
+    return false;
+  }
+}
+
+function hasHooks(rootNode: AcornNode) {
+  let found = false;
+  walk(rootNode, {
+    enter(node) {
+      if (node.type === "MemberExpression" || node.type === "Identifier") {
+        if (!found) found = isHook(node);
+      }
+    },
+  });
+  return found;
+}
+
+const internalRollupConfig: RollupOptions = {
   context: "globalThis",
   external: [
     "microsite/head",
     "microsite/document",
-    "microsite/hydrate",
     "microsite",
+    "preact",
     "preact/compat",
     "preact/jsx-runtime",
     "preact-render-to-string",
   ],
+
   treeshake: true,
+
   onwarn(message) {
-    if (/empty chunk/.test(message)) return;
+    if (/empty chunk/.test(`${message}`)) return;
+    if (message.pluginCode === "TS2686") return;
     console.error(message);
+  },
+
+  manualChunks(id, { getModuleInfo }) {
+    const info = getModuleInfo(id);
+
+    const dependentEntryPoints = [];
+    if (
+      info.importedIds.includes("preact/compat") ||
+      info.importedIds.includes("preact/jsx-runtime")
+    ) {
+      const idsToHandle = new Set([
+        ...info.importers,
+        ...info.dynamicImporters,
+      ]);
+      const hooks = hasHooks(info.ast);
+
+      if (hooks) {
+        for (const moduleId of idsToHandle) {
+          const { isEntry, dynamicImporters, importers } = getModuleInfo(
+            moduleId
+          );
+          if (isEntry || [...importers, ...dynamicImporters].length > 0)
+            dependentEntryPoints.push(moduleId);
+
+          for (const importerId of importers) idsToHandle.add(importerId);
+        }
+      }
+    }
+
+    if (dependentEntryPoints.length === 1) {
+      return `hydrate/${info.id.split("/").slice(-1)[0].split(".")[0]}`;
+    } else if (dependentEntryPoints.length > 1) {
+      return `hydrate/shared`;
+    }
   },
 };
 
@@ -115,6 +197,7 @@ async function writeGlobal() {
       global.write({
         format: "esm",
         sourcemap: false,
+        assetFileNames: "global.css",
         dir: OUTPUT_DIR,
         name: "global",
       }),
@@ -131,33 +214,22 @@ async function writeGlobal() {
 
 async function writePages() {
   try {
-    const pages = await glob(["src/pages/**/*.tsx"]);
-    const bundles = await Promise.all(
-      pages.map((input) =>
-        rollup({
-          ...internalRollupConfig,
-          plugins: [
-            ...requiredPlugins,
-            typescript({ target: "ES2018" }),
-            ...createPagePlugins(),
-          ],
-          input,
-        })
-      )
-    );
+    const bundle = await rollup({
+      ...internalRollupConfig,
+      plugins: [
+        multi(),
+        ...requiredPlugins,
+        typescript({ target: "ES2018" }),
+        ...createPagePlugins(),
+      ],
+      input: "src/pages/**/*.tsx",
+    });
 
-    const result = Promise.all(
-      bundles.map((bundle, i) =>
-        bundle.write({
-          ...outputOptions,
-          dir: pages[i]
-            .replace(/^src/, OUTPUT_DIR)
-            .split(sep)
-            .slice(0, -1)
-            .join(sep),
-        })
-      )
-    );
+    const result = await bundle.write({
+      ...outputOptions,
+      assetFileNames: "[name][extname]",
+      dir: OUTPUT_DIR,
+    });
     return result;
   } catch (e) {
     console.log(e);

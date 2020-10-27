@@ -21,24 +21,28 @@
   "dependencies": {
     "@rollup/plugin-alias": "^3.1.1",
     "@rollup/plugin-inject": "^4.0.2",
+    "@rollup/plugin-multi-entry": "^4.0.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "esm": "^3.2.25",
+    "estree-walker": "2.0.1",
     "globby": "^11.0.1",
     "postcss": "^8.1.2",
     "preact": "^10.5.5",
     "preact-render-to-string": "5.1.11",
     "rollup": "^2.32.1",
-    "rollup-plugin-postcss": "^3.1.8"
+    "rollup-plugin-styles": "^3.11.0"
   },
   "devDependencies": {
+    "@rollup/pluginutils": "^4.0.0",
     "@types/node": "^14.14.2",
     "husky": "^4.3.0",
     "lint-staged": "^10.4.2",
     "lodash": "^4.17.20",
     "prettier": "^2.1.2",
+    "rollup-plugin-multi-input": "^1.1.1",
     "typescript": "^4.1.0-beta"
   },
   "repository": {
