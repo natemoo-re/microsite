@@ -27,8 +27,14 @@ export const Document: FC<{
         ))}
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "window.__hydrate={components:{}}",
+          }}
+        />
         <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
 
+        <script src="/hydrate.js" async />
         {hasScripts ? (
           <>
             <script type="module" src="/index.js" />

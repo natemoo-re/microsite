@@ -1,14 +1,16 @@
-require = require("esm")(module);
-
-import { join, resolve, extname, dirname } from "path";
+import { join, resolve, extname, dirname, basename } from "path";
 import { AcornNode, OutputOptions, rollup, RollupOptions } from "rollup";
 import { walk } from "estree-walker";
 
-import { default as multi } from "rollup-plugin-multi-input";
-import { default as styles } from "rollup-plugin-styles";
-import { default as typescript } from "@rollup/plugin-typescript";
-import { default as nodeResolve } from "@rollup/plugin-node-resolve";
-import { default as alias } from "@rollup/plugin-alias";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const multi = require("rollup-plugin-multi-input").default;
+import styles from "rollup-plugin-styles";
+import typescript from "@rollup/plugin-typescript";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import alias from "@rollup/plugin-alias";
+import cjs from "@rollup/plugin-commonjs";
 
 import { Document } from "../document";
 import React from "preact/compat";
@@ -17,17 +19,8 @@ import { promises as fsp } from "fs";
 import inject from "@rollup/plugin-inject";
 const { readdir, readFile, rmdir, writeFile, mkdir, copyFile, stat } = fsp;
 
-const ROOT_DIR = join(process.cwd(), "src");
-
-// const _vnode = options.vnode;
-// options.vnode = vnode => {
-//   if (vnode.type && (vnode.type as any).hydrate) {
-//   }
-
-//   if (_vnode) {
-//     _vnode(vnode);
-//   }
-// }
+const BASE_DIR = process.cwd();
+const ROOT_DIR = join(BASE_DIR, "src");
 
 const requiredPlugins = [
   inject({
@@ -44,6 +37,7 @@ const requiredPlugins = [
     mainFields: ["module", "main"],
     dedupe: ["preact/compat"],
   }),
+  cjs(),
 ];
 
 const globalPlugins = [
@@ -122,7 +116,6 @@ const internalRollupConfig: RollupOptions = {
   external: [
     "microsite/head",
     "microsite/document",
-    "microsite",
     "preact",
     "preact/compat",
     "preact/jsx-runtime",
@@ -265,13 +258,13 @@ async function prepare() {
   }
 }
 
-async function cleanup() {
-  const paths = ["./.tmp/microsite"];
-  await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  if ((await readDir("./.tmp")).length === 0) {
-    await rmdir("./.tmp");
-  }
-}
+// async function cleanup() {
+//   const paths = ["./.tmp/microsite"];
+//   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
+//   if ((await readDir("./.tmp")).length === 0) {
+//     await rmdir("./.tmp");
+//   }
+// }
 
 export async function build() {
   await prepare();
@@ -295,8 +288,8 @@ export async function build() {
   }
 
   const files = await readDir("./.tmp/microsite/pages");
-  const getName = (f) =>
-    f.slice(f.indexOf("pages/") + "pages/".length - 1, extname(f).length * -1);
+  const getName = (f: string, base = "pages") =>
+    f.slice(f.indexOf(`${base}/`) + base.length + 1, extname(f).length * -1);
   const styles: any[] = await Promise.all(
     files
       .filter((f) => f.endsWith(".css"))
@@ -316,6 +309,29 @@ export async function build() {
           __name: getName(f),
         }))
       )
+  );
+
+  const hydrateFiles = await readDir("./.tmp/microsite/hydrate");
+  // const hydrateModules: any[] = await Promise.all(
+  //   hydrateFiles
+  //     .filter((f) => f.endsWith(".js"))
+  //     .map((f) =>
+  //       import(join(process.cwd(), f)).then((mod) => ({
+  //         ...mod,
+  //         __name: getName(f, 'hydrate'),
+  //       }))
+  //     )
+  // );
+
+  await mkdir(resolve(BASE_DIR, join("dist", "hydrate")));
+
+  await Promise.all(
+    hydrateFiles.map((file) =>
+      copyFile(
+        resolve(file),
+        resolve(BASE_DIR, join("dist", "hydrate", basename(file)))
+      )
+    )
   );
 
   const output = [];
@@ -348,12 +364,19 @@ export async function build() {
     }
   }
 
-  await Promise.all(
-    output.map(({ name, content }) =>
+  await Promise.all([
+    ...output.map(({ name, content }) =>
       mkdir(resolve(`./dist/${dirname(name)}`), { recursive: true }).then(() =>
         writeFile(resolve(`./dist/${name}.html`), content)
       )
-    )
-  );
-  await cleanup();
+    ),
+    writeFile(
+      resolve(`./dist/hydrate/index.js`),
+      `const $cmps = document.querySelectorAll('[data-hydrate]');
+Array.from($cmps).forEach(($marker) => {
+  console.log($marker);
+});`
+    ),
+  ]);
+  // await cleanup();
 }

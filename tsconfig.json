@@ -9,7 +9,7 @@
     "lib": ["dom", "ES2019"],
     "outDir": "./",
     "moduleResolution": "Node",
-    "module": "CommonJS",
+    "module": "ESNext",
     "target": "ES2017",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
