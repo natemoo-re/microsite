@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "author": {
     "name": "Nate Moore",
@@ -57,7 +57,7 @@
   },
   "homepage": "https://github.com/natemoo-re/microsite#readme",
   "volta": {
-    "node": "14.15.0"
+    "node": "12.19.0"
   },
   "husky": {
     "hooks": {

@@ -1,6 +1,7 @@
 import { join, resolve, extname, dirname, basename } from "path";
 import { AcornNode, OutputOptions, rollup, RollupOptions } from "rollup";
-import { walk } from "estree-walker";
+import estree from "estree-walker";
+const { walk } = estree;
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -19,8 +20,7 @@ import { Document, __DocContext, __hydratedComponents } from "../document";
 import React from "preact/compat";
 import render from "preact-render-to-string";
 import { promises as fsp } from "fs";
-import { rm } from "fs/promises";
-const { readdir, readFile, writeFile, mkdir, copyFile, stat } = fsp;
+const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 
 const BASE_DIR = process.cwd();
 const ROOT_DIR = join(BASE_DIR, "src");
@@ -288,7 +288,7 @@ async function readDir(dir) {
 
 async function prepare() {
   const paths = ["./dist", "./.tmp/microsite"];
-  await Promise.all(paths.map((p) => rm(p, { recursive: true, force: true })));
+  await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   await Promise.all(paths.map((p) => mkdir(p, { recursive: true })));
 
   if ((await stat("./src/public")).isDirectory()) {
@@ -306,12 +306,12 @@ async function prepare() {
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
   const paths = ["./.tmp/microsite"];
-  await Promise.all(paths.map((p) => rm(p, { recursive: true, force: true })));
+  await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   if ((await readDir("./.tmp")).length === 0) {
-    await rm("./.tmp", { recursive: true });
+    await rmdir("./.tmp", { recursive: true });
   }
   if (err) {
-    await rm("./dist", { recursive: true, force: true });
+    await rmdir("./dist", { recursive: true });
   }
 }
 
@@ -498,13 +498,11 @@ export async function build() {
     )
   );
   await Promise.all([
-    ...output
-      .flat()
-      .map(({ name, content }) =>
-        mkdir(resolve(`./dist/${dirname(name)}`), {
-          recursive: true,
-        }).then(() => writeFile(resolve(`./dist/${name}`), content))
-      ),
+    ...output.flat().map(({ name, content }) =>
+      mkdir(resolve(`./dist/${dirname(name)}`), {
+        recursive: true,
+      }).then(() => writeFile(resolve(`./dist/${name}`), content))
+    ),
   ]);
 
   await cleanup();

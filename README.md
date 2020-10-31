@@ -4,7 +4,7 @@
 
 **At the moment, this is an experiment more than a production-ready tool.**
 
-> Microsite is output as ESM, so it needs to run in a Node environment which supports it (like node@14)
+> Microsite is output as ESM, so it needs to run in a Node environment which supports it (like node@12)
 > You can add a script such as this to your project:
 > `node --experimental-modules --experimental-specifier-resolution=node node_modules/.bin/microsite build`
 
