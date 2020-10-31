@@ -1,19 +1,52 @@
 import React, { createContext, useRef, FC } from "preact/compat";
+
+export const __DocContext = createContext({
+  head: { current: [] },
+  hydrate: { current: [] },
+});
+export const __hydratedComponents = [];
+const unique = (value: string, index: number, self: string[]) =>
+  self.indexOf(value) === index;
+
 import render from "preact-render-to-string";
 
-export const __DocContext = createContext({ head: { current: [] } });
-
 export const Document: FC<{
-  render: any;
+  hydrateExportManifest?: any;
+  page?: string;
   styles?: string[];
   hasScripts?: boolean;
-}> = ({ styles = [], hasScripts = false, children }) => {
+}> = ({
+  hydrateExportManifest,
+  page,
+  styles = [],
+  hasScripts = false,
+  children,
+}) => {
   const head = useRef([]);
+  const hydrate = useRef([]);
   const subtree = render(
-    <__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>,
+    <__DocContext.Provider value={{ head, hydrate }}>
+      {children}
+    </__DocContext.Provider>,
     {},
     { pretty: true }
   );
+
+  const components = hydrate.current.map(({ name }) => name).filter(unique);
+  if (hydrate.current.length > 0)
+    __hydratedComponents.push({ page, components });
+
+  const componentStyles = components
+    .map((name) => {
+      const found = hydrateExportManifest.find((entry) =>
+        entry.exports.includes(name)
+      );
+      if (found) return found.styles;
+      return null;
+    })
+    .filter((v) => v)
+    .join("")
+    .trim();
 
   return (
     <html>
@@ -22,19 +55,25 @@ export const Document: FC<{
         <meta name="viewport" content="width=device-width" />
 
         <>{head.current}</>
-        {styles.map((style) => (
-          <style dangerouslySetInnerHTML={{ __html: style }} />
-        ))}
-      </head>
-      <body>
-        <script
+
+        <style
           dangerouslySetInnerHTML={{
-            __html: "window.__hydrate={components:{}}",
+            __html: "[data-hydrate]{display:contents;}",
           }}
         />
+        {styles.map((style) => (
+          <style dangerouslySetInnerHTML={{ __html: style.trim() }} />
+        ))}
+        {componentStyles && (
+          <style dangerouslySetInnerHTML={{ __html: componentStyles }} />
+        )}
+      </head>
+      <body>
         <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
 
-        <script src="/hydrate.js" async />
+        {hydrate.current.length > 0 && (
+          <script type="module" defer src={`/_hydrate/pages/${page}.js`} />
+        )}
         {hasScripts ? (
           <>
             <script type="module" src="/index.js" />
