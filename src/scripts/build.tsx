@@ -1,7 +1,5 @@
 import { join, resolve, extname, dirname, basename } from "path";
-import { AcornNode, OutputOptions, rollup, RollupOptions } from "rollup";
-import estree from "estree-walker";
-const { walk } = estree;
+import { OutputOptions, rollup, RollupOptions } from "rollup";
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -25,17 +23,69 @@ const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 const BASE_DIR = process.cwd();
 const ROOT_DIR = join(BASE_DIR, "src");
 
-const createHydrateInitScript = () => {
-  return `import { h, hydrate } from 'https://unpkg.com/preact@latest?module';
+const createHydrateInitScript = ( { isDebug = false }: { isDebug?: boolean} = {}) => {
+  return `import { h, hydrate as mount } from 'https://unpkg.com/preact@latest?module';
 
-export default (Components) => {
-  const $cmps = Array.from(document.querySelectorAll('[data-hydrate]'));
-  for (const $cmp of $cmps) {
-    const Component = Components[$cmp.dataset.hydrate];
+const createObserver = (hydrate) => {
+  if (!('IntersectionObserver') in window) return null;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const isIntersecting = entry.isIntersecting || entry.intersectionRatio > 0;
+      if (!isIntersecting) return;
+      hydrate();
+      io.disconnect();
+    })
+  });
+
+  return io;
+}
+
+function attach($cmp, { name, source }) {
+  const method = $cmp.dataset.method;
+
+  const hydrate = async () => {
+    if ($cmp.dataset.hydrate === '') return;
+    ${isDebug ? 'console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);' : ''}
+    const { [name]: Component } = await import(source); 
     const props = $cmp.dataset.props ? JSON.parse(atob($cmp.dataset.props)) : {};
-    hydrate(h(Component, props, null), $cmp);
+    mount(h(Component, props, null), $cmp);
     delete $cmp.dataset.props;
+    delete $cmp.dataset.method;
     $cmp.dataset.hydrate = '';
+  }
+
+  switch (method) {
+    case 'idle': {
+      if (!('requestIdleCallback' in window) || !('requestAnimationFrame' in window)) return hydrate();
+
+      requestIdleCallback(() => {
+        requestAnimationFrame(hydrate);
+      }, { timeout: 2000 });
+      break;
+    }
+    case 'interaction': {
+      $cmp.addEventListener('pointerenter', hydrate, { once: true, passive: true, capture: true });
+      $cmp.addEventListener('focus', ({ target }) => hydrate().then(() => target.focus()), { once: true, passive: true, capture: true });
+      break;
+    }
+    case 'visible': {
+      if (!('IntersectionObserver') in window) return hydrate();
+
+      const observer = createObserver(hydrate);
+      Array.from($cmp.children).forEach(child => observer.observe(child))
+      break;
+    }
+  }
+}
+
+export default (manifest) => {
+  const $cmps = Array.from(document.querySelectorAll('[data-hydrate]'));
+  
+  for (const $cmp of $cmps) {
+    const name = $cmp.dataset.hydrate;
+    const source = manifest[name];
+    attach($cmp, { name, source });
   }
 }`;
 };
@@ -52,18 +102,22 @@ const createHydrateScript = (components: string[], manifest: any) => {
     }))
     .filter(({ exports }) => exports.length > 0)
     .map(
-      ({ name, exports }) =>
-        `import { ${exports.join(", ")} } from '/_hydrate/chunks/${name}';`
+      ({ name, exports }) => exports.map(cmp => `  '${cmp}': '/_hydrate/chunks/${name}',`).join('\n')
     )
     .join("\n");
 
   return `import hydrate from '/_hydrate/index.js';
-${imports}
-
-hydrate({ ${components.join(", ")} });`;
+hydrate({
+${imports.slice(0, -1)}
+});`
 };
 
 const requiredPlugins = [
+  nodeResolve({
+    mainFields: ["module", "main"],
+    dedupe: ["preact/compat"],
+  }),
+  cjs(),
   inject({
     fetch: "node-fetch",
     React: "preact/compat",
@@ -75,11 +129,6 @@ const requiredPlugins = [
       { find: "react-dom", replacement: "preact/compat" },
     ],
   }),
-  nodeResolve({
-    mainFields: ["module", "main"],
-    dedupe: ["preact/compat"],
-  }),
-  cjs(),
 ];
 
 const globalPlugins = [
@@ -114,47 +163,6 @@ const outputOptions: OutputOptions = {
   minifyInternalExports: false,
 };
 
-/**
- * Catch all identifiers that begin with "use" followed by an uppercase Latin
- * character to exclude identifiers like "user".
- */
-
-function isHookName(s) {
-  return /^use[A-Z0-9].*$/.test(s);
-}
-
-/**
- * We consider hooks to be a hook name identifier or a member expression
- * containing a hook name.
- */
-function isHook(node) {
-  if (node.type === "Identifier") {
-    return isHookName(node.name);
-  } else if (
-    node.type === "MemberExpression" &&
-    !node.computed &&
-    isHook(node.property)
-  ) {
-    const obj = node.object;
-    const isPascalCaseNameSpace = /^[A-Z].*/;
-    return obj.type === "Identifier" && isPascalCaseNameSpace.test(obj.name);
-  } else {
-    return false;
-  }
-}
-
-function hasHooks(rootNode: AcornNode) {
-  let found = false;
-  walk(rootNode, {
-    enter(node) {
-      if (node.type === "MemberExpression" || node.type === "Identifier") {
-        if (!found) found = isHook(node);
-      }
-    },
-  });
-  return found;
-}
-
 const internalRollupConfig: RollupOptions = {
   context: "globalThis",
   external: [
@@ -181,32 +189,28 @@ const internalRollupConfig: RollupOptions = {
 
     const dependentEntryPoints = [];
     if (
-      info.importedIds.includes("preact/compat") ||
-      info.importedIds.includes("preact/jsx-runtime")
+      info.importedIds.includes("microsite/hydrate")
     ) {
       const idsToHandle = new Set([
         ...info.importers,
         ...info.dynamicImporters,
       ]);
-      const hooks = hasHooks(info.ast);
 
-      if (hooks) {
-        for (const moduleId of idsToHandle) {
-          const { isEntry, dynamicImporters, importers } = getModuleInfo(
-            moduleId
-          );
-          if (isEntry || [...importers, ...dynamicImporters].length > 0)
-            dependentEntryPoints.push(moduleId);
+      for (const moduleId of idsToHandle) {
+        const { isEntry, dynamicImporters, importers } = getModuleInfo(
+          moduleId
+        );
+        if (isEntry || [...importers, ...dynamicImporters].length > 0)
+          dependentEntryPoints.push(moduleId);
 
-          for (const importerId of importers) idsToHandle.add(importerId);
-        }
+        for (const importerId of importers) idsToHandle.add(importerId);
       }
     }
 
-    if (dependentEntryPoints.length === 1) {
-      return `hydrate/${info.id.split("/").slice(-1)[0].split(".")[0]}`;
-    } else if (dependentEntryPoints.length > 1) {
+    if (dependentEntryPoints.length > 1) {
       return `hydrate/shared`;
+    } else if (dependentEntryPoints.length === 1) {
+      return `hydrate/${info.id.split("/").slice(-1)[0].split(".")[0]}`;
     }
   },
 };
@@ -317,7 +321,7 @@ async function cleanup({ err = false }: { err?: boolean } = {}) {
 
 async function renderPage(
   page: any,
-  { styles, hydrateExportManifest, hasGlobalScript, globalStyle }: any
+  { styles, hydrateExportManifest, hasGlobalScript, globalStyle, isDebug }: any
 ) {
   let baseHydrate = false;
   const output = [];
@@ -356,10 +360,11 @@ async function renderPage(
       if (!baseHydrate) {
         output.push({
           name: `_hydrate/index.js`,
-          content: createHydrateInitScript(),
+          content: createHydrateInitScript({ isDebug }),
         });
         baseHydrate = true;
       }
+
       output.push({
         name: `_hydrate/pages/${__name}.js`,
         content: createHydrateScript(components, hydrateExportManifest),
@@ -379,7 +384,8 @@ async function renderPage(
   return output;
 }
 
-export async function build() {
+export async function build(args: string[] = []) {
+  const isDebug = args.includes('--debug-hydration');
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
@@ -494,6 +500,7 @@ export async function build() {
         hydrateExportManifest,
         hasGlobalScript,
         globalStyle,
+        isDebug
       })
     )
   );

@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "author": {
     "name": "Nate Moore",
@@ -29,7 +29,6 @@
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
-    "estree-walker": "2.0.1",
     "globby": "^11.0.1",
     "node-fetch": "^2.6.1",
     "postcss": "^8.1.2",

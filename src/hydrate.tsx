@@ -11,8 +11,13 @@ const isServer = typeof window === "undefined";
 const btoa = (str: string) => Buffer.from(str, "utf-8").toString("base64");
 const HydrateContext = createContext<string | false>(false);
 
-export function withHydrate<T extends FC<any>>(Component: T): T {
+export interface HydrationProps {
+  method?: 'idle' | 'visible' | 'interaction';
+}
+
+export function withHydrate<T extends FC<any>>(Component: T, hydrationProps: HydrationProps = {}): T {
   const name = Component.displayName || Component.name;
+  const { method = 'idle' } = hydrationProps;
   return forwardRef((props, ref) => {
     const { hydrate } = useContext(__DocContext);
     const hydrateParent = useContext(HydrateContext);
@@ -37,6 +42,7 @@ export function withHydrate<T extends FC<any>>(Component: T): T {
                   Object.keys(props).length > 0
                     ? btoa(JSON.stringify(props))
                     : null,
+                'data-method': method
               }
             : {})}
         >

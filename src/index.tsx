@@ -10,10 +10,10 @@ declare module "react" {
 
 import { build } from "./scripts/build";
 async function run() {
-  const [command] = process.argv.slice(2);
+  const [command, ...args] = process.argv.slice(2);
 
   if (command === "build") {
-    await build();
+    await build(args);
     return;
   }
 }
