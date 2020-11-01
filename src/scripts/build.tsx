@@ -23,7 +23,9 @@ const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 const BASE_DIR = process.cwd();
 const ROOT_DIR = join(BASE_DIR, "src");
 
-const createHydrateInitScript = ( { isDebug = false }: { isDebug?: boolean} = {}) => {
+const createHydrateInitScript = ({
+  isDebug = false,
+}: { isDebug?: boolean } = {}) => {
   return `import { h, hydrate as mount } from 'https://unpkg.com/preact@latest?module';
 
 const createObserver = (hydrate) => {
@@ -46,7 +48,11 @@ function attach($cmp, { name, source }) {
 
   const hydrate = async () => {
     if ($cmp.dataset.hydrate === '') return;
-    ${isDebug ? 'console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);' : ''}
+    ${
+      isDebug
+        ? 'console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);'
+        : ""
+    }
     const { [name]: Component } = await import(source); 
     const props = $cmp.dataset.props ? JSON.parse(atob($cmp.dataset.props)) : {};
     mount(h(Component, props, null), $cmp);
@@ -65,8 +71,19 @@ function attach($cmp, { name, source }) {
       break;
     }
     case 'interaction': {
-      $cmp.addEventListener('pointerenter', hydrate, { once: true, passive: true, capture: true });
-      $cmp.addEventListener('focus', ({ target }) => hydrate().then(() => target.focus()), { once: true, passive: true, capture: true });
+      const events = ['focus', 'click', 'touchstart', 'pointerenter'];
+      function handleEvent(event) {
+        hydrate().then(() => {
+          if (event.type === 'focus') event.target.focus();
+          for (const e of events) {
+            event.target.removeEventListener(e, handleEvent);
+          }
+        })
+      }
+
+      for (const e of events) {
+        $cmp.addEventListener(e, handleEvent, { once: true, passive: true, capture: true });
+      }
       break;
     }
     case 'visible': {
@@ -101,15 +118,15 @@ const createHydrateScript = (components: string[], manifest: any) => {
       ),
     }))
     .filter(({ exports }) => exports.length > 0)
-    .map(
-      ({ name, exports }) => exports.map(cmp => `  '${cmp}': '/_hydrate/chunks/${name}',`).join('\n')
+    .map(({ name, exports }) =>
+      exports.map((cmp) => `  '${cmp}': '/_hydrate/chunks/${name}',`).join("\n")
     )
     .join("\n");
 
   return `import hydrate from '/_hydrate/index.js';
 hydrate({
 ${imports.slice(0, -1)}
-});`
+});`;
 };
 
 const requiredPlugins = [
@@ -188,9 +205,7 @@ const internalRollupConfig: RollupOptions = {
     const info = getModuleInfo(id);
 
     const dependentEntryPoints = [];
-    if (
-      info.importedIds.includes("microsite/hydrate")
-    ) {
+    if (info.importedIds.includes("microsite/hydrate")) {
       const idsToHandle = new Set([
         ...info.importers,
         ...info.dynamicImporters,
@@ -385,7 +400,7 @@ async function renderPage(
 }
 
 export async function build(args: string[] = []) {
-  const isDebug = args.includes('--debug-hydration');
+  const isDebug = args.includes("--debug-hydration");
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
@@ -500,7 +515,7 @@ export async function build(args: string[] = []) {
         hydrateExportManifest,
         hasGlobalScript,
         globalStyle,
-        isDebug
+        isDebug,
       })
     )
   );
