@@ -4,7 +4,6 @@ import { ComponentProps, JSXElementConstructor } from "react";
 type RestParam<S extends string> = S extends `...${infer A}` ? A : never;
 // @ts-expect-error
 type StandardParam<S extends string> = S extends `...${infer A}` ? never : S;
-
 type ExtractParams<S extends string> = S extends `[${infer A}]` ? A : never;
 type TupleToUnion<T extends any[]> = T[number];
 type Split<S extends string> =
