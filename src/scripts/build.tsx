@@ -171,7 +171,7 @@ const createPagePlugins = () => [
   }),
 ];
 
-const OUTPUT_DIR = "./.tmp/microsite";
+const OUTPUT_DIR = "./node_modules/microsite/.tmp";
 
 const outputOptions: OutputOptions = {
   format: "esm",
@@ -306,7 +306,7 @@ async function readDir(dir) {
 }
 
 async function prepare() {
-  const paths = ["./dist", "./.tmp/microsite"];
+  const paths = [resolve("./dist"), resolve("./node_modules/microsite/.tmp")];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   await Promise.all(paths.map((p) => mkdir(p, { recursive: true })));
 
@@ -324,78 +324,242 @@ async function prepare() {
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
-  const paths = ["./.tmp/microsite"];
+  const paths = ["./node_modules/microsite/.tmp"];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  if ((await readDir("./.tmp")).length === 0) {
-    await rmdir("./.tmp", { recursive: true });
-  }
+  await rmdir("./node_modules/microsite/.tmp", { recursive: true });
   if (err) {
     await rmdir("./dist", { recursive: true });
   }
 }
+
+const DYNAMIC_ROUTE = /\[[^/]+?\](?=\/|$)/;
+function isDynamicRoute(route: string): boolean {
+  return DYNAMIC_ROUTE.test(route);
+}
+const routeToSegments = (route: string) =>
+  route.split("/").map((text) => {
+    const isDynamic = isDynamicRoute(text);
+    const isCatchAll = isDynamic && text.slice(1, -1).startsWith("...");
+    return { text, isDynamic, isCatchAll };
+  });
+
+export interface Params {
+  [param: string]: string | string[];
+}
+
+interface RouteInfo {
+  segments: ReturnType<typeof routeToSegments>;
+  params: Params;
+}
+export type StaticPath<P extends Params = Params> = string | { params: P };
+export interface StaticPropsContext<P extends Params = Params> {
+  path: string;
+  params: P;
+}
+
+const validateStaticPath = (staticPath: unknown, { segments }: RouteInfo) => {
+  if (typeof staticPath === "string") {
+    if (segments.find((v) => v.isCatchAll)) {
+      return staticPath.replace(/^\//, "").split("/").length >= segments.length;
+    } else {
+      return staticPath.replace(/^\//, "").split("/").length >= segments.length;
+    }
+  } else if (
+    typeof staticPath === "object" &&
+    typeof (staticPath as any).params === "object"
+  ) {
+    const { params } = staticPath as any;
+    return (
+      JSON.stringify(Object.keys(params)) ===
+      JSON.stringify(Object.keys(params))
+    );
+  }
+  return false;
+};
+const validateStaticPaths = (
+  staticPaths: unknown,
+  { segments, params }: RouteInfo
+): staticPaths is StaticPath[] => {
+  if (
+    typeof staticPaths === "object" &&
+    Array.isArray((staticPaths as any).paths)
+  ) {
+    const paths = (staticPaths as any).paths as any[];
+    return paths.every((path) =>
+      validateStaticPath(path, { segments, params })
+    );
+  }
+  return false;
+};
+const getParamsFromRoute = (
+  route: string,
+  segments: ReturnType<typeof routeToSegments>
+): Params => {
+  const parts = route.replace(/^\//, "").split("/");
+  return parts.reduce((acc, part, i) => {
+    const segment = segments[i] ?? segments[segments.length - 1];
+    if (segment.isCatchAll) {
+      const key = segment.text.slice(4, -1);
+      return { ...acc, [key]: [...(acc[key] ?? []), part] };
+    }
+    if (segment.isDynamic) {
+      const key = segment.text.slice(1, -1);
+      return { ...acc, [key]: part };
+    }
+    return acc;
+  }, {});
+};
+const staticPathToStaticPropsContext = (
+  staticPath: StaticPath<any>,
+  { segments }: RouteInfo
+): StaticPropsContext<any> => {
+  if (typeof staticPath === "string")
+    return {
+      path: staticPath,
+      params: getParamsFromRoute(staticPath, segments),
+    };
+  return {
+    ...staticPath,
+    path: segments
+      .map((segment) => {
+        const key = segment.text.slice(1, -1);
+        return segment.isDynamic ? staticPath.params[key] : segment.text;
+      })
+      .join("/"),
+  };
+};
 
 async function renderPage(
   page: any,
   { styles, hydrateExportManifest, hasGlobalScript, globalStyle, isDebug }: any
 ) {
   let baseHydrate = false;
+  let routeHydrate = false;
   const output = [];
-  const { default: Page, getStaticProps = () => {}, __name } = page;
+  let {
+    default: Page,
+    getStaticProps = () => {},
+    getStaticPaths,
+    __name,
+  } = page;
+
+  if (typeof Page === "object") {
+    if (Page.path.replace(/^\//, "") !== __name) {
+      console.warn(
+        `"/${__name}" uses \`definePage\` with a \`path\` value of \`${Page.path}\`.\n\nDid you mean to update your file structure?\nNote that \`path\` is used for type inference only and has no effect on the build process.`
+      );
+    }
+    getStaticProps = Page.getStaticProps ?? (() => {});
+    getStaticPaths = Page.getStaticPaths;
+    Page = Page.Component;
+  }
+
   const { content: style = null } =
     styles.find((style) => style.__name === __name) || {};
 
-  let props = {};
-  try {
-    const res = await getStaticProps();
-    props = res?.props ?? {};
-  } catch (e) {
-    console.error(`Error getting static props for "${__name}"`);
-    console.error(e);
+  let staticPaths: StaticPropsContext[] = [{ path: __name, params: {} }];
+
+  if (typeof getStaticPaths === "function") {
+    if (!isDynamicRoute(__name))
+      throw new Error(
+        `Error building /${__name}!\nExported \`getStaticPaths\`, but ${__name} is not a dynamic route`
+      );
+    const routeSegments = routeToSegments(__name);
+    const baseParams = getParamsFromRoute(__name, routeSegments);
+    const routeInfo: RouteInfo = {
+      segments: routeSegments,
+      params: baseParams,
+    };
+
+    const catchAllIndex = routeSegments.findIndex((v) => v.isCatchAll);
+    if (catchAllIndex !== -1 && catchAllIndex < routeSegments.length - 1)
+      throw new Error(
+        `Error building /${__name}!\n\`${routeSegments[catchAllIndex].text}\` must be the final segment of the route`
+      );
+    staticPaths = await getStaticPaths();
+    if (!staticPaths)
+      throw new Error(
+        `Error building /${__name}!\n\`getStaticPaths\` must return a value`
+      );
+    if (!validateStaticPaths(staticPaths, routeInfo))
+      throw new Error(
+        `Error building /${__name}!\nOne or more return values from \`getStaticPaths\` has an incorrect shape.\nEnsure that the returned values have the same number of segments as the route. Static path strings must begin from the site root.`
+      );
+
+    staticPaths = ((staticPaths as unknown) as {
+      paths: StaticPath[];
+    }).paths.map((staticPath) =>
+      staticPathToStaticPropsContext(staticPath, routeInfo)
+    );
+  } else if (isDynamicRoute(__name)) {
+    throw new Error(
+      `Error building /${__name}!\n${__name} is a dynamic route, but \`getStaticPaths\` is missing. Did you forget to \`export\` it?`
+    );
   }
 
-  try {
-    const content =
-      "<!DOCTYPE html>\n<!-- Generated by microsite -->\n" +
-      render(
-        <Document
-          hydrateExportManifest={hydrateExportManifest}
-          page={__name}
-          hasScripts={hasGlobalScript}
-          styles={[globalStyle, style].filter((v) => v)}
-        >
-          <Page {...props} />
-        </Document>,
-        {},
-        { pretty: true }
-      );
-    const { components } =
-      __hydratedComponents.find((s) => s.page === __name) ?? {};
+  async function renderSingle({ params, path }: StaticPropsContext) {
+    let props = {};
+    try {
+      const res = await getStaticProps({
+        path,
+        params: JSON.parse(JSON.stringify(params)),
+      });
+      props = res?.props ?? {};
+    } catch (e) {
+      console.error(`Error getting static props for "${path}"`);
+      console.error(e);
+    }
 
-    if (components) {
-      if (!baseHydrate) {
-        output.push({
-          name: `_hydrate/index.js`,
-          content: createHydrateInitScript({ isDebug }),
-        });
-        baseHydrate = true;
+    try {
+      const content =
+        "<!DOCTYPE html>\n<!-- Generated by microsite -->\n" +
+        render(
+          <Document
+            hydrateExportManifest={hydrateExportManifest}
+            page={__name}
+            hasScripts={hasGlobalScript}
+            styles={[globalStyle, style].filter((v) => v)}
+          >
+            <Page {...props} />
+          </Document>,
+          {},
+          { pretty: true }
+        );
+      const { components } =
+        __hydratedComponents.find((s) => s.page === __name) ?? {};
+
+      if (components) {
+        if (!baseHydrate) {
+          output.push({
+            name: `_hydrate/index.js`,
+            content: createHydrateInitScript({ isDebug }),
+          });
+          baseHydrate = true;
+        }
+
+        if (!routeHydrate) {
+          output.push({
+            name: `_hydrate/pages/${__name}.js`,
+            content: createHydrateScript(components, hydrateExportManifest),
+          });
+          routeHydrate = true;
+        }
       }
 
       output.push({
-        name: `_hydrate/pages/${__name}.js`,
-        content: createHydrateScript(components, hydrateExportManifest),
+        name: `${path}.html`,
+        content,
       });
+    } catch (e) {
+      console.log(`Error building /${__name}.html`);
+      console.error(e);
+      await cleanup({ err: true });
+      return;
     }
-
-    output.push({
-      name: `${__name}.html`,
-      content,
-    });
-  } catch (e) {
-    console.log(`Error building /${__name}.html`);
-    console.error(e);
-    await cleanup({ err: true });
-    return;
   }
+
+  await Promise.all(staticPaths.map((ctx) => renderSingle(ctx)));
+
   return output;
 }
 
@@ -404,24 +568,27 @@ export async function build(args: string[] = []) {
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
-  const globalStyle = await readFile("./.tmp/microsite/global.css").then((v) =>
-    v.toString()
-  );
-  const hasGlobalScript = await readFile("./.tmp/microsite/global.js").then(
-    (v) => !!v.toString().trim()
-  );
+  const globalStyle = await readFile(
+    "./node_modules/microsite/.tmp/global.css"
+  ).then((v) => v.toString());
+  const hasGlobalScript = await readFile(
+    "./node_modules/microsite/.tmp/global.js"
+  ).then((v) => !!v.toString().trim());
 
   if (hasGlobalScript) {
     await Promise.all([
-      copyFile(resolve("./.tmp/microsite/global.js"), "dist/index.js"),
       copyFile(
-        resolve("./.tmp/microsite/global.legacy.js"),
+        resolve("./node_modules/microsite/.tmp/global.js"),
+        "dist/index.js"
+      ),
+      copyFile(
+        resolve("./node_modules/microsite/.tmp/global.legacy.js"),
         "dist/index.legacy.js"
       ),
     ]);
   }
 
-  const files = await readDir("./.tmp/microsite/pages");
+  const files = await readDir("./node_modules/microsite/.tmp/pages");
   const getName = (f: string, base = "pages") =>
     f.slice(f.indexOf(`${base}/`) + base.length + 1, extname(f).length * -1);
   const styles: any[] = await Promise.all(
@@ -445,7 +612,7 @@ export async function build(args: string[] = []) {
       )
   );
 
-  const hydrateFiles = await readDir("./.tmp/microsite/hydrate");
+  const hydrateFiles = await readDir("./node_modules/microsite/.tmp/hydrate");
   const hydrateExportManifest = await Promise.all(
     hydrateFiles
       .filter((f) => extname(f) === ".js")
@@ -473,7 +640,7 @@ export async function build(args: string[] = []) {
 
   const hydrateBundle = await rollup({
     treeshake: true,
-    input: resolve("./.tmp/microsite/hydrate/**/*.js"),
+    input: resolve("./node_modules/microsite/.tmp/hydrate/**/*.js"),
     external: [
       "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
       "https://unpkg.com/preact@latest?module",
@@ -508,17 +675,23 @@ export async function build(args: string[] = []) {
     entryFileNames: (info) => `${basename(info.name)}.js`,
   });
 
-  const output = await Promise.all(
-    pages.map((page) =>
-      renderPage(page, {
-        styles,
-        hydrateExportManifest,
-        hasGlobalScript,
-        globalStyle,
-        isDebug,
-      })
-    )
-  );
+  let output = [];
+  try {
+    output = await Promise.all(
+      pages.map((page) =>
+        renderPage(page, {
+          styles,
+          hydrateExportManifest,
+          hasGlobalScript,
+          globalStyle,
+          isDebug,
+        })
+      )
+    );
+  } catch (e) {
+    console.error(e);
+  }
+
   await Promise.all([
     ...output.flat().map(({ name, content }) =>
       mkdir(resolve(`./dist/${dirname(name)}`), {
