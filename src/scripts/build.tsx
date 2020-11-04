@@ -444,7 +444,7 @@ async function renderPage(
   } = page;
 
   if (typeof Page === "object") {
-    if (Page.path.replace(/^\//, "") !== __name) {
+    if (Page.path && Page.path.replace(/^\//, "") !== __name) {
       console.warn(
         `"/${__name}" uses \`definePage\` with a \`path\` value of \`${Page.path}\`.\n\nDid you mean to update your file structure?\nNote that \`path\` is used for type inference only and has no effect on the build process.`
       );
