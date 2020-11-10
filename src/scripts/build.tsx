@@ -548,7 +548,7 @@ async function renderPage(
 
       output.push({
         name: `${path}.html`,
-        content,
+        content: content.replace(/^\s+$/gm, "\n"),
       });
     } catch (e) {
       console.log(`Error building /${__name}.html`);
