@@ -4,5 +4,8 @@
   "initialVersions": {
     "microsite": "0.4.1"
   },
-  "changesets": []
+  "changesets": [
+    "fifty-numbers-rhyme",
+    "spicy-seals-occur"
+  ]
 }
