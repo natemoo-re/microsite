@@ -5,6 +5,8 @@ import globby from "globby";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
+const typescriptPaths = require("rollup-plugin-typescript-paths")
+  .typescriptPaths;
 const multi = require("rollup-plugin-multi-input").default;
 import styles from "rollup-plugin-styles";
 import esbuild from "rollup-plugin-esbuild";
@@ -41,14 +43,14 @@ const createObserver = (hydrate) => {
   return io;
 }
 
-function attach($cmp, { name, source }) {
+function attach($cmp, { key, name, source }) {
   const method = $cmp.dataset.method;
 
   const hydrate = async () => {
     if ($cmp.dataset.hydrate === '') return;
     ${
       isDebug
-        ? 'console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);'
+        ? 'console.log(`[Hydrate] <${key} /> hydrated via "${method}"`);'
         : ""
     }
     const { [name]: Component } = await import(source); 
@@ -98,9 +100,9 @@ export default (manifest) => {
   const $cmps = Array.from(document.querySelectorAll('[data-hydrate]'));
   
   for (const $cmp of $cmps) {
-    const name = $cmp.dataset.hydrate;
-    const source = manifest[name];
-    attach($cmp, { name, source });
+    const key = $cmp.dataset.hydrate;
+    const [name, source] = manifest[key];
+    attach($cmp, { key, name, source });
   }
 }`;
 };
@@ -109,15 +111,23 @@ const createHydrateScript = (components: string[], manifest: any) => {
   if (components.length === 0) return null;
 
   const imports = manifest
-    .map(({ name, exports }) => ({
-      name,
-      exports: exports.filter(
-        (name: string) => components.findIndex((n) => n === name) > -1
-      ),
-    }))
+    .map(({ name, exports }) => {
+      return {
+        name,
+        exports: exports.filter(
+          ([_key, name]: [string, string]) =>
+            components.findIndex((n) => n === name) > -1
+        ),
+      };
+    })
     .filter(({ exports }) => exports.length > 0)
     .map(({ name, exports }) =>
-      exports.map((cmp) => `  '${cmp}': '/_hydrate/chunks/${name}',`).join("\n")
+      exports
+        .map(
+          ([key, comp]) =>
+            `  '${comp}': ['${key}', '/_hydrate/chunks/${name}'],`
+        )
+        .join("\n")
     )
     .join("\n");
 
@@ -131,8 +141,16 @@ const requiredPlugins = [
   nodeResolve({
     mainFields: ["module", "main"],
     dedupe: ["preact/compat"],
+    extensions: [".mjs", ".js", ".json", ".node", ".jsx", ".ts", ".tsx"],
   }),
-  cjs(),
+  cjs({
+    extensions: [".mjs", ".js", ".json", ".node", ".jsx", ".ts", ".tsx"],
+  }),
+  typescriptPaths({
+    transform(filename: string) {
+      return filename.replace(/\.js$/i, ".tsx");
+    },
+  }),
   inject({
     fetch: "node-fetch",
     React: "preact/compat",
@@ -214,6 +232,10 @@ const internalRollupConfig: RollupOptions = {
         const { isEntry, dynamicImporters, importers } = getModuleInfo(
           moduleId
         );
+
+        // naive check to see if module is a "facade" to only export sub-modules
+        // const isFacade = (basename(moduleId, extname(moduleId)) === 'index') && !isEntry && importedIds.every(m => dirname(m).startsWith(dirname(moduleId)));
+
         if (isEntry || [...importers, ...dynamicImporters].length > 0)
           dependentEntryPoints.push(moduleId);
 
@@ -276,7 +298,7 @@ async function writePages() {
     const bundle = await rollup({
       ...internalRollupConfig,
       plugins: [
-        esbuild({ target: "node12" }),
+        esbuild({ target: "es2015" }),
         ...requiredPlugins,
         ...createPagePlugins(),
       ],
@@ -632,7 +654,7 @@ export async function build(args: string[] = []) {
             return import(join(process.cwd(), file)).then((mod) => ({
               name: basename(file),
               styles,
-              exports: Object.keys(mod),
+              exports: Object.keys(mod).map((key) => [key, mod[key].name]),
             }));
           });
       })
