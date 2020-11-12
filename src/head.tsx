@@ -8,7 +8,7 @@ import React, {
 } from "preact/compat";
 import { __DocContext } from "./document";
 
-import render, { renderToString } from "preact-render-to-string";
+import render from "preact-render-to-string";
 
 export let warned = false;
 interface OpenGraphBase {
@@ -327,7 +327,7 @@ const normalizeChildren = (children: preact.ComponentChildren) => {
   if (["string", "number"].includes(typeof children))
     return children.toString();
   if (typeof children === "boolean") return children ? "" : null;
-  return renderToString(children as preact.VNode, {});
+  return render(children as preact.VNode, {});
 };
 
 const robots: FC<{ children?: never } & SEO["robots"]> = ({
