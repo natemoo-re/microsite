@@ -1,6 +1,6 @@
 {
   "mode": "pre",
-  "tag": "v0.5.0",
+  "tag": "alpha",
   "initialVersions": {
     "microsite": "0.4.1"
   },
