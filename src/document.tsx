@@ -1,4 +1,5 @@
 import React, { createContext, useRef, FC } from "preact/compat";
+import render from "preact-render-to-string";
 
 export const __DocContext = createContext({
   head: { current: [] },
@@ -7,8 +8,6 @@ export const __DocContext = createContext({
 export const __hydratedComponents = [];
 const unique = (value: string, index: number, self: string[]) =>
   self.indexOf(value) === index;
-
-import render from "preact-render-to-string";
 
 export const Document: FC<{
   hydrateExportManifest?: any;
@@ -51,11 +50,9 @@ export const Document: FC<{
   return (
     <html>
       <head>
-        <meta charSet="utf-8" />
+        <meta {...({ charset: "utf-8" } as any)} />
         <meta name="viewport" content="width=device-width" />
-
         <>{head.current}</>
-
         <style
           dangerouslySetInnerHTML={{
             __html: "[data-hydrate]{display:contents;}",
