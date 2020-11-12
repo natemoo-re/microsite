@@ -48,7 +48,7 @@ This behavior can be controlled with the `<seo.robots>` helper, which accepts `n
 
 `<seo.description>` accepts a `string` child. `<seo.description>` sets `<meta name="description">` as well as `<meta property="og:description">`.
 
-### seo.canonical
+#### seo.canonical
 
 `<seo.canonical>` accepts a `string` child representing the canonical URL of the current page. It generates `<link rel="canonical">` and `<meta property="og:url">`.
 
@@ -64,14 +64,14 @@ This behavior can be controlled with the `<seo.robots>` helper, which accepts `n
 
 `<seo.audio>` exposes an API similar to the native `<audio>`, accepting only a `src` prop. It generates all the meta tags necessary for valid Open Graph audio.
 
-### seo.twitter
+#### seo.twitter
 
 `<seo.twitter>` controls [Twitter meta tags](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup). It accepts `card`, `handle` (maps to `twitter:creator`), and `site`.
 
-### seo.facebook
+#### seo.facebook
 
 `<seo.facebook>` accepts an `appId` in order to set `<meta property="fb:app_id">`.
 
-### seo.openGraph
+#### seo.openGraph
 
 `<seo.openGraph>` provides low-level control over [Open Graph meta tags](https://ogp.me/). The accepted props vary based on `type`, so you might want to dig [into the code](https://github.com/natemoo-re/microsite/blob/8c0599f8c05da3214534b864c536a2614a89fb7f/src/head.tsx#L14) for this one.
