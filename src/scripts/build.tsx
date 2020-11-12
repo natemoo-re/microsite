@@ -1,12 +1,13 @@
 import { join, resolve, extname, dirname, basename } from "path";
 import { OutputOptions, rollup, RollupOptions } from "rollup";
+import globby from "globby";
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const multi = require("rollup-plugin-multi-input").default;
 import styles from "rollup-plugin-styles";
-import typescript from "@rollup/plugin-typescript";
+import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import alias from "@rollup/plugin-alias";
 import cjs from "@rollup/plugin-commonjs";
@@ -19,9 +20,6 @@ import React from "preact/compat";
 import render from "preact-render-to-string";
 import { promises as fsp } from "fs";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
-
-const BASE_DIR = process.cwd();
-const ROOT_DIR = join(BASE_DIR, "src");
 
 const createHydrateInitScript = ({
   isDebug = false,
@@ -141,7 +139,6 @@ const requiredPlugins = [
   }),
   alias({
     entries: [
-      { find: /^@\/(.*)/, replacement: join(ROOT_DIR, "$1.js") },
       { find: "react", replacement: "preact/compat" },
       { find: "react-dom", replacement: "preact/compat" },
     ],
@@ -171,7 +168,8 @@ const createPagePlugins = () => [
   }),
 ];
 
-const OUTPUT_DIR = "./node_modules/microsite/.tmp";
+const OUTDIR = "./.microsite";
+const OUTPUT_DIR = join(OUTDIR, "build");
 
 const outputOptions: OutputOptions = {
   format: "esm",
@@ -186,6 +184,7 @@ const internalRollupConfig: RollupOptions = {
     "node-fetch",
     "microsite/head",
     "microsite/document",
+    "microsite/page",
     "microsite/hydrate",
     "preact",
     "preact/compat",
@@ -234,8 +233,8 @@ async function writeGlobal() {
   const global = await rollup({
     ...internalRollupConfig,
     plugins: [
+      esbuild({ target: "es2018" }),
       ...requiredPlugins,
-      typescript({ target: "ES2018" }),
       ...globalPlugins,
     ],
     input: "src/global.ts",
@@ -243,8 +242,8 @@ async function writeGlobal() {
   const legacy = await rollup({
     ...internalRollupConfig,
     plugins: [
+      esbuild({ target: "es2015" }),
       ...requiredPlugins,
-      typescript({ target: "ES5" }),
       ...globalPlugins,
     ],
     input: "src/global.ts",
@@ -272,15 +271,20 @@ async function writeGlobal() {
 
 async function writePages() {
   try {
+    const input = await globby("src/pages/**/*.tsx");
+
     const bundle = await rollup({
       ...internalRollupConfig,
       plugins: [
-        multi(),
+        esbuild({ target: "node12" }),
         ...requiredPlugins,
-        typescript({ target: "ES2018" }),
         ...createPagePlugins(),
       ],
-      input: "src/pages/**/*.tsx",
+      input: input.reduce((acc, page) => {
+        let entryName = page.split("pages")[1].slice(1);
+        entryName = entryName.slice(0, extname(entryName).length * -1);
+        return { ...acc, [`pages/${entryName}`]: page };
+      }, {}),
     });
 
     const result = await bundle.write({
@@ -306,7 +310,7 @@ async function readDir(dir) {
 }
 
 async function prepare() {
-  const paths = [resolve("./dist"), resolve("./node_modules/microsite/.tmp")];
+  const paths = [resolve("./dist"), resolve(OUTPUT_DIR)];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   await Promise.all(paths.map((p) => mkdir(p, { recursive: true })));
 
@@ -324,9 +328,8 @@ async function prepare() {
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
-  const paths = ["./node_modules/microsite/.tmp"];
+  const paths = [OUTDIR];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  await rmdir("./node_modules/microsite/.tmp", { recursive: true });
   if (err) {
     await rmdir("./dist", { recursive: true });
   }
@@ -568,27 +571,24 @@ export async function build(args: string[] = []) {
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
-  const globalStyle = await readFile(
-    "./node_modules/microsite/.tmp/global.css"
-  ).then((v) => v.toString());
-  const hasGlobalScript = await readFile(
-    "./node_modules/microsite/.tmp/global.js"
-  ).then((v) => !!v.toString().trim());
+  const globalStyle = await readFile(join(OUTPUT_DIR, "global.css")).then((v) =>
+    v.toString()
+  );
+  const hasGlobalScript = await readFile(join(OUTPUT_DIR, "global.js")).then(
+    (v) => !!v.toString().trim()
+  );
 
   if (hasGlobalScript) {
     await Promise.all([
+      copyFile(resolve(join(OUTPUT_DIR, "global.js")), "dist/index.js"),
       copyFile(
-        resolve("./node_modules/microsite/.tmp/global.js"),
-        "dist/index.js"
-      ),
-      copyFile(
-        resolve("./node_modules/microsite/.tmp/global.legacy.js"),
+        resolve(join(OUTPUT_DIR, "global.legacy.js")),
         "dist/index.legacy.js"
       ),
     ]);
   }
 
-  const files = await readDir("./node_modules/microsite/.tmp/pages");
+  const files = await readDir(join(OUTPUT_DIR, "pages"));
   const getName = (f: string, base = "pages") =>
     f.slice(f.indexOf(`${base}/`) + base.length + 1, extname(f).length * -1);
   const styles: any[] = await Promise.all(
@@ -612,7 +612,7 @@ export async function build(args: string[] = []) {
       )
   );
 
-  const hydrateFiles = await readDir("./node_modules/microsite/.tmp/hydrate");
+  const hydrateFiles = await readDir(join(OUTPUT_DIR, "hydrate"));
   const hydrateExportManifest = await Promise.all(
     hydrateFiles
       .filter((f) => extname(f) === ".js")
@@ -638,9 +638,11 @@ export async function build(args: string[] = []) {
       })
   );
 
+  const input = await globby(join(OUTPUT_DIR, "hydrate", "**", "*.js"));
+
   const hydrateBundle = await rollup({
     treeshake: true,
-    input: resolve("./node_modules/microsite/.tmp/hydrate/**/*.js"),
+    input,
     external: [
       "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
       "https://unpkg.com/preact@latest?module",
