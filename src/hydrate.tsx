@@ -12,13 +12,17 @@ const btoa = (str: string) => Buffer.from(str, "utf-8").toString("base64");
 const HydrateContext = createContext<string | false>(false);
 
 export interface HydrationProps {
-  method?: 'idle' | 'visible' | 'interaction';
+  method?: "idle" | "visible" | "interaction";
 }
 
-export function withHydrate<T extends FC<any>>(Component: T, hydrationProps: HydrationProps = {}): T {
+export function withHydrate<T extends FC<any>>(
+  Component: T,
+  hydrationProps: HydrationProps = {}
+): T {
   const name = Component.displayName || Component.name;
-  const { method = 'idle' } = hydrationProps;
-  return forwardRef((props, ref) => {
+  const { method = "idle" } = hydrationProps;
+
+  const Wrapped = forwardRef((props, ref) => {
     const { hydrate } = useContext(__DocContext);
     const hydrateParent = useContext(HydrateContext);
     if (hydrateParent)
@@ -42,7 +46,7 @@ export function withHydrate<T extends FC<any>>(Component: T, hydrationProps: Hyd
                   Object.keys(props).length > 0
                     ? btoa(JSON.stringify(props))
                     : null,
-                'data-method': method
+                "data-method": method,
               }
             : {})}
         >
@@ -51,4 +55,7 @@ export function withHydrate<T extends FC<any>>(Component: T, hydrationProps: Hyd
       </HydrateContext.Provider>
     );
   }) as T;
+
+  Object.defineProperty(Wrapped, "name", { value: name, configurable: true });
+  return Wrapped;
 }
