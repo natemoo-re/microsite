@@ -1,8 +1,6 @@
 # Microsite
 
-`microsite` is a tiny, opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**.
-
-**At the moment, this is an experiment more than a production-ready tool.** The build script is full of hacks which I'd like to rewrite, but the concepts are solid.
+`microsite` is a fast opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**.
 
 [See the demo](https://microsite-demo.nmoo.vercel.app/)
 
@@ -12,25 +10,25 @@
 
 ## Automatic Partial Hydration (APH)
 
-The most exciting feature of Microsite is automatic partial hydration. Current solutions send the entire component tree, which has already been rendered server-side, to the client for hydration. 
+The most exciting feature of Microsite is automatic partial hydration. Current solutions send the entire component tree, which has already been rendered server-side, to the client for hydration.
 Microsite, on the other hand, uses a hint from the author (the `withHydrate` HOC) to strip away any unnecessary code and ship highly optimized code to the client.
 
 ```tsx
 import { withHydrate } from "microsite/hydrate";
 
 const Counter = () => {
-    const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
-    return (
-        <>
-          <button onClick={() => setCount(v => v - 1)}>-</button>
-          <span>{ count }</span>
-          <button onClick={() => setCount(v => v + 1)}>+</button>
-        </>
-    )
+  return (
+    <>
+      <button onClick={() => setCount((v) => v - 1)}>-</button>
+      <span>{count}</span>
+      <button onClick={() => setCount((v) => v + 1)}>+</button>
+    </>
+  );
 };
 
-export default withHydrate(Counter, { method: 'idle' });
+export default withHydrate(Counter, { method: "idle" });
 ```
 
 There are a few rules to keep in mind when leveraging APH:
@@ -43,7 +41,7 @@ There are a few rules to keep in mind when leveraging APH:
 
 #### `withHydrate` Options
 
-**method** 
+**method**
 
 As a developer, you know exactly how your site is structured, so Microsite allows you to tweak how hydration occurs, optimizing for your specific use cases.
 
@@ -52,7 +50,6 @@ As a developer, you know exactly how your site is structured, so Microsite allow
 - `visible` hydrates the component as soon as it enters the viewport, via [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
 
 - `interaction` hydrates the component as soon as the user interacts with it (via `focus` or `pointerenter` events.)
-
 
 ## Pages
 
@@ -79,7 +76,6 @@ project/
 │   └── public/         // copied to dist/
 └── tsconfig.json
 ```
-
 
 ## Acknowledgments
 
