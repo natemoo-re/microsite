@@ -580,7 +580,7 @@ async function renderPage(
       }
 
       output.push({
-        name: `${path}.html`,
+        name: `${path === "/" ? "/index" : path}.html`,
         content: content.replace(/^\s+$/gm, "\n"),
       });
     } catch (e) {
