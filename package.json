@@ -13,8 +13,7 @@
   "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc -p .",
-    "postinstall": "node -e \"try{require('./scripts/postinstall')}catch(e){}\""
+    "build": "tsc -p ."
   },
   "files": [
     "**/*.js",
