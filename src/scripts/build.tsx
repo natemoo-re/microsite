@@ -253,6 +253,12 @@ const internalRollupConfig: RollupOptions = {
 };
 
 async function writeGlobal() {
+  try {
+    (await stat("./src/global.ts")).isFile();
+  } catch (e) {
+    return;
+  }
+
   const global = await rollup({
     ...internalRollupConfig,
     plugins: [
@@ -339,17 +345,19 @@ async function prepare() {
     [...paths, CACHE_DIR].map((p) => mkdir(p, { recursive: true }))
   );
 
-  if ((await stat("./src/public")).isDirectory()) {
-    const files = await readDir("./src/public");
-    await Promise.all(
-      files.map((file) =>
-        copyFile(
-          resolve(process.cwd(), file),
-          resolve(process.cwd(), "./dist/" + file.slice("src/public/".length))
+  try {
+    if ((await stat("./src/public")).isDirectory()) {
+      const files = await readDir("./src/public");
+      await Promise.all(
+        files.map((file) =>
+          copyFile(
+            resolve(process.cwd(), file),
+            resolve(process.cwd(), "./dist/" + file.slice("src/public/".length))
+          )
         )
-      )
-    );
-  }
+      );
+    }
+  } catch (e) {}
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
@@ -604,12 +612,16 @@ export async function build(args: string[] = []) {
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
-  const globalStyle = await readFile(join(OUTPUT_DIR, "global.css")).then((v) =>
-    v.toString()
-  );
-  const hasGlobalScript = await readFile(join(OUTPUT_DIR, "global.js")).then(
-    (v) => !!v.toString().trim()
-  );
+  let globalStyle = null;
+  let hasGlobalScript = false;
+  try {
+    globalStyle = await readFile(join(OUTPUT_DIR, "global.css")).then((v) =>
+      v.toString()
+    );
+    hasGlobalScript = await readFile(join(OUTPUT_DIR, "global.js")).then(
+      (v) => !!v.toString().trim()
+    );
+  } catch (e) {}
 
   if (hasGlobalScript) {
     await Promise.all([
