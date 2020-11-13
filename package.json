@@ -14,7 +14,7 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc -p .",
-    "postinstall": "[ -e 'scripts/postinstall.js' ] && node scripts/postinstall"
+    "postinstall": "node -e \"try{require('./scripts/postinstall')}catch(e){}\""
   },
   "files": [
     "**/*.js",
