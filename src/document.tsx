@@ -38,7 +38,7 @@ export const Document: FC<{
   const componentStyles = components
     .map((name) => {
       const found = hydrateExportManifest.find((entry) =>
-        entry.exports.includes(name)
+        entry.exports.find(([_key, n]) => n === name)
       );
       if (found) return found.styles;
       return null;
