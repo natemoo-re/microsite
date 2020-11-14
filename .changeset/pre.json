@@ -1,11 +1,8 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "next",
   "initialVersions": {
     "microsite": "0.5.0"
   },
-  "changesets": [
-    "dull-spoons-float",
-    "tender-cooks-sin"
-  ]
+  "changesets": ["dull-spoons-float", "tender-cooks-sin"]
 }
