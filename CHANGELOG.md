@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.2
+
+### Patch Changes
+
+- 60de6a2: Fix esbuild jsxFactory
+
 ## 0.6.1
 
 ### Patch Changes
