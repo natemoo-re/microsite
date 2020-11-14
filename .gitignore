@@ -1,4 +1,5 @@
 node_modules
 **/*.js
 **/*.d.ts
+!types/**/*.d.ts
 .DS_Store
