@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.6
+
+### Patch Changes
+
+- 7e955a0: Ensure children is not required for Head component
+
 ## 0.6.5
 
 ### Patch Changes
