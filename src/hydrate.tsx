@@ -1,9 +1,6 @@
-import React, {
-  forwardRef,
-  FC,
-  createContext,
-  useContext,
-} from "preact/compat";
+import { h, FunctionComponent, createContext } from "preact";
+
+import { useContext } from "preact/hooks";
 import { Buffer } from "buffer";
 import { __DocContext } from "./document";
 
@@ -15,14 +12,14 @@ export interface HydrationProps {
   method?: "idle" | "visible" | "interaction";
 }
 
-export function withHydrate<T extends FC<any>>(
+export function withHydrate<T extends FunctionComponent<any>>(
   Component: T,
   hydrationProps: HydrationProps = {}
 ): T {
   const name = Component.displayName || Component.name;
   const { method = "idle" } = hydrationProps;
 
-  const Wrapped = forwardRef((props, ref) => {
+  const Wrapped: FunctionComponent<any> = (props, ref) => {
     const { hydrate } = useContext(__DocContext);
     const hydrateParent = useContext(HydrateContext);
     if (hydrateParent)
@@ -54,8 +51,8 @@ export function withHydrate<T extends FC<any>>(
         </div>
       </HydrateContext.Provider>
     );
-  }) as T;
+  };
 
   Object.defineProperty(Wrapped, "name", { value: name, configurable: true });
-  return Wrapped;
+  return (Wrapped as unknown) as T;
 }
