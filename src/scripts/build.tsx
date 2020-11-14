@@ -256,7 +256,7 @@ async function writeGlobal() {
     ...internalRollupConfig,
     plugins: [
       autoExternal(),
-      esbuild({ target: "es2018" }),
+      esbuild({ target: "es2018", jsxFactory: "h", jsxFragment: "Fragment" }),
       ...requiredPlugins,
       ...globalPlugins,
     ],
@@ -266,7 +266,7 @@ async function writeGlobal() {
     ...internalRollupConfig,
     plugins: [
       autoExternal(),
-      esbuild({ target: "es2015" }),
+      esbuild({ target: "es2015", jsxFactory: "h", jsxFragment: "Fragment" }),
       ...requiredPlugins,
       ...globalPlugins,
     ],
@@ -301,7 +301,7 @@ async function writePages() {
       ...internalRollupConfig,
       plugins: [
         autoExternal(),
-        esbuild({ target: "es2018" }),
+        esbuild({ target: "es2018", jsxFactory: "h", jsxFragment: "Fragment" }),
         ...requiredPlugins,
         ...createPagePlugins(),
       ],
