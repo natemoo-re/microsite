@@ -1,5 +1,12 @@
 # microsite
 
+## 0.5.1-next.0
+
+### Patch Changes
+
+- a29b71e: Fix handling of node builtins for intermediate builds
+- 078b910: Remove .microsite/cache dir for now
+
 ## 0.5.0
 
 ### Minor Changes

@@ -4,5 +4,8 @@
   "initialVersions": {
     "microsite": "0.5.0"
   },
-  "changesets": []
+  "changesets": [
+    "dull-spoons-float",
+    "tender-cooks-sin"
+  ]
 }
