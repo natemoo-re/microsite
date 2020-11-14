@@ -1,6 +1,6 @@
 # Microsite
 
-`microsite` is a fast opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**.
+`microsite` is a fast, opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**. Pages are written with Preact, Typescript, and CSS Modules and compiled with `esbuild`.
 
 [See the demo](https://microsite-demo.nmoo.vercel.app/)
 
@@ -55,7 +55,7 @@ As a developer, you know exactly how your site is structured, so Microsite allow
 
 Microsite uses the file-system to generate your output, meaning each component in `src/pages` outputs a corresponding HTML file.
 
-Page templates are written as `.tsx` files with React (although [Preact](https://preactjs.com/) is used on the client.)
+Page templates are written as `.tsx` files with [Preact](https://preactjs.com/).
 
 ## Styles
 
