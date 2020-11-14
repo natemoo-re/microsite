@@ -142,6 +142,7 @@ const requiredPlugins = [
     fetch: "node-fetch",
     h: ["preact", "h"],
     Fragment: ["preact", "Fragment"],
+    exclude: [/\.css$/],
   }),
   nodeResolve({
     preferBuiltins: true,
