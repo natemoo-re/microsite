@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.5.0",
+  "version": "0.5.1-next.0",
   "type": "module",
   "author": {
     "name": "Nate Moore",
@@ -36,6 +36,7 @@
     "preact": "^10.5.5",
     "preact-render-to-string": "5.1.11",
     "rollup": "^2.32.1",
+    "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-esbuild": "^2.5.2",
     "rollup-plugin-multi-input": "1.1.1",
     "rollup-plugin-styles": "^3.11.0",

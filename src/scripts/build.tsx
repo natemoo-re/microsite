@@ -11,6 +11,7 @@ const multi = require("rollup-plugin-multi-input").default;
 import styles from "rollup-plugin-styles";
 import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import autoExternal from "rollup-plugin-auto-external";
 import alias from "@rollup/plugin-alias";
 import cjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
@@ -189,7 +190,6 @@ const createPagePlugins = () => [
 
 const OUTDIR = "./.microsite";
 const OUTPUT_DIR = join(OUTDIR, "build");
-const CACHE_DIR = join(OUTDIR, "cache");
 
 const outputOptions: OutputOptions = {
   format: "esm",
@@ -207,7 +207,7 @@ const internalRollupConfig: RollupOptions = {
     "microsite/page",
     "microsite/hydrate",
     "preact",
-    "preact/compat",
+    "preact/hooks",
     "preact/jsx-runtime",
     "preact-render-to-string",
   ],
@@ -263,6 +263,7 @@ async function writeGlobal() {
   const global = await rollup({
     ...internalRollupConfig,
     plugins: [
+      autoExternal(),
       esbuild({ target: "es2018" }),
       ...requiredPlugins,
       ...globalPlugins,
@@ -272,6 +273,7 @@ async function writeGlobal() {
   const legacy = await rollup({
     ...internalRollupConfig,
     plugins: [
+      autoExternal(),
       esbuild({ target: "es2015" }),
       ...requiredPlugins,
       ...globalPlugins,
@@ -306,6 +308,7 @@ async function writePages() {
     const bundle = await rollup({
       ...internalRollupConfig,
       plugins: [
+        autoExternal(),
         esbuild({ target: "es2018" }),
         ...requiredPlugins,
         ...createPagePlugins(),
@@ -346,9 +349,7 @@ async function readDir(dir) {
 async function prepare() {
   const paths = [resolve("./dist"), resolve(OUTPUT_DIR)];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  await Promise.all(
-    [...paths, CACHE_DIR].map((p) => mkdir(p, { recursive: true }))
-  );
+  await Promise.all([...paths].map((p) => mkdir(p, { recursive: true })));
 
   try {
     if ((await stat("./src/public")).isDirectory()) {
@@ -366,7 +367,7 @@ async function prepare() {
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
-  const paths = [OUTPUT_DIR];
+  const paths = [OUTDIR];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   if (err) {
     await rmdir("./dist", { recursive: true });
