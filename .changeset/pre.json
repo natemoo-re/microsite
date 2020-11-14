@@ -1,11 +1,8 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "alpha",
   "initialVersions": {
     "microsite": "0.4.1"
   },
-  "changesets": [
-    "fifty-numbers-rhyme",
-    "spicy-seals-occur"
-  ]
+  "changesets": ["fifty-numbers-rhyme", "spicy-seals-occur"]
 }

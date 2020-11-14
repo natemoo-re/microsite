@@ -1,0 +1,30 @@
+name: Release (Canary)
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - next
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - uses: volta-cli/action@v1
+
+    - run: npm install
+
+    - name: Create Release Pull Request or Publish to npm
+      id: changesets
+      uses: changesets/action@master
+      with:
+        version: changeset version --snapshot canary
+        publish: npm publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
