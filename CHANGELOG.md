@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.5
+
+### Patch Changes
+
+- f65c7f4: Improve types by adding global `h` and `Fragment`, and ambient `*.modules.css` declarations
+
 ## 0.6.4
 
 ### Patch Changes
