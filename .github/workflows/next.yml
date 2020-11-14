@@ -31,7 +31,7 @@ jobs:
       id: changesets
       uses: changesets/action@master
       with:
-        publish: npx changeset publish --tag next
+        publish: npm publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
