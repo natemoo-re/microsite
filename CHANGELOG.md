@@ -1,10 +1,16 @@
 # microsite
 
+## 0.6.0
+
+### Breaking Changes
+
+- 9d0e9cc: Drop `@types/react` and switch to `preact`. See issue [#5](https://github.com/natemoo-re/microsite/issues/5) for more background.
+
 ## 0.0.0-canary-2020101419274
 
-### Minor Changes
+### Breaking Changes
 
-- 7fd4679: **Breaking** Drop `@types/react` and switch to `preact`. See issue [#5](https://github.com/natemoo-re/microsite/issues/5) for more background.
+- 7fd4679: Drop `@types/react` and switch to `preact`. See issue [#5](https://github.com/natemoo-re/microsite/issues/5) for more background.
 
 ## 0.5.1
 
