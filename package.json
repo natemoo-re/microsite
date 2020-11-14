@@ -13,11 +13,12 @@
   "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc -p ."
+    "build": "tsc -p tsconfig.internal.json"
   },
   "files": [
     "**/*.js",
-    "**/*.d.ts"
+    "**/*.d.ts",
+    "tsconfig.json"
   ],
   "dependencies": {
     "@rollup/plugin-alias": "^3.1.1",
