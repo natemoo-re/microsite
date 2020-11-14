@@ -1,5 +1,13 @@
 # microsite
 
+## 0.6.4
+
+### Patch Changes
+
+- e53864f: Update default `tsconfig` to be named `base`.
+
+  Update `tsconfig.baseUrl` to resolve from inside `node_modules`
+
 ## 0.6.3
 
 ### Patch Changes
