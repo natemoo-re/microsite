@@ -14,11 +14,9 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "skipLibCheck": true,
-    "baseUrl": "./src",
+    "baseUrl": "../../src",
     "paths": {
       "@/*": ["./*"]
     }
-  },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  }
 }
