@@ -139,6 +139,7 @@ ${imports.slice(0, -1)}
 
 const requiredPlugins = [
   nodeResolve({
+    preferBuiltins: true,
     mainFields: ["module", "main"],
     dedupe: ["preact/compat"],
     extensions: [".mjs", ".js", ".json", ".node", ".jsx", ".ts", ".tsx"],
@@ -328,14 +329,18 @@ async function writePages() {
 }
 
 async function readDir(dir) {
-  const entries = await readdir(dir, { withFileTypes: true });
-  return Promise.all(
-    entries.map((entry) =>
-      entry.isDirectory()
-        ? readDir(join(dir, entry.name))
-        : join(dir, entry.name)
-    )
-  ).then((arr) => arr.flat(Infinity));
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return Promise.all(
+      entries.map((entry) =>
+        entry.isDirectory()
+          ? readDir(join(dir, entry.name))
+          : join(dir, entry.name)
+      )
+    ).then((arr) => arr.flat(Infinity));
+  } catch (e) {
+    return [];
+  }
 }
 
 async function prepare() {
@@ -657,70 +662,75 @@ export async function build(args: string[] = []) {
       )
   );
 
-  const hydrateFiles = await readDir(join(OUTPUT_DIR, "hydrate"));
-  const hydrateExportManifest = await Promise.all(
-    hydrateFiles
-      .filter((f) => extname(f) === ".js")
-      .map((file) => {
-        const style = basename(file).split("-")[0] + ".css";
-        const styleFile = resolve(join(".", dirname(file), style));
-        let styles = null;
-        return stat(styleFile)
-          .then((stats) => {
-            if (stats.isFile()) {
-              return readFile(styleFile).then((buff) => {
-                styles = buff.toString();
-              });
-            }
-          })
-          .then(() => {
-            return import(join(process.cwd(), file)).then((mod) => ({
-              name: basename(file),
-              styles,
-              exports: Object.keys(mod).map((key) => [key, mod[key].name]),
-            }));
-          });
-      })
-  );
+  let hydrateFiles = [];
+  let hydrateExportManifest = [];
+  try {
+    hydrateFiles = await readDir(join(OUTPUT_DIR, "hydrate"));
+    hydrateExportManifest = await Promise.all(
+      hydrateFiles
+        .filter((f) => extname(f) === ".js")
+        .map((file) => {
+          const style = basename(file).split("-")[0] + ".css";
+          const styleFile = resolve(join(".", dirname(file), style));
+          let styles = null;
+          return stat(styleFile)
+            .then((stats) => {
+              if (stats.isFile()) {
+                return readFile(styleFile).then((buff) => {
+                  styles = buff.toString();
+                });
+              }
+            })
+            .then(() => {
+              return import(join(process.cwd(), file)).then((mod) => ({
+                name: basename(file),
+                styles,
+                exports: Object.keys(mod).map((key) => [key, mod[key].name]),
+              }));
+            });
+        })
+    );
 
-  const input = await globby(join(OUTPUT_DIR, "hydrate", "**", "*.js"));
-
-  const hydrateBundle = await rollup({
-    treeshake: true,
-    input,
-    external: [
-      "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
-      "https://unpkg.com/preact@latest?module",
-    ],
-    plugins: [
-      multi(),
-      replace({
-        values: {
-          "preact/compat":
-            "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
-          "React.Fragment": "Fragment",
-          "React.createElement": "h",
-          "import { withHydrate } from 'microsite/hydrate';":
-            "const withHydrate = v => v;",
+    const input = await globby(join(OUTPUT_DIR, "hydrate", "**", "*.js"));
+    if (input.length > 0) {
+      const hydrateBundle = await rollup({
+        treeshake: true,
+        input,
+        external: [
+          "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
+          "https://unpkg.com/preact@latest?module",
+        ],
+        plugins: [
+          multi(),
+          replace({
+            values: {
+              "preact/compat":
+                "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
+              "React.Fragment": "Fragment",
+              "React.createElement": "h",
+              "import { withHydrate } from 'microsite/hydrate';":
+                "const withHydrate = v => v;",
+            },
+            delimiters: ["", ""],
+          }),
+          inject({
+            Fragment: ["https://unpkg.com/preact@latest?module", "Fragment"],
+            h: ["https://unpkg.com/preact@latest?module", "h"],
+          }),
+          terser(),
+        ],
+        onwarn(warning, handler) {
+          if (warning.code === "UNUSED_EXTERNAL_IMPORT") return;
+          handler(warning);
         },
-        delimiters: ["", ""],
-      }),
-      inject({
-        Fragment: ["https://unpkg.com/preact@latest?module", "Fragment"],
-        h: ["https://unpkg.com/preact@latest?module", "h"],
-      }),
-      terser(),
-    ],
-    onwarn(warning, handler) {
-      if (warning.code === "UNUSED_EXTERNAL_IMPORT") return;
-      handler(warning);
-    },
-  });
-  await hydrateBundle.write({
-    minifyInternalExports: true,
-    dir: resolve("dist/_hydrate/chunks"),
-    entryFileNames: (info) => `${basename(info.name)}.js`,
-  });
+      });
+      await hydrateBundle.write({
+        minifyInternalExports: true,
+        dir: resolve("dist/_hydrate/chunks"),
+        entryFileNames: (info) => `${basename(info.name)}.js`,
+      });
+    }
+  } catch (e) {}
 
   let output = [];
   try {
