@@ -1,5 +1,5 @@
 import { StaticPath, StaticPropsContext } from './scripts/build';
-import { ComponentProps, JSXElementConstructor } from "react";
+import { ComponentProps, JSX, ComponentType } from "preact";
 
 type RestParam<S extends string> = S extends `...${infer A}` ? A : never;
 // @ts-expect-error
@@ -18,7 +18,7 @@ type RestParams<S extends string, Base extends string = keyof AllPathParams<S>> 
 type StandardParams<S extends string, Base extends string = keyof AllPathParams<S>> = { [a in StandardParam<Base>]: string };
 export type PathParams<S extends string> = RestParams<S> & StandardParams<S>;
 
-export function definePage<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>, Path extends string, P extends PathParams<Path>>(
+export function definePage<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>>(
     Component: T,
     page: {
         path?: Path,

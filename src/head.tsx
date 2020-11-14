@@ -1,11 +1,5 @@
-import React, {
-  FC,
-  Fragment,
-  useContext,
-  createContext,
-  useRef,
-  Ref,
-} from "preact/compat";
+import { h, createContext, Fragment, FunctionalComponent } from "preact";
+import { useRef, useContext, Ref } from "preact/hooks";
 import { __DocContext } from "./document";
 
 import render from "preact-render-to-string";
@@ -302,8 +296,9 @@ export function Head({ children }) {
     </Fragment>
   );
 
+  const _children = Array.isArray(children) ? children : [children];
   head.current.push(
-    React.Children.map(children, (child) => {
+    _children.map((child) => {
       if (child.type === "title" && !child.props["data-microsite-ignore"]) {
         console.warn(
           `Prefer microsite's built-in <seo.title> component over <title>${child.props.children}</title>`
@@ -330,7 +325,7 @@ const normalizeChildren = (children: preact.ComponentChildren) => {
   return render(children as preact.VNode, {});
 };
 
-const robots: FC<{ children?: never } & SEO["robots"]> = ({
+const robots: FunctionalComponent<{ children?: never } & SEO["robots"]> = ({
   children,
   ...props
 }) => {
@@ -339,64 +334,70 @@ const robots: FC<{ children?: never } & SEO["robots"]> = ({
   return null;
 };
 
-const title: FC = ({ children }) => {
+const title: FunctionalComponent = ({ children }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.title = normalizeChildren(children);
   return null;
 };
 
-const description: FC = ({ children }) => {
+const description: FunctionalComponent = ({ children }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.description = normalizeChildren(children);
   return null;
 };
 
-const image: FC<{ children?: never } & SEO["images"][number]> = ({
-  children,
-  ...props
-}) => {
+const image: FunctionalComponent<
+  { children?: never } & SEO["images"][number]
+> = ({ children, ...props }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.images = [...(seo.current.images ?? []), props];
   return null;
 };
 
-const video: FC<{ children?: never } & SEO["videos"][number]> = ({
-  children,
-  ...props
-}) => {
+const video: FunctionalComponent<
+  { children?: never } & SEO["videos"][number]
+> = ({ children, ...props }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.videos = [...(seo.current.videos ?? []), props];
   return null;
 };
 
-const audio: FC<{ children?: never } & SEO["audio"][number]> = ({
-  children,
-  ...props
-}) => {
+const audio: FunctionalComponent<
+  { children?: never } & SEO["audio"][number]
+> = ({ children, ...props }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.audio = [...(seo.current.audio ?? []), props];
   return null;
 };
 
-const canonical: FC = ({ children }) => {
+const canonical: FunctionalComponent = ({ children }) => {
   const { seo } = useContext(__SeoContext);
   seo.current.canonical = normalizeChildren(children);
   return null;
 };
 
-const twitter: FC<SEO["twitter"]> = ({ children, ...props }) => {
+const twitter: FunctionalComponent<SEO["twitter"]> = ({
+  children,
+  ...props
+}) => {
   const { seo } = useContext(__SeoContext);
   seo.current.twitter = props;
   return null;
 };
 
-const facebook: FC<SEO["facebook"]> = ({ children, ...props }) => {
+const facebook: FunctionalComponent<SEO["facebook"]> = ({
+  children,
+  ...props
+}) => {
   const { seo } = useContext(__SeoContext);
   seo.current.facebook = props;
   return null;
 };
 
-const openGraph: FC<SEO["openGraph"]> = ({ children, ...props }) => {
+const openGraph: FunctionalComponent<SEO["openGraph"]> = ({
+  children,
+  ...props
+}) => {
   const { seo } = useContext(__SeoContext);
   seo.current.openGraph = props;
   return null;

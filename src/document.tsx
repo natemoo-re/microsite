@@ -1,4 +1,5 @@
-import React, { createContext, useRef, FC } from "preact/compat";
+import { h, createContext, Fragment, FunctionalComponent } from "preact";
+import { useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
 export const __DocContext = createContext({
@@ -9,7 +10,7 @@ export const __hydratedComponents = [];
 const unique = (value: string, index: number, self: string[]) =>
   self.indexOf(value) === index;
 
-export const Document: FC<{
+export const Document: FunctionalComponent<{
   hydrateExportManifest?: any;
   page?: string;
   styles?: string[];
@@ -52,7 +53,7 @@ export const Document: FC<{
       <head>
         <meta {...({ charset: "utf-8" } as any)} />
         <meta name="viewport" content="width=device-width" />
-        <>{head.current}</>
+        <Fragment>{head.current}</Fragment>
         <style
           dangerouslySetInnerHTML={{
             __html: "[data-hydrate]{display:contents;}",
@@ -72,14 +73,14 @@ export const Document: FC<{
           <script type="module" defer src={`/_hydrate/pages/${page}.js`} />
         )}
         {hasScripts ? (
-          <>
+          <Fragment>
             <script type="module" src="/index.js" />
             <script
               {...{ nomodule: "" }}
               src="https://unpkg.com/systemjs@2.0.0/dist/s.min.js"
             />
             <script {...{ nomodule: "" }} src="/index.legacy.js" />
-          </>
+          </Fragment>
         ) : null}
       </body>
     </html>
