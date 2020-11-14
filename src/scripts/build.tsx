@@ -12,14 +12,13 @@ import styles from "rollup-plugin-styles";
 import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import autoExternal from "rollup-plugin-auto-external";
-import alias from "@rollup/plugin-alias";
 import cjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
 import inject from "@rollup/plugin-inject";
 import { terser } from "rollup-plugin-terser";
 
 import { Document, __DocContext, __hydratedComponents } from "../document";
-import React from "preact/compat";
+import { h } from "preact";
 import render from "preact-render-to-string";
 import { promises as fsp } from "fs";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
@@ -155,13 +154,6 @@ const requiredPlugins = [
   }),
   inject({
     fetch: "node-fetch",
-    React: "preact/compat",
-  }),
-  alias({
-    entries: [
-      { find: "react", replacement: "preact/compat" },
-      { find: "react-dom", replacement: "preact/compat" },
-    ],
   }),
 ];
 
@@ -705,18 +697,10 @@ export async function build(args: string[] = []) {
           multi(),
           replace({
             values: {
-              "preact/compat":
-                "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
-              "React.Fragment": "Fragment",
-              "React.createElement": "h",
               "import { withHydrate } from 'microsite/hydrate';":
                 "const withHydrate = v => v;",
             },
             delimiters: ["", ""],
-          }),
-          inject({
-            Fragment: ["https://unpkg.com/preact@latest?module", "Fragment"],
-            h: ["https://unpkg.com/preact@latest?module", "h"],
           }),
           terser(),
         ],
@@ -726,6 +710,11 @@ export async function build(args: string[] = []) {
         },
       });
       await hydrateBundle.write({
+        paths: {
+          preact: "https://unpkg.com/preact@latest?module",
+          "preact/hooks":
+            "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
+        },
         minifyInternalExports: true,
         dir: resolve("dist/_hydrate/chunks"),
         entryFileNames: (info) => `${basename(info.name)}.js`,
