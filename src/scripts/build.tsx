@@ -689,10 +689,7 @@ export async function build(args: string[] = []) {
       const hydrateBundle = await rollup({
         treeshake: true,
         input,
-        external: [
-          "https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module",
-          "https://unpkg.com/preact@latest?module",
-        ],
+        external: ["preact", "preact/hooks"],
         plugins: [
           multi(),
           replace({
