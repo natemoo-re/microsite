@@ -13,7 +13,7 @@
   "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc -p tsconfig.internal.json"
+    "build": "tsc -p tsconfig.json"
   },
   "files": [
     "**/*.js",
