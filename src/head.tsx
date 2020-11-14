@@ -73,7 +73,7 @@ export const __SeoContext = createContext<{ seo: Ref<SEO> }>({
   seo: { current: {} },
 });
 
-export function Head({ children }) {
+export const Head: FunctionalComponent<any> = ({ children }) => {
   const seo = useRef<SEO>({});
   const { head } = useContext(__DocContext);
 
@@ -315,7 +315,7 @@ export function Head({ children }) {
   );
 
   return null;
-}
+};
 
 const normalizeChildren = (children: preact.ComponentChildren) => {
   if (Array.isArray(children)) return children.map(normalizeChildren).join("");
