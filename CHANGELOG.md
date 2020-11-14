@@ -1,5 +1,12 @@
 # microsite
 
+## 0.6.3
+
+### Patch Changes
+
+- a760228: Automatically inject h and Fragment
+- 580bb4f: expose default tsconfig.json for end-users
+
 ## 0.6.2
 
 ### Patch Changes
