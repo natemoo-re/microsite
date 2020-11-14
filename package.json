@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.0.0-canary-2020101419274",
+  "version": "0.0.0",
   "type": "module",
   "author": {
     "name": "Nate Moore",

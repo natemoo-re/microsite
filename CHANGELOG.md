@@ -1,5 +1,12 @@
 # microsite
 
+## 0.0.0
+
+### Patch Changes
+
+- 55c200d: Fix handling of node builtins for intermediate builds
+- 13263eb: Remove .microsite/cache dir for now
+
 ## 0.0.0-canary-2020101419274
 
 ### Minor Changes
