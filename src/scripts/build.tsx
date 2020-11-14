@@ -11,6 +11,7 @@ const multi = require("rollup-plugin-multi-input").default;
 import styles from "rollup-plugin-styles";
 import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import autoExternal from "rollup-plugin-auto-external";
 import alias from "@rollup/plugin-alias";
 import cjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
@@ -207,7 +208,7 @@ const internalRollupConfig: RollupOptions = {
     "microsite/page",
     "microsite/hydrate",
     "preact",
-    "preact/compat",
+    "preact/hooks",
     "preact/jsx-runtime",
     "preact-render-to-string",
   ],
@@ -263,6 +264,7 @@ async function writeGlobal() {
   const global = await rollup({
     ...internalRollupConfig,
     plugins: [
+      autoExternal(),
       esbuild({ target: "es2018" }),
       ...requiredPlugins,
       ...globalPlugins,
@@ -272,6 +274,7 @@ async function writeGlobal() {
   const legacy = await rollup({
     ...internalRollupConfig,
     plugins: [
+      autoExternal(),
       esbuild({ target: "es2015" }),
       ...requiredPlugins,
       ...globalPlugins,
@@ -306,6 +309,7 @@ async function writePages() {
     const bundle = await rollup({
       ...internalRollupConfig,
       plugins: [
+        autoExternal(),
         esbuild({ target: "es2018" }),
         ...requiredPlugins,
         ...createPagePlugins(),
