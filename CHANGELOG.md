@@ -1,5 +1,12 @@
 # microsite
 
+## 0.6.1
+
+### Patch Changes
+
+- a3a5131: Fix external warning
+- 5c79ec3: update README
+
 ## 0.6.0
 
 ### Breaking Changes
