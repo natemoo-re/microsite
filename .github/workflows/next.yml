@@ -16,7 +16,16 @@ jobs:
 
     - uses: volta-cli/action@v1
 
-    - run: npm install
+    - uses: actions/cache@v2
+      id: node-cache
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - if: steps.node-cache.outputs.cache-hit != 'true'
+      run: npm ci
 
     - name: Create Release Pull Request or Publish to npm
       id: changesets
