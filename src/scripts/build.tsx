@@ -154,6 +154,8 @@ const requiredPlugins = [
   }),
   inject({
     fetch: "node-fetch",
+    h: ["preact", "h"],
+    Fragment: ["preact", "Fragment"],
   }),
 ];
 
