@@ -138,6 +138,11 @@ ${imports.slice(0, -1)}
 };
 
 const requiredPlugins = [
+  inject({
+    fetch: "node-fetch",
+    h: ["preact", "h"],
+    Fragment: ["preact", "Fragment"],
+  }),
   nodeResolve({
     preferBuiltins: true,
     mainFields: ["module", "main"],
@@ -151,11 +156,6 @@ const requiredPlugins = [
     transform(filename: string) {
       return filename.replace(/\.js$/i, ".tsx");
     },
-  }),
-  inject({
-    fetch: "node-fetch",
-    h: ["preact", "h"],
-    Fragment: ["preact", "Fragment"],
   }),
 ];
 
