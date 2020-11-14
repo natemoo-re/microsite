@@ -1,5 +1,12 @@
 # microsite
 
+## 0.5.1
+
+### Patch Changes
+
+- 3d99331: Fix handling of node builtins for intermediate builds
+- 3d99331: Remove .microsite/cache dir for now
+
 ## 0.5.1-next.0
 
 ### Patch Changes
