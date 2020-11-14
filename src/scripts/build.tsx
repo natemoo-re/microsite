@@ -190,7 +190,6 @@ const createPagePlugins = () => [
 
 const OUTDIR = "./.microsite";
 const OUTPUT_DIR = join(OUTDIR, "build");
-const CACHE_DIR = join(OUTDIR, "cache");
 
 const outputOptions: OutputOptions = {
   format: "esm",
@@ -350,9 +349,7 @@ async function readDir(dir) {
 async function prepare() {
   const paths = [resolve("./dist"), resolve(OUTPUT_DIR)];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  await Promise.all(
-    [...paths, CACHE_DIR].map((p) => mkdir(p, { recursive: true }))
-  );
+  await Promise.all([...paths].map((p) => mkdir(p, { recursive: true })));
 
   try {
     if ((await stat("./src/public")).isDirectory()) {
@@ -370,7 +367,7 @@ async function prepare() {
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
-  const paths = [OUTPUT_DIR];
+  const paths = [OUTDIR];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   if (err) {
     await rmdir("./dist", { recursive: true });
