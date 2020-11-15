@@ -9,10 +9,9 @@ on:
 jobs:
   release:
 
+    name: Release (Canary)
     runs-on: macos-latest
 
-    name: Release
-    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
