@@ -8,6 +8,9 @@ on:
 
 jobs:
   release:
+
+    runs-on: macos-latest
+
     name: Release
     runs-on: ubuntu-latest
     steps:
