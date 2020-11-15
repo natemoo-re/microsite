@@ -1,4 +1,12 @@
-# Microsite
+<br />
+<br />
+
+<div align="center">
+    <img src="/.github/assets/microsite.svg?sanitize=true" alt="microsite" width="375" />
+</div>
+
+<br />
+<br />
 
 `microsite` is a fast, opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**. Pages are written with Preact, Typescript, and CSS Modules and compiled with `esbuild`.
 
