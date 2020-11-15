@@ -1,5 +1,6 @@
 node_modules
-**/*.js
-**/*.d.ts
-!types/**/*.d.ts
 .DS_Store
+
+packages/microsite/**/*.js
+packages/microsite/**/*.d.ts
+!packages/microsite/types/**/*.d.ts
