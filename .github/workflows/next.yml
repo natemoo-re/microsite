@@ -18,7 +18,7 @@ jobs:
 
     - uses: volta-cli/action@v1
 
-    - run: npm ci
+    - run: npm i
 
     - name: Create Release Pull Request or Publish to npm
       id: changesets
