@@ -27,7 +27,7 @@ jobs:
       uses: changesets/action@master
       with:
         version: npx changeset version
-        publish: npx lerna publish from-package -y --no-verify-access
+        publish: cd packages/microsite && npm publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
