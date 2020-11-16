@@ -12,7 +12,7 @@ const Index: FunctionalComponent<any> = () => {
       <main>
         <h1>Microsite</h1>
         
-        <a href="https://github.com/natemoo-re/microsite">See Github</a>
+        <a href="https://github.com/natemoo-re/microsite">Github</a>
       </main>
     </>
   );
