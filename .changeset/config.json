@@ -3,8 +3,10 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "linked": [],
-  "access": "restricted",
+  "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "@microsite/root"
+  ]
 }

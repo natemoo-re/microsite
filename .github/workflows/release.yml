@@ -9,7 +9,7 @@ jobs:
   release:
 
     name: Release
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -18,13 +18,15 @@ jobs:
 
     - uses: volta-cli/action@v1
 
-    - run: npm i
+    - run: npm ci
+    
+    - run: npx lerna bootstrap --ci
 
     - name: Create Release Pull Request or Publish to npm
       id: changesets
       uses: changesets/action@master
       with:
-        publish: npm publish
+        publish: npx lerna publish from-package -y --no-verify-access
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
