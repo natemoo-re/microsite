@@ -2,7 +2,7 @@
 <br />
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/natemoo-re/microsite/master/.github/assets/microsite.svg?sanitize=true" alt="microsite" width="375" />
+    <img src="https://raw.githubusercontent.com/natemoo-re/microsite/master/.github/assets/microsite.svg?sanitize=true" alt="microsite" width="375" height="101" />
 </div>
 
 <br />
