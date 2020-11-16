@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --experimental-modules --experimental-specifier-resolution=node
 import { build } from "./scripts/build";
 async function run() {
   const [command, ...args] = process.argv.slice(2);

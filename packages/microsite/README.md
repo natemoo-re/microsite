@@ -12,9 +12,8 @@
 
 [See the demo](https://microsite-demo.nmoo.vercel.app/)
 
-> Microsite is output as ESM, so it needs to run in a Node environment which supports it (like node@12)
-> You can add a script such as this to your project:
-> `node --experimental-modules --experimental-specifier-resolution=node node_modules/.bin/microsite build`
+> Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0)
+> Ensure that your project includes `"type": "module"` in `package.json`.
 
 ## Automatic Partial Hydration (APH)
 
