@@ -6,7 +6,5 @@
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@microsite/root"
-  ]
+  "ignore": ["@microsite/*"]
 }
