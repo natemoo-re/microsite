@@ -610,6 +610,7 @@ async function renderPage(
 
 export async function build(args: string[] = []) {
   const isDebug = args.includes("--debug-hydration");
+  const noClean = args.includes("--no-clean");
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
@@ -747,5 +748,5 @@ export async function build(args: string[] = []) {
     ),
   ]);
 
-  await cleanup();
+  if (!noClean) await cleanup();
 }
