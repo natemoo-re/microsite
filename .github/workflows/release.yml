@@ -26,6 +26,7 @@ jobs:
       id: changesets
       uses: changesets/action@master
       with:
+        version: npx changeset version
         publish: npx lerna publish from-package -y --no-verify-access
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
