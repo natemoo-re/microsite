@@ -4,22 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "prepare": "npm run build",
-    "build": "npm run --prefix=packages/microsite build"
+    "prepare": "lerna run build",
+    "build": "lerna run build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
     "husky": "^4.3.0",
+    "lerna": "^3.22.1",
     "lint-staged": "^10.4.2",
     "prettier": "^2.1.2"
   },
   "volta": {
-    "node": "12.19.0",
-    "npm": "7.0.11"
+    "node": "12.19.0"
   },
   "husky": {
     "hooks": {

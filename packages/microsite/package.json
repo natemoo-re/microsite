@@ -58,7 +58,6 @@
   },
   "homepage": "https://github.com/natemoo-re/microsite#readme",
   "volta": {
-    "node": "12.19.0",
-    "npm": "7.0.11"
+    "node": "12.19.0"
   }
 }
