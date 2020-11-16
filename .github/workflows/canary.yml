@@ -28,7 +28,7 @@ jobs:
       uses: changesets/action@master
       with:
         version: npx changeset version --snapshot canary
-        publish: npm publish
+        publish: npx lerna publish from-package -y --no-verify-access
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
