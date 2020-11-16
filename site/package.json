@@ -1,0 +1,21 @@
+{
+  "name": "@microsite/site",
+  "private": true,
+  "volta": {
+    "node": "12.19.0"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node --experimental-modules --experimental-specifier-resolution=node node_modules/.bin/microsite build -- --debug-hydration"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.2",
+    "microsite": "^0.6.8",
+    "preact": "^10.5.7",
+    "remark": "^13.0.0",
+    "remark-html": "^13.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.0-beta"
+  }
+}
