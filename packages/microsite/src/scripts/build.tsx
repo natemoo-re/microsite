@@ -1,6 +1,7 @@
 import { join, resolve, extname, dirname, basename } from "path";
 import { OutputOptions, rollup, RollupOptions } from "rollup";
 import globby from "globby";
+import crypto from "crypto";
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -243,9 +244,14 @@ const internalRollupConfig: RollupOptions = {
     if (dependentEntryPoints.length > 1) {
       return `hydrate/shared`;
     } else if (dependentEntryPoints.length === 1) {
+      const { code } = getModuleInfo(dependentEntryPoints[0]);
+      const hash = crypto.createHash("sha256");
+      hash.update(Buffer.from(code));
+      const sha = hash.digest("hex").slice(0, 7);
+
       return `hydrate/${
         dependentEntryPoints[0].split("/").slice(-1)[0].split(".")[0]
-      }`;
+      }-${sha}`;
     }
   },
 };
@@ -319,6 +325,7 @@ async function writePages() {
 
     const result = await bundle.write({
       ...outputOptions,
+      chunkFileNames: "[name].js",
       assetFileNames: "[name][extname]",
       dir: OUTPUT_DIR,
     });
