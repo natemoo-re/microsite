@@ -1,5 +1,5 @@
 {
-  "name": "@microsite/site",
+  "name": "site",
   "private": true,
   "volta": {
     "node": "12.19.0"
