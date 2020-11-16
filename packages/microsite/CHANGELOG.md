@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.9-next.0
+
+### Patch Changes
+
+- Add --no-clean flag to persist intermediate build (useful for debugging)
+
 ## 0.6.6
 
 ### Patch Changes
