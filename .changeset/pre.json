@@ -5,5 +5,5 @@
     "microsite": "0.6.8",
     "site": "0.0.0"
   },
-  "changesets": ["good-bears-camp"]
+  "changesets": ["good-bears-camp", "tender-crews-push"]
 }
