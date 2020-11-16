@@ -243,7 +243,9 @@ const internalRollupConfig: RollupOptions = {
     if (dependentEntryPoints.length > 1) {
       return `hydrate/shared`;
     } else if (dependentEntryPoints.length === 1) {
-      return `hydrate/${info.id.split("/").slice(-1)[0].split(".")[0]}`;
+      return `hydrate/${
+        dependentEntryPoints[0].split("/").slice(-1)[0].split(".")[0]
+      }`;
     }
   },
 };
