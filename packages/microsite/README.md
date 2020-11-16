@@ -12,7 +12,8 @@
 
 [See the demo](https://microsite-demo.nmoo.vercel.app/)
 
-> Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0)
+> Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0).
+>
 > Ensure that your project includes `"type": "module"` in `package.json`, which will allow you to use ESM in your project's `node` scripts.
 
 ## Automatic Partial Hydration (APH)
