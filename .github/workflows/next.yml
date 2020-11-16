@@ -19,6 +19,8 @@ jobs:
     - uses: volta-cli/action@v1
 
     - run: npm i
+    
+    - run: npx lerna bootstrap --ci
 
     - name: Create Release Pull Request or Publish to npm
       id: changesets
