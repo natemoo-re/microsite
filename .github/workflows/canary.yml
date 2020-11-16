@@ -19,7 +19,7 @@ jobs:
 
     - uses: volta-cli/action@v1
 
-    - run: npm i
+    - run: npm ci
     
     - run: npx lerna bootstrap --ci
 
