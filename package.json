@@ -7,6 +7,10 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "npm run --prefix=packages/microsite build"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
     "husky": "^4.3.0",
