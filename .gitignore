@@ -1,7 +1,11 @@
 node_modules
 .DS_Store
+dist/
+.microsite
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts
 !packages/microsite/types/**/*.d.ts
 !packages/microsite/**/*.json
+
+.vercel
