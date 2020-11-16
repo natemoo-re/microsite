@@ -2,7 +2,12 @@ import { FunctionalComponent } from "preact";
 import { definePage } from "microsite/page";
 import { Head, seo } from "microsite/head";
 
-const Index: FunctionalComponent<any> = () => {
+import { resolve, join } from 'path';
+import { promises as fsp } from 'fs';
+import remark from "remark";
+import html from "remark-html";
+
+const Index: FunctionalComponent<{ content?: string }> = ({ content }) => {
   return (
     <>
       <Head>
@@ -10,12 +15,27 @@ const Index: FunctionalComponent<any> = () => {
       </Head>
 
       <main>
-        <h1>Microsite</h1>
-        
-        <a href="https://github.com/natemoo-re/microsite">Github</a>
+        <article dangerouslySetInnerHTML={{ __html: content }}></article>
       </main>
     </>
   );
 };
 
-export default definePage(Index);
+async function markdownToHtml(markdown) {
+  const result = await remark().use(html).process(markdown);
+  return result.toString();
+}
+
+export default definePage(Index, {
+  async getStaticProps() {
+    const readme = resolve(join('..', `README.md`));
+    const content = await fsp.readFile(readme, "utf8");
+    const html = await markdownToHtml(content);
+
+    return {
+      props: {
+        content: html
+      }
+    }
+  }
+});
