@@ -2,6 +2,7 @@ import { join, resolve, extname, dirname, basename } from "path";
 import { OutputOptions, rollup, RollupOptions } from "rollup";
 import globby from "globby";
 import crypto from "crypto";
+import { BuildArgs } from "../index";
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -656,9 +657,13 @@ async function renderPage(
   return output;
 }
 
-export async function build(args: string[] = []) {
-  const isDebug = args.includes("--debug-hydration");
-  const noClean = args.includes("--no-clean");
+export async function build(args: BuildArgs) {
+  const isDebug = args["--debug-hydration"];
+  const noClean = args["--no-clean"];
+  const filter = args["--filter"];
+
+  console.log(filter);
+
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
 
