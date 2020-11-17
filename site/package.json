@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "gray-matter": "^4.0.2",
-    "microsite": "^0.6.9-next.0",
+    "microsite": "^0.6.9",
     "preact": "^10.5.7",
     "remark": "^13.0.0",
     "remark-html": "^13.0.1"

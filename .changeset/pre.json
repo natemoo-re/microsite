@@ -1,9 +1,0 @@
-{
-  "mode": "exit",
-  "tag": "next",
-  "initialVersions": {
-    "microsite": "0.6.8",
-    "site": "0.0.0"
-  },
-  "changesets": ["perfect-dragons-exercise"]
-}
