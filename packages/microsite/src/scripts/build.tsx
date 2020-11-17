@@ -146,7 +146,7 @@ ${imports.slice(0, -1)}
 
 const requiredPlugins = [
   inject({
-    fetch: "node-fetch",
+    fetch: "microsite/utils/fetch.js",
     h: ["preact", "h"],
     Fragment: ["preact", "Fragment"],
     exclude: [/\.css$/],
@@ -200,21 +200,22 @@ const outputOptions: OutputOptions = {
   minifyInternalExports: false,
 };
 
+const EXTERNALS = [
+  "microsite/head",
+  "microsite/document",
+  "microsite/global",
+  "microsite/page",
+  "microsite/hydrate",
+  "microsite/utils/fetch.js",
+  "preact",
+  "preact/hooks",
+  "preact/jsx-runtime",
+  "preact-render-to-string",
+];
+
 const internalRollupConfig: RollupOptions = {
   context: "globalThis",
-  external: [
-    "node-fetch",
-    "microsite/head",
-    "microsite/document",
-    "microsite/global",
-    "microsite/page",
-    "microsite/hydrate",
-    "preact",
-    "preact/hooks",
-    "preact/jsx-runtime",
-    "preact-render-to-string",
-  ],
-
+  external: EXTERNALS,
   treeshake: true,
 
   onwarn(message) {
@@ -380,7 +381,7 @@ async function prepare() {
 }
 
 async function cleanup({ err = false }: { err?: boolean } = {}) {
-  const paths = [OUTDIR];
+  const paths = [OUTPUT_DIR];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
   if (err) {
     await rmdir("./dist", { recursive: true });
