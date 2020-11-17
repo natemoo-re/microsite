@@ -1,5 +1,14 @@
 # microsite
 
+## 0.6.9
+
+### Patch Changes
+
+- 788860d: Add --no-clean flag to persist intermediate build (useful for debugging)
+- 64add28: Fixes issue with named hydration chunks
+- 10f9fd5: Improve caching by using external styles rather than inlined styles
+- 0641e72: Update microsite bin to use correct arguments
+
 ## 0.6.9-next.0
 
 ### Patch Changes
