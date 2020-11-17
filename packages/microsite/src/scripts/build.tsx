@@ -21,8 +21,14 @@ import { terser } from "rollup-plugin-terser";
 import { Document, __DocContext, __hydratedComponents } from "../document";
 import { h } from "preact";
 import render from "preact-render-to-string";
-import { promises as fsp } from "fs";
+import { promises as fsp, readFileSync } from "fs";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
+
+const hashFileSync = (p: string) => {
+  const hash = crypto.createHash("sha256");
+  hash.update(readFileSync(p));
+  return hash.digest("hex").slice(0, 7);
+};
 
 const createHydrateInitScript = ({
   isDebug = false,
@@ -249,9 +255,11 @@ const internalRollupConfig: RollupOptions = {
       hash.update(Buffer.from(code));
       const sha = hash.digest("hex").slice(0, 7);
 
-      return `hydrate/${
-        dependentEntryPoints[0].split("/").slice(-1)[0].split(".")[0]
-      }-${sha}`;
+      return `hydrate/${dependentEntryPoints[0]
+        .split("/")
+        .slice(-1)[0]
+        .split(".")[0]
+        .replace(/([\[\]])/gi, "")}-${sha}`;
     }
   },
 };
@@ -569,7 +577,8 @@ async function renderPage(
             hydrateExportManifest={hydrateExportManifest}
             page={__name}
             hasScripts={hasGlobalScript}
-            styles={[globalStyle, style].filter((v) => v)}
+            globalStyle={globalStyle ?? null}
+            styles={[style].filter((v) => v)}
           >
             <Page {...props} />
           </Document>,
@@ -626,9 +635,20 @@ export async function build(args: string[] = []) {
   let globalStyle = null;
   let hasGlobalScript = false;
   try {
-    globalStyle = await readFile(join(OUTPUT_DIR, "global.css")).then((v) =>
-      v.toString()
+    if (!(await stat(join(OUTPUT_DIR, "global.css"))).isFile())
+      throw new Error();
+    await mkdir(resolve(`dist/_hydrate/styles`), { recursive: true });
+    await copyFile(
+      join(OUTPUT_DIR, "global.css"),
+      join("dist", "_hydrate", "styles", "global.css")
     );
+
+    globalStyle = `global.css?v=${hashFileSync(
+      join(OUTPUT_DIR, "global.css")
+    )}`;
+  } catch (e) {}
+
+  try {
     hasGlobalScript = await readFile(join(OUTPUT_DIR, "global.js")).then(
       (v) => !!v.toString().trim()
     );
@@ -676,28 +696,41 @@ export async function build(args: string[] = []) {
       hydrateFiles
         .filter((f) => extname(f) === ".js")
         .map((file) => {
-          const style = basename(file).split("-")[0] + ".css";
+          const style = basename(file, ".js") + ".css";
           const styleFile = resolve(join(".", dirname(file), style));
           let styles = null;
-          return stat(styleFile)
-            .then((stats) => {
-              if (stats.isFile()) {
-                return readFile(styleFile).then((buff) => {
-                  styles = buff.toString();
-                });
-              }
-            })
-            .then(() => {
-              return import(join(process.cwd(), file)).then((mod) => ({
-                name: basename(file),
-                styles,
-                exports: Object.keys(mod).map((key) => [key, mod[key].name]),
-              }));
-            });
+
+          if (
+            hydrateFiles.includes(
+              ".microsite/" + styleFile.split(".microsite/")[1]
+            )
+          ) {
+            styles = styleFile.split("hydrate/")[1];
+          }
+
+          return import(join(process.cwd(), file)).then((mod) => ({
+            name: basename(file),
+            styles,
+            exports: Object.keys(mod).map((key) => [key, mod[key].name]),
+          }));
         })
     );
 
     const input = await globby(join(OUTPUT_DIR, "hydrate", "**", "*.js"));
+    const styles = await globby(join(OUTPUT_DIR, "hydrate", "**", "*.css"));
+
+    if (styles.length > 0) {
+      await mkdir(resolve(`dist/_hydrate/styles`), { recursive: true });
+      await Promise.all(
+        styles.map((file) => {
+          copyFile(
+            resolve(file),
+            resolve(`dist/_hydrate/styles/${file.split("hydrate")[1]}`)
+          );
+        })
+      );
+    }
+
     if (input.length > 0) {
       const hydrateBundle = await rollup({
         treeshake: true,
@@ -727,10 +760,13 @@ export async function build(args: string[] = []) {
         },
         minifyInternalExports: true,
         dir: resolve("dist/_hydrate/chunks"),
-        entryFileNames: (info) => `${basename(info.name)}.js`,
+        entryFileNames: (info) =>
+          `${basename(info.name).replace(/([\[\]])/gi, "")}.js`,
       });
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error(e);
+  }
 
   let output = [];
   try {

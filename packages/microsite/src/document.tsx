@@ -14,12 +14,14 @@ export const Document: FunctionalComponent<{
   hydrateExportManifest?: any;
   page?: string;
   styles?: string[];
+  globalStyle?: string;
   hasScripts?: boolean;
 }> = ({
   hydrateExportManifest,
   page,
   styles = [],
   hasScripts = false,
+  globalStyle,
   children,
 }) => {
   const head = useRef([]);
@@ -45,8 +47,7 @@ export const Document: FunctionalComponent<{
       return null;
     })
     .filter((v) => v)
-    .join("")
-    .trim();
+    .filter(unique) as string[];
 
   return (
     <html>
@@ -54,16 +55,23 @@ export const Document: FunctionalComponent<{
         <meta {...({ charset: "utf-8" } as any)} />
         <meta name="viewport" content="width=device-width" />
         <Fragment>{head.current}</Fragment>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: "[data-hydrate]{display:contents;}",
-          }}
-        />
+
+        {globalStyle && (
+          <link rel="stylesheet" href={`/_hydrate/styles/${globalStyle}`} />
+        )}
+        {componentStyles &&
+          componentStyles.map((href) => (
+            <link rel="stylesheet" href={`/_hydrate/styles/${href}`} />
+          ))}
         {styles.map((style) => (
           <style dangerouslySetInnerHTML={{ __html: style.trim() }} />
         ))}
-        {componentStyles && (
-          <style dangerouslySetInnerHTML={{ __html: componentStyles }} />
+        {hydrate.current.length > 0 && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: "[data-hydrate]{display:contents;}",
+            }}
+          />
         )}
       </head>
       <body>
