@@ -184,7 +184,7 @@ const createPagePlugins = () => [
     minimize: true,
     autoModules: true,
     modules: {
-      generateScopedName: "[hash:6]",
+      generateScopedName: `[local]_[hash:5]`,
     },
     sourceMap: false,
   }),
@@ -206,6 +206,7 @@ const internalRollupConfig: RollupOptions = {
     "node-fetch",
     "microsite/head",
     "microsite/document",
+    "microsite/global",
     "microsite/page",
     "microsite/hydrate",
     "preact",
@@ -737,6 +738,7 @@ export async function build(args: string[] = []) {
         input,
         external: ["preact", "preact/hooks"],
         plugins: [
+          nodeResolve(),
           multi(),
           replace({
             values: {
