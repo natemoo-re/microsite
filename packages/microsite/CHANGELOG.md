@@ -1,5 +1,11 @@
 # microsite
 
+## 0.0.0-canary-2020101832635
+
+### Minor Changes
+
+- fd4c454: Add [HTTP Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching) to `fetch` via [`make-fetch-happen`](https://github.com/zkat/make-fetch-happen/). Thanks [@zkat](https://github.com/zkat)!
+
 ## 0.6.10
 
 ### Patch Changes
