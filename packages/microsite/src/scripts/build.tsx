@@ -30,6 +30,12 @@ const hashFileSync = (p: string) => {
   return hash.digest("hex").slice(0, 7);
 };
 
+const hashContentSync = (content: string) => {
+  const hash = crypto.createHash("sha256");
+  hash.update(Buffer.from(content));
+  return hash.digest("hex").slice(0, 7);
+};
+
 const createHydrateInitScript = ({
   isDebug = false,
 }: { isDebug?: boolean } = {}) => {
@@ -192,6 +198,7 @@ const createPagePlugins = () => [
 
 const OUTDIR = "./.microsite";
 const OUTPUT_DIR = join(OUTDIR, "build");
+const CACHE_DIR = join(OUTDIR, "cache");
 
 const outputOptions: OutputOptions = {
   format: "esm",
@@ -250,18 +257,16 @@ const internalRollupConfig: RollupOptions = {
     }
 
     if (dependentEntryPoints.length > 1) {
-      return `hydrate/shared`;
+      const hash = hashContentSync(info.code);
+      return `hydrate/shared-${hash}`;
     } else if (dependentEntryPoints.length === 1) {
       const { code } = getModuleInfo(dependentEntryPoints[0]);
-      const hash = crypto.createHash("sha256");
-      hash.update(Buffer.from(code));
-      const sha = hash.digest("hex").slice(0, 7);
-
+      const hash = hashContentSync(code);
       return `hydrate/${dependentEntryPoints[0]
         .split("/")
         .slice(-1)[0]
         .split(".")[0]
-        .replace(/([\[\]])/gi, "")}-${sha}`;
+        .replace(/([\[\]])/gi, "")}-${hash}`;
     }
   },
 };
@@ -363,7 +368,9 @@ async function readDir(dir) {
 async function prepare() {
   const paths = [resolve("./dist"), resolve(OUTPUT_DIR)];
   await Promise.all(paths.map((p) => rmdir(p, { recursive: true })));
-  await Promise.all([...paths].map((p) => mkdir(p, { recursive: true })));
+  await Promise.all(
+    [...paths, CACHE_DIR].map((p) => mkdir(p, { recursive: true }))
+  );
 
   try {
     if ((await stat("./src/public")).isDirectory()) {
