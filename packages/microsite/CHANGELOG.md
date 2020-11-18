@@ -1,5 +1,11 @@
 # microsite
 
+## 0.0.0-canary-202010183714
+
+### Patch Changes
+
+- 41f1b57: Add preload hints for hydrated pages
+
 ## 0.6.9
 
 ### Patch Changes
