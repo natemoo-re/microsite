@@ -1,6 +1,6 @@
 {
   "name": "site",
-  "version": "0.0.0-canary-2020101832635",
+  "version": "0.0.0",
   "private": true,
   "volta": {
     "node": "12.19.0"
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "gray-matter": "^4.0.2",
-    "microsite": "^0.0.0-canary-2020101832635",
+    "microsite": "latest",
     "preact": "^10.5.7",
     "remark": "^13.0.0",
     "remark-html": "^13.0.1"
