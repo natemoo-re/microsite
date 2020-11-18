@@ -1,6 +1,6 @@
 # microsite
 
-## 0.0.0-canary-2020101832635
+## 0.6.11
 
 ### Minor Changes
 
@@ -26,7 +26,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx
