@@ -73,6 +73,19 @@ export const Document: FunctionalComponent<{
             }}
           />
         )}
+        {hydrate.current.length > 0 && (
+          <Fragment>
+            <link
+              rel="modulepreload"
+              href="https://unpkg.com/preact@latest?module"
+            />
+            <link
+              rel="modulepreload"
+              href="https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module"
+            />
+            <link rel="modulepreload" href={`/_hydrate/pages/${page}.js`} />
+          </Fragment>
+        )}
       </head>
       <body>
         <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
