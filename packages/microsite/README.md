@@ -91,3 +91,4 @@ project/
 - [Markus Oberlehner](https://twitter.com/maoberlehner), [Building Partially Hydrated, Progressively Enhanced Static Websites with Isomorphic Preact and Eleventy](https://markus.oberlehner.net/blog/building-partially-hydrated-progressively-enhanced-static-websites-with-isomorphic-preact-and-eleventy/)
 - [Lukas Bombach](https://twitter.com/luke_schmuke), [The case of partial hydration (with Next and Preact)](https://medium.com/@luke_schmuke/how-we-achieved-the-best-web-performance-with-partial-hydration-20fab9c808d5)
 - [Jason Miller](https://twitter.com/_developit) and [Addy Osmani](https://twitter.com/addyosmani), [Rendering on the Web](https://developers.google.com/web/updates/2019/02/rendering-on-the-web)
+- [Poimandres](https://github.com/pmndrs), [`valtio`](https://github.com/pmndrs/valtio) for inspiring `microsite/global`
