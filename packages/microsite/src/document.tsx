@@ -50,10 +50,14 @@ export const Document: FunctionalComponent<{
     .filter(unique) as string[];
 
   return (
-    <html>
+    <html lang="en" dir="ltr">
       <head>
         <meta {...({ charset: "utf-8" } as any)} />
-        <meta name="viewport" content="width=device-width" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
+        />
+
         <Fragment>{head.current}</Fragment>
 
         {globalStyle && (
