@@ -1,5 +1,12 @@
 # microsite
 
+## 0.6.12-next.0
+
+### Patch Changes
+
+- 9d22932: Update to typescript@4.1.2
+- 217299b: Update Document viewport meta tag, html lang and dir
+
 ## 0.6.11
 
 ### Minor Changes
@@ -26,7 +33,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx

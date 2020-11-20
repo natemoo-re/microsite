@@ -3,7 +3,12 @@
   "tag": "next",
   "initialVersions": {
     "microsite": "0.6.11",
-    "site": "0.0.0"
+    "site": "0.0.0",
+    "create-microsite": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "gentle-bananas-clean",
+    "pink-shoes-beg",
+    "purple-adults-relax"
+  ]
 }
