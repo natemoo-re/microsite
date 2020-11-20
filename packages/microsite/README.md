@@ -10,6 +10,10 @@
 
 `microsite` is a fast, opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**. Pages are written with Preact, Typescript, and CSS Modules and compiled with `esbuild`.
 
+```bash
+npm init microsite <project>
+```
+
 [See the demo](https://microsite-demo.nmoo.vercel.app/)
 
 > Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0).
