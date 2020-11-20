@@ -2,8 +2,7 @@
 import degit from "degit";
 import arg from "arg";
 import { bold, green, cyan, underline, red, white } from "kleur/colors";
-import { join, resolve } from "path";
-import { exec } from "child_process";
+import { join } from "path";
 
 const REPO = `natemoo-re/microsite-templates`;
 const TEMPLATES = ["default"];
