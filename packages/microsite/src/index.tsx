@@ -23,7 +23,6 @@ async function run() {
 
   if (command === "build") {
     const args = getBuildArgs(argv);
-    console.log(args);
     await build(args);
     return;
   }
