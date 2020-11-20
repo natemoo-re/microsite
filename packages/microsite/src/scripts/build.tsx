@@ -590,9 +590,7 @@ async function renderPage(
     const {
       data = null,
       metadata: { key: previousKey = null, file: previousFile = null } = {},
-    } = await cache
-      .get(CACHE_DIR, cacheKey)
-      .catch(() => ({} as GetCacheObject));
+    } = await cache.get(CACHE_DIR, cacheKey).catch(() => ({} as any));
     const currentFile = __hash;
     let staticPathsOrKey = await getStaticPaths({
       isPrefetch: true,
