@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "0.6.12-next.0",
+  "version": "0.6.12",
   "type": "module",
   "author": {
     "name": "Nate Moore",
