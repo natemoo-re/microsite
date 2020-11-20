@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "declaration": true,
+    "declarationDir": "./",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": ["dom", "ES2019"],
+    "outDir": "./",
+    "moduleResolution": "Node",
+    "module": "ESNext",
+    "target": "ES2017",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

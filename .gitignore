@@ -8,4 +8,7 @@ packages/microsite/**/*.d.ts
 !packages/microsite/types/**/*.d.ts
 !packages/microsite/**/*.json
 
+packages/create-microsite/**/*.js
+packages/create-microsite/**/*.d.ts
+
 .vercel
