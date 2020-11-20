@@ -27,7 +27,7 @@ jobs:
       uses: changesets/action@master
       with:
         version: npx changeset version
-        publish: npx lerna exec --scope microsite -- npm publish --tag next
+        publish: npx lerna exec --scope="microsite create-microsite" -- npm publish --tag next
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
