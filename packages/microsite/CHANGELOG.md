@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 86bdb17: Fix bug where <pre> code was improperly indented
+- 86bdb17: Fix bug where &gt;pre> code was improperly indented
 
 ## 0.6.12
 
