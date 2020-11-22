@@ -615,9 +615,23 @@ async function renderPage(
         }
       }
 
+      let cleanOutput = content
+        .replace(/^\s+$/gm, "\n")
+        .replace(/(?<=<pre><code.*?>)([\s\S]+?)(?=<\/code>)/gi, (match) => {
+          let mindent = 0;
+          return match
+            .split("\n")
+            .map((ln) => {
+              let diff = ln.length - ln.trimStart().length;
+              if (diff > 0 && !mindent) mindent = diff;
+              return ln.slice(mindent);
+            })
+            .join("\n")
+            .trim();
+        });
       output.push({
         name: `${path === "/" ? "/index" : path}.html`,
-        content: content.replace(/^\s+$/gm, "\n"),
+        content: cleanOutput,
       });
     } catch (e) {
       console.log(`Error building /${__name}.html`);
