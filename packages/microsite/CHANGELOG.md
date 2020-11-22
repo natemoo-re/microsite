@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.13
+
+### Patch Changes
+
+- 86bdb17: Fix bug where <pre> code was improperly indented
+
 ## 0.6.12
 
 ### Patch Changes
@@ -40,7 +46,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
