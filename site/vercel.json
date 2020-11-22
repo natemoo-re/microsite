@@ -1,10 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": ".*",
-      "destination": "https://github.com/natemoo-re/microsite"
-    }
-  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
