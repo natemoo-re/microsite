@@ -43,6 +43,7 @@ async function run() {
     },
     { argv }
   );
+
   try {
     await clone("default", resolve(name), args);
   } catch (err) {
@@ -52,11 +53,12 @@ async function run() {
           white("--force")
         )} to override.`
       );
-      return;
     } else {
       console.error(err);
     }
+    return;
   }
+
   console.log(
     `${bold(green("✓"))} Created ${underline(
       green("./" + name)
