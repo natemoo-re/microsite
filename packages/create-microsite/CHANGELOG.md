@@ -1,5 +1,11 @@
 # create-microsite
 
+## 0.1.3
+
+### Patch Changes
+
+- 63d4d00: Return early if clone throws
+
 ## 0.1.2
 
 ### Patch Changes
