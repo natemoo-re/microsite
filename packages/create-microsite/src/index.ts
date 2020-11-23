@@ -2,7 +2,7 @@
 import degit from "degit";
 import arg from "arg";
 import { bold, green, cyan, underline, red, white } from "kleur/colors";
-import { join } from "path";
+import { resolve } from "path";
 
 const REPO = `natemoo-re/microsite-templates`;
 const TEMPLATES = ["default"];
@@ -18,7 +18,7 @@ async function clone(
 ) {
   return new Promise<void>((resolve, reject) => {
     const emitter = degit(`${REPO}/${template}#main`, {
-      cache: true,
+      cache: false,
       force: args["--force"] ?? false,
       verbose: true,
     });
@@ -36,7 +36,6 @@ async function clone(
 
 async function run() {
   console.log();
-  const cwd = process.cwd();
   const [name, ...argv] = process.argv.slice(2);
   const args = arg(
     {
@@ -45,20 +44,22 @@ async function run() {
     { argv }
   );
   try {
-    await clone("default", join(cwd, name), args);
+    await clone("default", resolve(name), args);
   } catch (err) {
     if (err.code === "DEST_NOT_EMPTY") {
       console.log(
-        `${bold(red("✗"))} ${cyan("/" + name)} is not empty. Use ${bold(
+        `${bold(red("✗"))} ${cyan("./" + name)} is not empty. Use ${bold(
           white("--force")
         )} to override.`
       );
       return;
+    } else {
+      console.error(err);
     }
   }
   console.log(
     `${bold(green("✓"))} Created ${underline(
-      green("/" + name)
+      green("./" + name)
     )} from template ${underline(cyan("default"))}`
   );
 }
