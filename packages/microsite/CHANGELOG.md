@@ -1,5 +1,11 @@
 # microsite
 
+## 0.6.14
+
+### Patch Changes
+
+- e18c71c: Fix Linux shebang issue (#40) by removing need for --experimental-module-resolution=node. Uses .js import specifiers everywhere
+
 ## 0.6.13
 
 ### Patch Changes
