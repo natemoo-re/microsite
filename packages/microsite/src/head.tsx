@@ -1,6 +1,6 @@
 import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useRef, useContext, Ref } from "preact/hooks";
-import { __DocContext } from "./document";
+import { __DocContext } from "./document.js";
 
 import render from "preact-render-to-string";
 

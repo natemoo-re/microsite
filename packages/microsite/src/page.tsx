@@ -1,4 +1,4 @@
-import { StaticPath, StaticPropsContext } from './scripts/build';
+import { StaticPath, StaticPropsContext } from './scripts/build.js';
 import { ComponentProps, JSX, ComponentType } from "preact";
 
 type RestParam<S extends string> = S extends `...${infer A}` ? A : never;

@@ -2,7 +2,7 @@ import { h, FunctionComponent, createContext } from "preact";
 
 import { useContext } from "preact/hooks";
 import { Buffer } from "buffer";
-import { __DocContext } from "./document";
+import { __DocContext } from "./document.js";
 
 const isServer = typeof window === "undefined";
 const btoa = (str: string) => Buffer.from(str, "utf-8").toString("base64");

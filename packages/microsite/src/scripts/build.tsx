@@ -18,7 +18,7 @@ import replace from "@rollup/plugin-replace";
 import inject from "@rollup/plugin-inject";
 import { terser } from "rollup-plugin-terser";
 
-import { Document, __DocContext, __hydratedComponents } from "../document";
+import { Document, __DocContext, __hydratedComponents } from "../document.js";
 import { h } from "preact";
 import render from "preact-render-to-string";
 import { promises as fsp, readFileSync } from "fs";
@@ -343,6 +343,13 @@ async function writePages() {
       chunkFileNames: "[name].js",
       assetFileNames: "[name][extname]",
       dir: OUTPUT_DIR,
+      paths: {
+        "microsite/head": "microsite/head.js",
+        "microsite/document": "microsite/document.js",
+        "microsite/global": "microsite/global.js",
+        "microsite/page": "microsite/page.js",
+        "microsite/hydrate": "microsite/hydrate.js",
+      },
     });
     return result;
   } catch (e) {

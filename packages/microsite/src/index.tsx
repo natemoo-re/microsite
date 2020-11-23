@@ -1,5 +1,5 @@
-#!/usr/bin/env node --experimental-modules --experimental-specifier-resolution=node
-import { build } from "./scripts/build";
+#!/usr/bin/env node
+import { build } from "./scripts/build.js";
 async function run() {
   const [command, ...args] = process.argv.slice(2);
 
