@@ -1,4 +1,4 @@
-#!/usr/bin/env node --experimental-modules --experimental-specifier-resolution=node
+#!/usr/bin/env node
 import degit from "degit";
 import arg from "arg";
 import { bold, green, cyan, underline, red, white } from "kleur/colors";

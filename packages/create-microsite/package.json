@@ -10,7 +10,7 @@
   "license": "MIT",
   "main": "./index.js",
   "bin": {
-    "create-microsite": "index.js"
+    "create-microsite": "./index.js"
   },
   "scripts": {
     "prepare": "npm run build",
