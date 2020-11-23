@@ -1,5 +1,12 @@
 # site
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [e18c71c]
+  - microsite@0.6.14
+
 ## 0.0.1
 
 ### Patch Changes
