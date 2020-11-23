@@ -1,5 +1,11 @@
 # create-microsite
 
+## 0.1.2
+
+### Patch Changes
+
+- c2f6f6b: fix(#40): log uncaught errors, remove `degit` cache, prefer `path.resolve`
+
 ## 0.1.1
 
 ### Patch Changes
