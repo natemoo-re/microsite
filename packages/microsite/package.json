@@ -51,7 +51,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/natemoo-re/microsite.git"
+    "url": "https://github.com/natemoo-re/microsite.git",
+    "directory": "packages/microsite"
   },
   "bugs": {
     "url": "https://github.com/natemoo-re/microsite/issues"

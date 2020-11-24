@@ -30,12 +30,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/natemoo-re/microsite.git"
+    "url": "https://github.com/natemoo-re/microsite.git",
+    "directory": "packages/create-microsite"
   },
+  "homepage": "https://github.com/natemoo-re/microsite/tree/master/packages/create-microsite#readme",
   "bugs": {
     "url": "https://github.com/natemoo-re/microsite/issues"
   },
-  "homepage": "https://github.com/natemoo-re/microsite#readme",
   "volta": {
     "node": "12.19.0"
   }
