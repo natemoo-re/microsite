@@ -1,4 +1,5 @@
 import { StaticPath, StaticPropsContext } from './scripts/build.js';
+import type { createPrefetch } from './utils/prefetch';
 import { ComponentProps, JSX, ComponentType } from "preact";
 
 type RestParam<S extends string> = S extends `...${infer A}` ? A : never;
@@ -19,11 +20,11 @@ type StandardParams<S extends string, Base extends string = keyof AllPathParams<
 export type PathParams<S extends string> = RestParams<S> & StandardParams<S>;
 
 export interface GetStaticPaths<Path extends string, P extends PathParams<Path>> {
-    (ctx: { isPrefetch: boolean, key: string|null }): Promise<{ paths: StaticPath<P>[] }|string>;
+    (ctx: { prefetch?: ReturnType<typeof createPrefetch> }): Promise<{ paths: StaticPath<P>[] }|string|null>;
 }
 
 export interface GetStaticProps<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>> {
-    (ctx: StaticPropsContext<P> & { isPrefetch: boolean, key: string|null }): Promise<{ props: ComponentProps<T> }|string>;
+    (ctx: StaticPropsContext<P> & { prefetch?: ReturnType<typeof createPrefetch> }): Promise<{ props: ComponentProps<T> }|string|null>;
 }
 
 export interface Page<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>> {

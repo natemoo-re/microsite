@@ -24,6 +24,7 @@ import { Document, __DocContext, __hydratedComponents } from "../document.js";
 import { h } from "preact";
 import render from "preact-render-to-string";
 import { promises as fsp, readFileSync } from "fs";
+import { createPrefetch } from "../utils/prefetch.js";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 
 const hashFileSync = (p: string, len?: number) => {
@@ -593,11 +594,10 @@ async function renderPage(
     } = await cache.get(CACHE_DIR, cacheKey).catch(() => ({} as any));
     const currentFile = __hash;
     let staticPathsOrKey = await getStaticPaths({
-      isPrefetch: true,
-      key: previousKey,
+      prefetch: createPrefetch(previousKey),
     });
 
-    if (typeof staticPathsOrKey === "string") {
+    if (typeof staticPathsOrKey === "string" || staticPathsOrKey === null) {
       const currentKey = staticPathsOrKey;
       if (
         previousKey &&
@@ -609,10 +609,13 @@ async function renderPage(
       } else {
         if (previousKey && previousFile) await cache.rm(CACHE_DIR, cacheKey);
 
-        staticPaths = await getStaticPaths({ isPrefetch: false, key: null });
-        await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticPaths), {
-          metadata: { name: __name, key: currentKey, file: currentFile },
-        });
+        staticPaths = await getStaticPaths({ prefetch: undefined });
+
+        if (currentKey) {
+          await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticPaths), {
+            metadata: { name: __name, key: currentKey, file: currentFile },
+          });
+        }
       }
     } else {
       staticPaths = staticPathsOrKey;
@@ -656,10 +659,9 @@ async function renderPage(
         path,
         params: JSON.parse(JSON.stringify(params)),
         meta,
-        isPrefetch: true,
-        key: previousKey,
+        prefetch: createPrefetch(previousKey),
       });
-      if (typeof staticPropsOrKey === "string") {
+      if (typeof staticPropsOrKey === "string" || staticPropsOrKey === null) {
         const currentKey = staticPropsOrKey;
         if (
           previousKey &&
@@ -675,17 +677,19 @@ async function renderPage(
             path,
             params: JSON.parse(JSON.stringify(params)),
             meta,
-            isPrefetch: false,
-            key: null,
+            prefetch: undefined,
           });
-          await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticProps), {
-            metadata: {
-              name: __name,
-              path: path,
-              key: currentKey,
-              file: currentFile,
-            },
-          });
+
+          if (currentKey) {
+            await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticProps), {
+              metadata: {
+                name: __name,
+                path: path,
+                key: currentKey,
+                file: currentFile,
+              },
+            });
+          }
         }
       } else {
         staticProps = staticPropsOrKey;
