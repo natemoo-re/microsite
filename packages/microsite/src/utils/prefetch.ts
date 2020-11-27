@@ -1,39 +1,98 @@
-import fetch, { Request, RequestInfo, RequestInit } from "node-fetch";
+import fetch, { Request, Response, RequestInfo, RequestInit } from "node-fetch";
+import CachePolicy from "http-cache-semantics";
 import { promises as fsp } from "fs";
 import { join } from "path";
 import { createHash } from "crypto";
+import { Buffer } from "buffer";
 
 export function createPrefetch(previousKey: string | null) {
-  console.log({ previousKey });
   return async function prefetch(
     info: RequestInfo,
     init: RequestInit = {}
   ): Promise<string | null> {
     // file mode
     if (typeof info === "string" && !info.startsWith("http")) {
-      const currentKey = await createFileKey(info);
-      // console.log('fs', { previousKey, currentKey });
-      return currentKey;
+      const key = await createFileKey(info);
+      return key;
     }
 
     // fetch mode
-    const req = new Request(info, { ...init, method: "HEAD" });
+    let req = new Request(info, { ...init, method: "HEAD" });
+    let previousPolicy = null;
+    let previousRes = null;
+
+    if (previousKey) {
+      const { policy, response } = JSON.parse(
+        Buffer.from(previousKey, "base64").toString("utf8")
+      );
+      previousPolicy = CachePolicy.fromObject(policy);
+      previousRes = response;
+    }
+
+    if (previousPolicy && previousPolicy.satisfiesWithoutRevalidation(req)) {
+      previousRes.headers = previousPolicy.responseHeaders();
+      const response = !previousPolicy.storable()
+        ? null
+        : serializeRes(previousRes);
+      return Buffer.from(
+        JSON.stringify({ policy: previousPolicy.toObject(), response })
+      ).toString("base64");
+    }
+
+    if (previousPolicy) {
+      req = new Request(info, {
+        ...init,
+        method: "HEAD",
+        headers: {
+          ...req.headers,
+          ...previousPolicy.revalidationHeaders(serializeReq(req)),
+        },
+      });
+      const res = await fetch(req);
+      const { policy, modified } = previousPolicy.revalidatedPolicy(req, res);
+
+      const response = !policy.storable() ? null : serializeRes(res);
+      if (modified) {
+        return Buffer.from(
+          JSON.stringify({ policy: policy.toObject(), response })
+        ).toString("base64");
+      }
+
+      return Buffer.from(
+        JSON.stringify({ policy: previousPolicy.toObject(), response })
+      ).toString("base64");
+    }
+
     const res = await fetch(req);
-    return res.headers.get("etag") ?? null;
+    const policy = createPolicy(req, res);
+    const response = !policy.storable() ? null : serializeRes(res);
+
+    return Buffer.from(
+      JSON.stringify({ policy: policy.toObject(), response })
+    ).toString("base64");
   };
 }
 
-// const serializeReq = (req: Request) => ({
-//     url: req.url,
-//     method: req.method,
-//     headers: iterableToObject(req.headers)
-// })
-// const serializeRes = (res: Response) => ({
-//     status: res.status,
-//     headers: iterableToObject(res.headers)
-// })
+const serializeReq = (req: Request) => ({
+  url: req.url,
+  method: req.method,
+  headers: iterableToObject(req.headers),
+});
+const serializeRes = (res: Response) => ({
+  status: res.status,
+  headers: iterableToObject(res.headers),
+});
+const iterableToObject = (iter: any) => {
+  if (typeof iter.keys !== "function") return iter;
+  let obj = {};
+  for (const key of iter.keys()) {
+    obj[key] = iter.get(key);
+  }
+  return obj;
+};
 
-// const createPolicy = (req: Request, res: Response) => new CachePolicy(serializeReq(req), serializeRes(res), { shared: false });
+const createPolicy = (req: Request, res: Response) =>
+  new CachePolicy(serializeReq(req), serializeRes(res), { shared: false });
 
 async function createFileKey(p: string): Promise<string> {
   const hash = createHash("sha1");

@@ -1,3 +1,3 @@
-import fetch from "make-fetch-happen";
+import fetch from "node-fetch";
 
 export default fetch;
