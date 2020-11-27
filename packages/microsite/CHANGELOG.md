@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.0-next.2
+
+### Patch Changes
+
+- 4475a3c: Update prefetch logic to accomodate changing headers
+
 ## 0.7.0-next.1
 
 ### Patch Changes
