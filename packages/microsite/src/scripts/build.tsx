@@ -24,7 +24,7 @@ import { Document, __DocContext, __hydratedComponents } from "../document.js";
 import { h } from "preact";
 import render from "preact-render-to-string";
 import { promises as fsp, readFileSync } from "fs";
-import { createPrefetch } from "../utils/prefetch.js";
+import { createPrefetch, isKeyValid } from "../utils/prefetch.js";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 
 const hashFileSync = (p: string, len?: number) => {
@@ -597,13 +597,12 @@ async function renderPage(
       prefetch: createPrefetch(previousKey),
     });
 
-    if (typeof staticPathsOrKey === "string" || staticPathsOrKey === null) {
+    if (typeof staticPathsOrKey === "string") {
       const currentKey = staticPathsOrKey;
       if (
-        previousKey &&
         previousFile &&
-        previousKey === currentKey &&
-        previousFile === currentFile
+        previousFile === currentFile &&
+        isKeyValid(previousKey, currentKey)
       ) {
         staticPaths = JSON.parse(data.toString());
       } else {
@@ -664,10 +663,9 @@ async function renderPage(
       if (typeof staticPropsOrKey === "string" || staticPropsOrKey === null) {
         const currentKey = staticPropsOrKey;
         if (
-          previousKey &&
           previousFile &&
-          previousKey === currentKey &&
-          previousFile === currentFile
+          previousFile === currentFile &&
+          isKeyValid(previousKey, currentKey)
         ) {
           staticProps = JSON.parse(data.toString());
         } else {

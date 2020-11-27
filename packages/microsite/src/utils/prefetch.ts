@@ -12,7 +12,9 @@ export function createPrefetch(previousKey: string | null) {
     // file mode
     if (typeof info === "string" && !info.startsWith("http")) {
       const key = await createFileKey(info);
-      return key;
+      return Buffer.from(JSON.stringify({ type: "fs", key })).toString(
+        "base64"
+      );
     }
 
     // fetch mode
@@ -34,7 +36,11 @@ export function createPrefetch(previousKey: string | null) {
         ? null
         : serializeRes(previousRes);
       return Buffer.from(
-        JSON.stringify({ policy: previousPolicy.toObject(), response })
+        JSON.stringify({
+          type: "network",
+          policy: previousPolicy.toObject(),
+          response,
+        })
       ).toString("base64");
     }
 
@@ -53,12 +59,20 @@ export function createPrefetch(previousKey: string | null) {
       const response = !policy.storable() ? null : serializeRes(res);
       if (modified) {
         return Buffer.from(
-          JSON.stringify({ policy: policy.toObject(), response })
+          JSON.stringify({
+            type: "network",
+            policy: policy.toObject(),
+            response,
+          })
         ).toString("base64");
       }
 
       return Buffer.from(
-        JSON.stringify({ policy: previousPolicy.toObject(), response })
+        JSON.stringify({
+          type: "network",
+          policy: previousPolicy.toObject(),
+          response,
+        })
       ).toString("base64");
     }
 
@@ -71,6 +85,21 @@ export function createPrefetch(previousKey: string | null) {
     ).toString("base64");
   };
 }
+
+export const isKeyValid = (previousKey: string | null, key: string | null) => {
+  if (!previousKey || !key) return false;
+  const { type } = JSON.parse(
+    Buffer.from(previousKey, "base64").toString("utf8")
+  );
+
+  if (type === "fs") return previousKey === key;
+
+  const { type: _type, ...current } = JSON.parse(
+    Buffer.from(key, "base64").toString("utf8")
+  );
+
+  return current.response.status === 200 || current.response.status === 304;
+};
 
 const serializeReq = (req: Request) => ({
   url: req.url,
