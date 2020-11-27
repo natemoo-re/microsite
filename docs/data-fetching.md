@@ -82,8 +82,8 @@ From this, Microsite will generate `/posts/1` and `/posts/2` using the page comp
 
 ```tsx
 export default definePage(Component, {
-  async getStaticProps(context) {
-    if (context.prefetch) {
+  async getStaticProps({ prefetch }) {
+    if (prefetch) {
       // remote network resource
       return prefetch("https://.../posts");
 
