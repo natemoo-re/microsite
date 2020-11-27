@@ -6,5 +6,8 @@
     "microsite": "0.6.14",
     "site": "0.0.2"
   },
-  "changesets": ["thirty-colts-fry"]
+  "changesets": [
+    "silly-lions-protect",
+    "thirty-colts-fry"
+  ]
 }
