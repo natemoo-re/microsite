@@ -3,7 +3,6 @@ import CachePolicy from "http-cache-semantics";
 import { promises as fsp } from "fs";
 import { join } from "path";
 import { createHash } from "crypto";
-import { Buffer } from "buffer";
 
 export function createPrefetch(previousKey: string | null) {
   return async function prefetch(
