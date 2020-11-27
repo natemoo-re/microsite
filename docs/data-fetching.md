@@ -78,27 +78,20 @@ From this, Microsite will generate `/posts/1` and `/posts/2` using the page comp
 
 ## Prefetching
 
-`getStaticProps` and `getStaticPaths` can be a bottleneck for builds if you're performing expensive network requests or file system reads. Because of this, both can optionally return a key (`string`) to save the next result to a cache. In this case, `context` will always include `isPrefetch: true` and conditionally include `key: string` if the cache has a matching entry.
+`getStaticProps` and `getStaticPaths` can be a bottleneck for builds if you're performing expensive network requests or file system reads. To alleviate this, both functions can optionally return the `prefetch` method to enable resource caching. These resources can be local, on your filesystem, or remote, on the network (CMS, GitHub, etc.)
 
 ```tsx
 export default definePage(Component, {
   async getStaticProps(context) {
-    if (context.isPrefetch) {
-      // network request with ETag
-      const res = await fetch("https://.../posts", { method: "HEAD" });
-      return res.headers.get("ETag");
+    if (context.prefetch) {
+      // remote network resource
+      return prefetch("https://.../posts");
 
-      // network request with Last-Modified
-      const res = await fetch("https://.../posts", {
-        "If-Modified-Since": context.key,
-        method: "HEAD",
-      });
-      return res.headers.get("Last-Modified");
+      // local filesystem resource (directory, caches filenames inside directory)
+      return prefetch("./src/posts");
 
-      // or filesystem read
-      const sum = crypto.createHash("sha256");
-      sum.update(path.join(process.cwd(), "posts"));
-      return sum.digest("hex");
+      // local filesystem resource (file, caches content of file)
+      return prefetch("./src/posts/post.md");
     }
   },
 });
