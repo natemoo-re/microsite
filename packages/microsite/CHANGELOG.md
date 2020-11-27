@@ -1,5 +1,18 @@
 # microsite
 
+## 0.7.0
+
+### Minor Changes
+
+- 65bf0bd: Implements a caching strategy for `getStaticProps` and `getStaticPaths`, which can often become a build bottleneck due to network or filesystem reads.
+
+  This change introduces a new `prefetch` method for both of these functions. [Read the docs](/docs/data-fetching) for more details.
+
+### Patch Changes
+
+- 4475a3c: Update prefetch logic to accomodate changing headers
+- f3b313b: Update to esbuild@0.8.x
+
 ## 0.7.0-next.2
 
 ### Patch Changes
@@ -72,7 +85,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx
