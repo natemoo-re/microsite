@@ -1,4 +1,5 @@
 import { StaticPath, StaticPropsContext } from './scripts/build.js';
+import type { createPrefetch } from './utils/prefetch';
 import { ComponentProps, JSX, ComponentType } from "preact";
 
 type RestParam<S extends string> = S extends `...${infer A}` ? A : never;
@@ -18,13 +19,23 @@ type RestParams<S extends string, Base extends string = keyof AllPathParams<S>> 
 type StandardParams<S extends string, Base extends string = keyof AllPathParams<S>> = { [a in StandardParam<Base>]: string };
 export type PathParams<S extends string> = RestParams<S> & StandardParams<S>;
 
+export interface GetStaticPaths<Path extends string, P extends PathParams<Path>> {
+    (ctx: { prefetch?: ReturnType<typeof createPrefetch> }): Promise<{ paths: StaticPath<P>[] }|string|null>;
+}
+
+export interface GetStaticProps<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>> {
+    (ctx: StaticPropsContext<P> & { prefetch?: ReturnType<typeof createPrefetch> }): Promise<{ props: ComponentProps<T> }|string|null>;
+}
+
+export interface Page<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>> {
+    path?: Path;
+    getStaticPaths?: GetStaticPaths<Path, P>;
+    getStaticProps?: GetStaticProps<T, Path, P>;
+}
+
 export function definePage<T extends ComponentType<any> | keyof JSX.IntrinsicElements, Path extends string, P extends PathParams<Path>>(
     Component: T,
-    page: {
-        path?: Path,
-        getStaticPaths?: () => Promise<{ paths: StaticPath<P>[] }>,
-        getStaticProps?: (ctx: StaticPropsContext<P>) => Promise<{ props: ComponentProps<T> }>
-    } = {}
+    page: Page<T, Path, P> = {}
 ) {
     return { Component, ...page };
 }

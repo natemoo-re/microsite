@@ -2,6 +2,8 @@ import { join, resolve, extname, dirname, basename } from "path";
 import { OutputOptions, rollup, RollupOptions } from "rollup";
 import globby from "globby";
 import crypto from "crypto";
+import cache from "cacache";
+import { BuildArgs } from "../index";
 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -22,18 +24,23 @@ import { Document, __DocContext, __hydratedComponents } from "../document.js";
 import { h } from "preact";
 import render from "preact-render-to-string";
 import { promises as fsp, readFileSync } from "fs";
+import { createPrefetch } from "../utils/prefetch.js";
 const { readdir, readFile, writeFile, mkdir, copyFile, stat, rmdir } = fsp;
 
-const hashFileSync = (p: string) => {
+const hashFileSync = (p: string, len?: number) => {
   const hash = crypto.createHash("sha256");
   hash.update(readFileSync(p));
-  return hash.digest("hex").slice(0, 7);
+  let res = hash.digest("hex");
+  if (typeof len === "number") res = res.slice(0, len);
+  return res;
 };
 
-const hashContentSync = (content: string) => {
+const hashContentSync = (content: string, len?: number) => {
   const hash = crypto.createHash("sha256");
   hash.update(Buffer.from(content));
-  return hash.digest("hex").slice(0, 7);
+  let res = hash.digest("hex");
+  if (typeof len === "number") res = res.slice(0, len);
+  return res;
 };
 
 const createHydrateInitScript = ({
@@ -257,11 +264,11 @@ const internalRollupConfig: RollupOptions = {
     }
 
     if (dependentEntryPoints.length > 1) {
-      const hash = hashContentSync(info.code);
+      const hash = hashContentSync(info.code, 7);
       return `hydrate/shared-${hash}`;
     } else if (dependentEntryPoints.length === 1) {
       const { code } = getModuleInfo(dependentEntryPoints[0]);
-      const hash = hashContentSync(code);
+      const hash = hashContentSync(code, 7);
       return `hydrate/${dependentEntryPoints[0]
         .split("/")
         .slice(-1)[0]
@@ -330,6 +337,33 @@ async function writePages() {
         esbuild({ target: "es2018", jsxFactory: "h", jsxFragment: "Fragment" }),
         ...requiredPlugins,
         ...createPagePlugins(),
+        {
+          name: "microsite-manifest",
+          generateBundle(_opts, bundle) {
+            let manifest = [];
+            for (const [_file, info] of Object.entries(bundle)) {
+              if (info.type === "asset") {
+                manifest.push({
+                  file: info.fileName,
+                  type: info.type,
+                  hash: hashContentSync(info.source.toString()),
+                });
+              } else {
+                manifest.push({
+                  file: info.fileName,
+                  type: info.type,
+                  hash: hashContentSync(info.code.toString()),
+                });
+              }
+            }
+
+            this.emitFile({
+              type: "asset",
+              fileName: "microsite-manifest.json",
+              source: JSON.stringify(manifest, null, 2),
+            });
+          },
+        },
       ],
       input: input.reduce((acc, page) => {
         let entryName = page.split("pages")[1].slice(1);
@@ -421,10 +455,13 @@ interface RouteInfo {
   segments: ReturnType<typeof routeToSegments>;
   params: Params;
 }
-export type StaticPath<P extends Params = Params> = string | { params: P };
+export type StaticPath<P extends Params = Params> =
+  | string
+  | { params: P; meta?: any };
 export interface StaticPropsContext<P extends Params = Params> {
   path: string;
   params: P;
+  meta?: any;
 }
 
 const validateStaticPath = (staticPath: unknown, { segments }: RouteInfo) => {
@@ -511,6 +548,7 @@ async function renderPage(
     getStaticProps = () => {},
     getStaticPaths,
     __name,
+    __hash,
   } = page;
 
   if (typeof Page === "object") {
@@ -527,7 +565,9 @@ async function renderPage(
   const { content: style = null } =
     styles.find((style) => style.__name === __name) || {};
 
-  let staticPaths: StaticPropsContext[] = [{ path: __name, params: {} }];
+  let staticPaths: StaticPropsContext[] = [
+    { path: __name, params: {}, meta: null },
+  ];
 
   if (typeof getStaticPaths === "function") {
     if (!isDynamicRoute(__name))
@@ -546,7 +586,41 @@ async function renderPage(
       throw new Error(
         `Error building /${__name}!\n\`${routeSegments[catchAllIndex].text}\` must be the final segment of the route`
       );
-    staticPaths = await getStaticPaths();
+
+    const cacheKey = `microsite:getStaticPaths:${__name}`;
+    const {
+      data = null,
+      metadata: { key: previousKey = null, file: previousFile = null } = {},
+    } = await cache.get(CACHE_DIR, cacheKey).catch(() => ({} as any));
+    const currentFile = __hash;
+    let staticPathsOrKey = await getStaticPaths({
+      prefetch: createPrefetch(previousKey),
+    });
+
+    if (typeof staticPathsOrKey === "string" || staticPathsOrKey === null) {
+      const currentKey = staticPathsOrKey;
+      if (
+        previousKey &&
+        previousFile &&
+        previousKey === currentKey &&
+        previousFile === currentFile
+      ) {
+        staticPaths = JSON.parse(data.toString());
+      } else {
+        if (previousKey && previousFile) await cache.rm(CACHE_DIR, cacheKey);
+
+        staticPaths = await getStaticPaths({ prefetch: undefined });
+
+        if (currentKey) {
+          await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticPaths), {
+            metadata: { name: __name, key: currentKey, file: currentFile },
+          });
+        }
+      }
+    } else {
+      staticPaths = staticPathsOrKey;
+    }
+
     if (!staticPaths)
       throw new Error(
         `Error building /${__name}!\n\`getStaticPaths\` must return a value`
@@ -569,14 +643,58 @@ async function renderPage(
     );
   }
 
-  async function fetchSingle({ params, path }: StaticPropsContext) {
+  async function fetchSingle({ params, path, meta }: StaticPropsContext) {
+    let staticProps: any;
     let props = {};
+
     try {
-      const res = await getStaticProps({
+      const cacheKey = `microsite:getStaticProps:${path}`;
+      const {
+        data = null,
+        metadata: { key: previousKey = null, file: previousFile = null } = {},
+      } = await cache.get(CACHE_DIR, cacheKey).catch(() => ({} as any));
+      const currentFile = __hash;
+
+      let staticPropsOrKey = await getStaticProps({
         path,
         params: JSON.parse(JSON.stringify(params)),
+        meta,
+        prefetch: createPrefetch(previousKey),
       });
-      props = res?.props ?? {};
+      if (typeof staticPropsOrKey === "string" || staticPropsOrKey === null) {
+        const currentKey = staticPropsOrKey;
+        if (
+          previousKey &&
+          previousFile &&
+          previousKey === currentKey &&
+          previousFile === currentFile
+        ) {
+          staticProps = JSON.parse(data.toString());
+        } else {
+          if (previousKey && previousFile) await cache.rm(CACHE_DIR, cacheKey);
+
+          staticProps = await getStaticProps({
+            path,
+            params: JSON.parse(JSON.stringify(params)),
+            meta,
+            prefetch: undefined,
+          });
+
+          if (currentKey) {
+            await cache.put(CACHE_DIR, cacheKey, JSON.stringify(staticProps), {
+              metadata: {
+                name: __name,
+                path: path,
+                key: currentKey,
+                file: currentFile,
+              },
+            });
+          }
+        }
+      } else {
+        staticProps = staticPropsOrKey;
+      }
+      props = staticProps?.props ?? {};
     } catch (e) {
       console.error(`Error getting static props for "${path}"`);
       console.error(e);
@@ -656,11 +774,17 @@ async function renderPage(
   return output;
 }
 
-export async function build(args: string[] = []) {
-  const isDebug = args.includes("--debug-hydration");
-  const noClean = args.includes("--no-clean");
+export async function build(args: BuildArgs) {
+  console.time("Build");
+  const isDebug = args["--debug-hydration"];
+  const noClean = args["--no-clean"];
+
   await prepare();
   await Promise.all([writeGlobal(), writePages()]);
+
+  const micrositeManifest = await fsp
+    .readFile(join(OUTPUT_DIR, "microsite-manifest.json"))
+    .then((res) => JSON.parse(res.toString()));
 
   let globalStyle = null;
   let hasGlobalScript = false;
@@ -674,7 +798,8 @@ export async function build(args: string[] = []) {
     );
 
     globalStyle = `global.css?v=${hashFileSync(
-      join(OUTPUT_DIR, "global.css")
+      join(OUTPUT_DIR, "global.css"),
+      7
     )}`;
   } catch (e) {}
 
@@ -711,10 +836,16 @@ export async function build(args: string[] = []) {
     files
       .filter((f) => f.endsWith(".js"))
       .map((f) =>
-        import(join(process.cwd(), f)).then((mod) => ({
-          ...mod,
-          __name: getName(f),
-        }))
+        import(join(process.cwd(), f)).then((mod) => {
+          const entry = micrositeManifest.find(
+            (entry) => f.indexOf(entry.file) > -1
+          );
+          return {
+            ...mod,
+            __name: getName(f),
+            __hash: entry.hash,
+          };
+        })
       )
   );
 
@@ -825,4 +956,6 @@ export async function build(args: string[] = []) {
   ]);
 
   if (!noClean) await cleanup();
+  await cache.verify(CACHE_DIR);
+  console.timeEnd("Build");
 }
