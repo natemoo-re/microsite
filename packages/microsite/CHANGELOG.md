@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.0-next.1
+
+### Patch Changes
+
+- f3b313b: Update to esbuild@0.8.x
+
 ## 0.7.0-next.0
 
 ### Minor Changes
@@ -60,7 +66,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
