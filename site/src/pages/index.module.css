@@ -1,0 +1,79 @@
+.header {
+  position: relative;
+  padding-block: 2em;
+
+  background: linear-gradient(235deg, red -150%, pink 100%), pink;
+}
+
+.header h2 {
+  max-width: 16ch;
+  font-size: clamp(52px, calc(1rem + 6vw), 96px);
+  line-height: 1;
+  color: white;
+  font-family: display;
+}
+
+.cta {
+  display: flex;
+  flex-flow: row wrap;
+  gap: base;
+}
+
+@media screen and (min-width: 640px) {
+  .header {
+    padding-block-end: 3em;
+  }
+  .cta {
+    position: absolute;
+    bottom: -24px;
+  }
+}
+
+.github {
+  display: flex;
+  padding: 0;
+  width: 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.main {
+  padding-block: xl;
+  display: flex;
+  flex-flow: row wrap;
+  gap: max(base, 2vmax);
+}
+
+@media screen and (min-width: 640px) {
+  .main {
+    padding-block: 2xl;
+  }
+}
+
+.article {
+  font-family: body;
+  font-weight: normal;
+  max-width: 65ch;
+}
+
+.lede {
+  font-size: 1.25rem;
+}
+
+.main > aside {
+  width: full;
+  max-width: 52ch;
+}
+
+.features > li:first-child {
+  margin-top: 0.175em;
+}
+
+.features > li {
+  display: flex;
+  align-items: center;
+}
+
+.features > li > svg {
+  margin-right: base;
+}

@@ -1,0 +1,70 @@
+.prompt {
+  display: flex;
+  padding: md;
+  border-radius: sm;
+  background: gray.1;
+  margin-block-start: lg;
+  white-space: nowrap;
+  line-height: 1;
+  cursor: pointer;
+  color: white;
+
+  transition: background fast out;
+}
+
+.prompt:hover,
+.prompt:focus {
+  background: gray.2;
+}
+
+.prompt:active {
+  background: mint;
+  cursor: copy;
+  color: transparent;
+}
+
+.prompt:active span::before,
+.prompt:active .project {
+  color: inherit;
+}
+
+.prompt > code {
+  width: full;
+  height: full;
+
+  background: none;
+  font-family: code;
+  font-size: 14px;
+  color: inherit;
+}
+
+.prompt > code::before {
+  position: absolute;
+  content: "✔️ Copied to clipboard!";
+  opacity: 0;
+  user-select: none;
+  color: gray.1;
+}
+
+.prompt:active > code::before {
+  opacity: 1;
+}
+
+@media screen and (min-width: 640px) {
+  .prompt {
+    max-width: max-content;
+    margin-block-start: 0;
+  }
+}
+
+.prompt span::before {
+  content: "▶ ";
+  margin-inline: -2xs 2xs;
+  user-select: none;
+  color: mint;
+}
+
+.project {
+  color: mint;
+  font-style: italic;
+}

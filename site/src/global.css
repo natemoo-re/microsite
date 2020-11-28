@@ -1,3 +1,5 @@
+@stylo base;
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,36 +10,113 @@
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   font-size: clamp(14px, calc(0.5rem + 1vw), 20px);
   line-height: 1.25;
-
-  padding: 1rem;
 }
 
-code {
-  font-size: 100%;
-  padding: 0.125em;
-  margin: 0 -0.125em;
-  border-radius: 0.25em;
-  background: #eee;
-}
-
-pre {
-  padding: 1em 0.5em;
-  margin: 0 -0.5em;
-  border-radius: 0.5em;
-  background: #eee;
-}
-
-pre > code {
-  margin: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-main {
-  max-width: 65ch;
+.container {
+  padding-inline: sm;
+  width: calc(screen - (sm * 2));
+  max-width: container;
   margin-inline: auto;
 }
 
-article > * + * {
-  margin-top: 1em;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: display;
+  font-weight: medium;
+}
+
+h3 {
+  font-size: clamp(32px, calc(1rem + 3vw), 40px);
+}
+
+a {
+  font-family: body;
+  font-weight: bold;
+
+  text-decoration: none;
+  color: inherit;
+}
+
+em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+code {
+  font-family: code;
+  font-size: 0.75em;
+  padding: xs;
+  margin-inline: -2xs;
+  background: gray.6;
+  border-radius: sm;
+}
+
+.button {
+  box-sizing: content-box;
+  line-height: 1;
+  padding: md;
+  font-family: body;
+  font-weight: bold;
+  background: white;
+  border-radius: sm;
+  box-shadow: inset 0 0 0 3px currentColor;
+}
+
+ul[role="list"] {
+  padding: 0;
+  list-style: none;
+}
+
+ul[role="list"] > li {
+  padding: 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: none;
+  -webkit-appearance: button;
+  border-radius: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+[data-stack] {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-stack="2xs"] > * + * {
+  margin-top: 2xs;
+}
+[data-stack="xs"] > * + * {
+  margin-top: xs;
+}
+[data-stack="sm"] > * + * {
+  margin-top: sm;
+}
+[data-stack="md"] > * + * {
+  margin-top: md;
+}
+[data-stack="lg"] > * + * {
+  margin-top: lg;
+}
+[data-stack="xl"] > * + * {
+  margin-top: xl;
+}
+[data-stack="2xl"] > * + * {
+  margin-top: 2xl;
+}
+[data-stack="3xl"] > * + * {
+  margin-top: 3xl;
 }

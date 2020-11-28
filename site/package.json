@@ -7,7 +7,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "node --experimental-modules --experimental-specifier-resolution=node node_modules/microsite/index.js build -- --debug-hydration"
+    "build": "microsite build"
   },
   "dependencies": {
     "gray-matter": "^4.0.2",
@@ -17,6 +17,8 @@
     "remark-html": "^13.0.1"
   },
   "devDependencies": {
-    "typescript": "^4.1.0-beta"
+    "@stylo/core": "1.0.0-next.15",
+    "@stylo/postcss": "1.0.0-next.15",
+    "typescript": "^4.1.1"
   }
 }
