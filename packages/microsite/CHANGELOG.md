@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.2
+
+### Patch Changes
+
+- c71d8da: Whoops, actually fix that bundling bug
+
 ## 0.7.1
 
 ### Patch Changes
