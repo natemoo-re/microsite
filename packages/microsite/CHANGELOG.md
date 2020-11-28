@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.1
+
+### Patch Changes
+
+- bf8cfa0: Fix bundling bug
+
 ## 0.7.0
 
 ### Minor Changes
@@ -85,7 +91,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
