@@ -905,7 +905,7 @@ export async function build(args: BuildArgs) {
           multi(),
           replace({
             values: {
-              "import { withHydrate } from 'microsite/hydrate';":
+              "import { withHydrate } from 'microsite/hydrate.js';":
                 "const withHydrate = v => v;",
             },
             delimiters: ["", ""],
