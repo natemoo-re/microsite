@@ -1,0 +1,36 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.header > :global(.container) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header svg {
+  height: xl;
+  margin-inline-start: -sm;
+}
+
+.nav > ul {
+  display: flex;
+  color: gray.1;
+}
+
+.nav > ul > li + li {
+  margin-inline-start: base;
+}
+
+.nav > ul a {
+  font-weight: normal;
+}
+
+.nav > ul a:hover,
+.nav > ul a:focus {
+  font-weight: bold;
+}

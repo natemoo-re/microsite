@@ -46,9 +46,9 @@ const theme = {
   },
   fonts: {
     fallback: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif`,
-    display: `'Degular Display', fallback`,
-    body: `Degular, fallback`,
-    code: `'Zeitung Mono Pro', 'Courier New', Courier, monospace`,
+    headline: `degular-display, 'Degular Display', fallback`,
+    body: `degular, Degular, fallback`,
+    code: `zeitung-mono, 'Zeitung Mono Pro', 'Courier New', Courier, monospace`,
   },
   fontWeights: {
     normal: 400,

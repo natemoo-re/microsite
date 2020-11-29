@@ -8,6 +8,8 @@
   line-height: 1;
   cursor: pointer;
   color: white;
+  width: full;
+  text-align: left;
 
   transition: background fast out;
 }
@@ -17,18 +19,21 @@
   background: gray.2;
 }
 
-.prompt:active {
+.prompt:active,
+.prompt.copying {
   background: mint;
   cursor: copy;
   color: transparent;
 }
 
+.prompt.copying span::before,
 .prompt:active span::before,
-.prompt:active .project {
+.prompt.copying .project .prompt:active .project {
   color: inherit;
 }
 
 .prompt > code {
+  pointer-events: none;
   width: full;
   height: full;
 
@@ -46,6 +51,7 @@
   color: gray.1;
 }
 
+.prompt.copying > code::before,
 .prompt:active > code::before {
   opacity: 1;
 }

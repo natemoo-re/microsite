@@ -1,8 +1,5 @@
 import { FunctionalComponent } from "preact";
 import { Head, seo } from "microsite/head";
-
-import remark from "remark";
-import html from "remark-html";
 import {
   Fire,
   Docs,
@@ -14,6 +11,7 @@ import {
 } from "@/components/Icon";
 
 import css from "./index.module.css";
+import Header from "@/components/Header";
 import Prompt from "@/components/Prompt";
 
 const Index: FunctionalComponent = () => {
@@ -21,18 +19,29 @@ const Index: FunctionalComponent = () => {
     <>
       <Head>
         <seo.title>Microsite</seo.title>
+        <seo.description>
+          Microsite is a Preact-based static site generator featuring
+          next-generation features like Automatic Partial Hydration and
+          intelligent build caches.
+        </seo.description>
+
+        <link
+          rel="preload"
+          as="style"
+          href="https://use.typekit.net/ssd0uka.css"
+        />
+        <link rel="stylesheet" href="https://use.typekit.net/ssd0uka.css" />
       </Head>
 
-      <header class={css.header}>
+      <Header />
+
+      <div class={css.header}>
         <div class="container">
           <h2>Static sites made simple.</h2>
 
           <div class={css.cta}>
             <Prompt />
-            <a
-              class="button"
-              href="https://github.com/natemoo-re/microsite/tree/master/docs"
-            >
+            <a class="button" href="/docs/getting-started">
               Read the docs
             </a>
             <a
@@ -44,7 +53,7 @@ const Index: FunctionalComponent = () => {
             </a>
           </div>
         </div>
-      </header>
+      </div>
 
       <main class={`${css.main} container`}>
         <article class={css.article} data-stack="md">

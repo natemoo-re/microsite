@@ -13,6 +13,7 @@
     "gray-matter": "^4.0.2",
     "microsite": "0.7.6",
     "preact": "^10.5.7",
+    "quicklink": "^2.0.0",
     "remark": "^13.0.0",
     "remark-html": "^13.0.1"
   },

@@ -1,16 +1,18 @@
 .header {
   position: relative;
-  padding-block: 2em;
+  padding-block: 2xl;
+  padding-block-start: calc(2xl + xl);
+  margin-block-start: calc(-xl * 2);
 
   background: linear-gradient(235deg, red -150%, pink 100%), pink;
 }
 
 .header h2 {
-  max-width: 16ch;
+  max-width: 8em;
   font-size: clamp(52px, calc(1rem + 6vw), 96px);
   line-height: 1;
   color: white;
-  font-family: display;
+  font-family: headline;
 }
 
 .cta {
@@ -53,7 +55,7 @@
 .article {
   font-family: body;
   font-weight: normal;
-  max-width: 65ch;
+  max-width: 36em;
 }
 
 .lede {
@@ -62,7 +64,7 @@
 
 .main > aside {
   width: full;
-  max-width: 52ch;
+  max-width: 28em;
 }
 
 .features > li:first-child {
