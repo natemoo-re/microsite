@@ -15,6 +15,7 @@ export const Document: FunctionalComponent<{
   page?: string;
   styles?: string[];
   globalStyle?: string;
+  sharedStyle?: string;
   hasScripts?: boolean;
 }> = ({
   hydrateExportManifest,
@@ -22,6 +23,7 @@ export const Document: FunctionalComponent<{
   styles = [],
   hasScripts = false,
   globalStyle,
+  sharedStyle,
   children,
 }) => {
   const head = useRef([]);
@@ -62,6 +64,9 @@ export const Document: FunctionalComponent<{
 
         {globalStyle && (
           <link rel="stylesheet" href={`/_hydrate/styles/${globalStyle}`} />
+        )}
+        {sharedStyle && (
+          <link rel="stylesheet" href={`/_hydrate/styles/${sharedStyle}`} />
         )}
         {componentStyles &&
           componentStyles.map((href) => (

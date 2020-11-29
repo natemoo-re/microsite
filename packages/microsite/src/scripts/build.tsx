@@ -240,39 +240,40 @@ const internalRollupConfig: RollupOptions = {
   manualChunks(id, { getModuleInfo }) {
     const info = getModuleInfo(id);
 
-    const dependentEntryPoints = [];
-    if (info.importedIds.includes("microsite/hydrate")) {
-      const idsToHandle = new Set([
-        ...info.importers,
-        ...info.dynamicImporters,
-      ]);
+    const dependentStaticEntryPoints = [];
+    const dependentHydrateEntryPoints = [];
+    const target = info.importedIds.includes("microsite/hydrate")
+      ? dependentHydrateEntryPoints
+      : dependentStaticEntryPoints;
+    const idsToHandle = new Set([...info.importers, ...info.dynamicImporters]);
 
-      for (const moduleId of idsToHandle) {
-        const { isEntry, dynamicImporters, importers } = getModuleInfo(
-          moduleId
-        );
+    for (const moduleId of idsToHandle) {
+      const { isEntry, dynamicImporters, importers } = getModuleInfo(moduleId);
 
-        // naive check to see if module is a "facade" to only export sub-modules
-        // const isFacade = (basename(moduleId, extname(moduleId)) === 'index') && !isEntry && importedIds.every(m => dirname(m).startsWith(dirname(moduleId)));
+      // naive check to see if module is a "facade" to only export sub-modules
+      // const isFacade = (basename(moduleId, extname(moduleId)) === 'index') && !isEntry && importedIds.every(m => dirname(m).startsWith(dirname(moduleId)));
 
-        if (isEntry || [...importers, ...dynamicImporters].length > 0)
-          dependentEntryPoints.push(moduleId);
+      if (isEntry || [...importers, ...dynamicImporters].length > 0)
+        target.push(moduleId);
 
-        for (const importerId of importers) idsToHandle.add(importerId);
-      }
+      for (const importerId of importers) idsToHandle.add(importerId);
     }
 
-    if (dependentEntryPoints.length > 1) {
+    if (dependentHydrateEntryPoints.length > 1) {
       const hash = hashContentSync(info.code, 7);
       return `hydrate/shared-${hash}`;
-    } else if (dependentEntryPoints.length === 1) {
-      const { code } = getModuleInfo(dependentEntryPoints[0]);
+    } else if (dependentHydrateEntryPoints.length === 1) {
+      const { code } = getModuleInfo(dependentHydrateEntryPoints[0]);
       const hash = hashContentSync(code, 7);
-      return `hydrate/${dependentEntryPoints[0]
+      return `hydrate/${dependentHydrateEntryPoints[0]
         .split("/")
         .slice(-1)[0]
         .split(".")[0]
         .replace(/([\[\]])/gi, "")}-${hash}`;
+    }
+
+    if (dependentStaticEntryPoints.length > 1) {
+      return "shared";
     }
   },
 };
@@ -543,7 +544,14 @@ const staticPathToStaticPropsContext = (
 
 async function renderPage(
   page: any,
-  { styles, hydrateExportManifest, hasGlobalScript, globalStyle, isDebug }: any
+  {
+    styles,
+    hydrateExportManifest,
+    hasGlobalScript,
+    globalStyle,
+    sharedStyle,
+    isDebug,
+  }: any
 ) {
   let baseHydrate = false;
   let routeHydrate = false;
@@ -715,6 +723,7 @@ async function renderPage(
             page={__name}
             hasScripts={hasGlobalScript}
             globalStyle={globalStyle ?? null}
+            sharedStyle={sharedStyle ?? null}
             styles={[style].filter((v) => v)}
           >
             <Page {...props} />
@@ -790,6 +799,7 @@ export async function build(args: BuildArgs) {
     .then((res) => JSON.parse(res.toString()));
 
   let globalStyle = null;
+  let sharedStyle = null;
   let hasGlobalScript = false;
   try {
     if (!(await stat(join(OUTPUT_DIR, "global.css"))).isFile())
@@ -802,6 +812,21 @@ export async function build(args: BuildArgs) {
 
     globalStyle = `global.css?v=${hashFileSync(
       join(OUTPUT_DIR, "global.css"),
+      7
+    )}`;
+  } catch (e) {}
+
+  try {
+    if (!(await stat(join(OUTPUT_DIR, "shared.css"))).isFile())
+      throw new Error();
+    await mkdir(resolve(`dist/_hydrate/styles`), { recursive: true });
+    await copyFile(
+      join(OUTPUT_DIR, "shared.css"),
+      join("dist", "_hydrate", "styles", "shared.css")
+    );
+
+    sharedStyle = `shared.css?v=${hashFileSync(
+      join(OUTPUT_DIR, "shared.css"),
       7
     )}`;
   } catch (e) {}
@@ -942,6 +967,7 @@ export async function build(args: BuildArgs) {
           hydrateExportManifest,
           hasGlobalScript,
           globalStyle,
+          sharedStyle,
           isDebug,
         })
       )
