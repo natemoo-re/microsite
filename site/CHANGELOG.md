@@ -1,5 +1,12 @@
 # site
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [2535fe9]
+  - microsite@0.7.3
+
 ## 0.0.5
 
 ### Patch Changes

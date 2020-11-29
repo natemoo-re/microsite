@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.3
+
+### Patch Changes
+
+- 2535fe9: Fix bug where global script would have extra code injected
+
 ## 0.7.2
 
 ### Patch Changes
@@ -97,7 +103,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx
