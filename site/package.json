@@ -7,7 +7,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "microsite build"
+    "build": "node --experimental-specifier-resolution=node node_modules/microsite/index.js build -- --debug-hydration"
   },
   "dependencies": {
     "gray-matter": "^4.0.2",
