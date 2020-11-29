@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.4
+
+### Patch Changes
+
+- 5eb1b20: Fix issue where shared styles of non-hydrated components would not be included in the output
+
 ## 0.7.3
 
 ### Patch Changes
@@ -103,7 +109,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
