@@ -1,5 +1,12 @@
 # site
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [cb4da30]
+  - microsite@0.7.5
+
 ## 0.0.7
 
 ### Patch Changes

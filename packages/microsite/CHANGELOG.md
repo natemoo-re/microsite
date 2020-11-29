@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.5
+
+### Patch Changes
+
+- cb4da30: Fix dedent within <pre> tags
+
 ## 0.7.4
 
 ### Patch Changes
@@ -109,7 +115,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx
