@@ -158,12 +158,6 @@ ${imports.slice(0, -1)}
 };
 
 const requiredPlugins = [
-  inject({
-    fetch: "microsite/utils/fetch.js",
-    h: ["preact", "h"],
-    Fragment: ["preact", "Fragment"],
-    exclude: [/\.css$/],
-  }),
   nodeResolve({
     preferBuiltins: true,
     mainFields: ["module", "main"],
@@ -340,6 +334,12 @@ async function writePages() {
       plugins: [
         autoExternal(),
         esbuild({ target: "es2018", jsxFactory: "h", jsxFragment: "Fragment" }),
+        inject({
+          fetch: "microsite/utils/fetch.js",
+          h: ["preact", "h"],
+          Fragment: ["preact", "Fragment"],
+          exclude: [/\.css$/],
+        }),
         ...requiredPlugins,
         ...createPagePlugins(),
         {
