@@ -754,7 +754,7 @@ async function renderPage(
 
       let cleanOutput = content
         .replace(/^\s+$/gm, "\n")
-        .replace(/(?<=<pre><code.*?>)([\s\S]+?)(?=<\/code>)/gi, (match) => {
+        .replace(/(?<=<pre.*?><code.*?>)([\s\S]+?)(?=<\/code>)/gi, (match) => {
           let mindent = 0;
           return match
             .split("\n")
