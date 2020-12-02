@@ -1,5 +1,11 @@
 # microsite
 
+## 0.7.6
+
+### Patch Changes
+
+- 837da9c: Fix issue with `<pre> <code>` dedent
+
 ## 0.7.5
 
 ### Patch Changes
@@ -115,7 +121,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
