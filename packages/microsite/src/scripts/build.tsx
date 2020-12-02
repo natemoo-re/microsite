@@ -761,7 +761,10 @@ async function renderPage(
             .map((ln) => {
               let diff = ln.length - ln.trimStart().length;
               if (diff > 0 && !mindent) mindent = diff;
-              return ln.slice(mindent);
+              if (ln.slice(0, mindent).match(/^\s+$/)) {
+                return ln.slice(mindent);
+              }
+              return ln;
             })
             .join("\n")
             .trim();
