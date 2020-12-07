@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { build } from "./scripts/build.js";
+import { dev } from './scripts/dev.js';
 import arg from "arg";
 
 export type BuildArgs = ReturnType<typeof getBuildArgs>;
@@ -25,6 +26,8 @@ async function run() {
     const args = getBuildArgs(argv);
     await build(args);
     return;
+  } else if (command === "dev") {
+    await dev();
   }
 }
 run();

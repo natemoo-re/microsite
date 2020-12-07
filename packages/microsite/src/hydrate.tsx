@@ -5,7 +5,7 @@ import { __DocContext } from "./document.js";
 
 const isServer = typeof window === "undefined";
 const btoa = (str: string) => Buffer.from(str, "utf-8").toString("base64");
-const HydrateContext = createContext<string | false>(false);
+export const HydrateContext = createContext<string | false>(false);
 
 export interface HydrationProps {
   method?: "idle" | "visible" | "interaction";

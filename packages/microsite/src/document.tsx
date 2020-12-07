@@ -1,5 +1,5 @@
 import { h, createContext, Fragment, FunctionalComponent } from "preact";
-import { useRef } from "preact/hooks";
+import { useContext, useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
 export const __DocContext = createContext({
@@ -116,3 +116,18 @@ export const Document: FunctionalComponent<{
     </html>
   );
 };
+
+export const Head = () => {
+  const { head } = useContext(__DocContext);
+  return (
+    <head>
+      <meta {...({ charset: "utf-8" } as any)} />
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
+      />
+
+      <Fragment>{head.current}</Fragment>
+    </head>
+  );
+}

@@ -17,10 +17,7 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    }
   },
-  "include": ["src"],
+  "include": ["src", "./internal.d.ts"],
   "exclude": ["node_modules"]
 }

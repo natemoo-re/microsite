@@ -2,7 +2,7 @@ import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useRef, useContext, Ref } from "preact/hooks";
 import { __DocContext } from "./document.js";
 
-import render from "preact-render-to-string";
+import render, { renderToString } from "preact-render-to-string";
 
 export let warned = false;
 interface OpenGraphBase {
@@ -76,6 +76,7 @@ export const __SeoContext = createContext<{ seo: Ref<SEO> }>({
 export const Head: FunctionalComponent<any> = ({ children }) => {
   const seo = useRef<SEO>({});
   const { head } = useContext(__DocContext);
+  const prevHead = useRef(null);
 
   render(
     <__SeoContext.Provider value={{ seo }}>{children}</__SeoContext.Provider>,
@@ -83,7 +84,7 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
     { pretty: true }
   );
 
-  head.current.push(
+  head.current = [
     <Fragment>
       <meta
         name="robots"
@@ -294,7 +295,7 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
         </Fragment>
       )}
     </Fragment>
-  );
+  ];
 
   const _children = Array.isArray(children) ? children : [children];
   head.current.push(
@@ -313,6 +314,26 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
       return child;
     })
   );
+
+  if (typeof window !== 'undefined') {
+    head.current.push(<meta name="microsite-end" />);
+
+    let html = renderToString(<Fragment>{head.current}</Fragment>, {}, { pretty: true });
+    if (prevHead.current !== html) {
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      if (prevHead.current) {
+        let el = document.head.firstElementChild;
+        while (el && el.getAttribute("name") !== 'microsite-end') {
+          el.remove();
+          el = document.head.firstElementChild;
+        }
+        el.remove();
+      }
+      document.head.prepend(template.content.cloneNode(true));
+      prevHead.current = html;
+    }
+  }
 
   return null;
 };
