@@ -1,4 +1,4 @@
-import { StaticPath, StaticPropsContext } from './scripts/build.js';
+import type { StaticPath, StaticPropsContext } from './utils/data';
 import type { createPrefetch } from './utils/prefetch';
 import { ComponentProps, JSX, ComponentType } from "preact";
 

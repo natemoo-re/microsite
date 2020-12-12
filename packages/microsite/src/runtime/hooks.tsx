@@ -13,10 +13,10 @@ import {
 } from 'preact/hooks';
 import { HydrateContext } from './hydrate.js';
 
-const hooks = new WeakMap<any, any>();
+const hooks = new WeakMap();
 
 const warn = (name: string, hook: any, result: any) => {
-    console.error(`A non-hydrated component attempted to invoke "${name}".\n\nWrap this component in the "withHydrate" HOC (exported by "microsite/hydrate") to enable interactivity at compile time.`);
+    console.error(new Error(`A non-hydrated component attempted to invoke "${name}".\n\nWrap this component in the "withHydrate" HOC (exported by "microsite/hydrate") to enable interactivity at compile time.`));
     hooks.set(hook, result);
     return result;
 };
@@ -25,8 +25,8 @@ function wrapHook<T extends (...args: any) => any>(name: string, hook: T): T {
     function wrappedHook(...args: any) {
         const hydrated = _useContext(HydrateContext);
         if (!hydrated) {
-            if (!hooks.has(hook)) return warn(name, hook, hook.apply(null, args));
-            return hooks.get(hook);
+            if (hooks.has(hook)) return hooks.get(hook);
+            return warn(name, hook, hook.apply(null, args));
         }
 
         return hook.apply(null, args);

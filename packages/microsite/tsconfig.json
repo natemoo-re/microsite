@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "lib": ["dom", "ES2019"],
-    "outDir": "./",
+    "outDir": "./dist",
     "moduleResolution": "Node",
     "module": "ESNext",
     "target": "ES2017",

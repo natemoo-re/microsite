@@ -2,54 +2,31 @@ import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useContext, useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
+import { generateHydrateScript } from './utils/common.js';
+import type { ManifestEntry } from "./scripts/build";
+
 export const __DocContext = createContext({
-  head: { current: [] },
-  hydrate: { current: [] },
+  head: { current: [] }
 });
-export const __hydratedComponents = [];
-const unique = (value: string, index: number, self: string[]) =>
-  self.indexOf(value) === index;
 
 export const Document: FunctionalComponent<{
-  hydrateExportManifest?: any;
-  page?: string;
-  styles?: string[];
-  globalStyle?: string;
-  sharedStyle?: string;
-  hasScripts?: boolean;
+  manifest?: ManifestEntry,
+  preload?: string[]
 }> = ({
-  hydrateExportManifest,
-  page,
-  styles = [],
-  hasScripts = false,
-  globalStyle,
-  sharedStyle,
+  manifest,
+  preload = [],
   children,
 }) => {
   const head = useRef([]);
-  const hydrate = useRef([]);
   const subtree = render(
-    <__DocContext.Provider value={{ head, hydrate }}>
+    <__DocContext.Provider value={{ head }}>
       {children}
     </__DocContext.Provider>,
-    {},
-    { pretty: true }
+    {}
   );
 
-  const components = hydrate.current.map(({ name }) => name).filter(unique);
-  if (hydrate.current.length > 0)
-    __hydratedComponents.push({ page, components });
-
-  const componentStyles = components
-    .map((name) => {
-      const found = hydrateExportManifest.find((entry) =>
-        entry.exports.find(([_key, n]) => n === name)
-      );
-      if (found) return found.styles;
-      return null;
-    })
-    .filter((v) => v)
-    .filter(unique) as string[];
+  const styles = manifest.hydrateStyleBindings;
+  const scripts = manifest.hydrateBindings;
 
   return (
     <html lang="en" dir="ltr">
@@ -62,56 +39,21 @@ export const Document: FunctionalComponent<{
 
         <Fragment>{head.current}</Fragment>
 
-        {globalStyle && (
-          <link rel="stylesheet" href={`/_hydrate/styles/${globalStyle}`} />
-        )}
-        {sharedStyle && (
-          <link rel="stylesheet" href={`/_hydrate/styles/${sharedStyle}`} />
-        )}
-        {componentStyles &&
-          componentStyles.map((href) => (
-            <link rel="stylesheet" href={`/_hydrate/styles/${href}`} />
-          ))}
-        {styles.map((style) => (
-          <style dangerouslySetInnerHTML={{ __html: style.trim() }} />
-        ))}
-        {hydrate.current.length > 0 && (
+        {styles && styles.map((href) => <link rel="stylesheet" href={`/${href}`} />)}
+        {scripts && (
           <style
             dangerouslySetInnerHTML={{
               __html: "[data-hydrate]{display:contents;}",
             }}
           />
         )}
-        {hydrate.current.length > 0 && (
-          <Fragment>
-            <link
-              rel="modulepreload"
-              href="https://unpkg.com/preact@latest?module"
-            />
-            <link
-              rel="modulepreload"
-              href="https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module"
-            />
-            <link rel="modulepreload" href={`/_hydrate/pages/${page}.js`} />
-          </Fragment>
-        )}
+        
+        {preload.length > 0 && preload.map(href => <link rel="modulepreload" href={href} />)}
       </head>
       <body>
         <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
 
-        {hydrate.current.length > 0 && (
-          <script type="module" defer src={`/_hydrate/pages/${page}.js`} />
-        )}
-        {hasScripts ? (
-          <Fragment>
-            <script type="module" src="/index.js" />
-            <script
-              {...{ nomodule: "" }}
-              src="https://unpkg.com/systemjs@2.0.0/dist/s.min.js"
-            />
-            <script {...{ nomodule: "" }} src="/index.legacy.js" />
-          </Fragment>
-        ) : null}
+        {scripts && <script type="module" dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts) }} />}
       </body>
     </html>
   );

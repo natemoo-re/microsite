@@ -73,6 +73,11 @@ export const __SeoContext = createContext<{ seo: Ref<SEO> }>({
   seo: { current: {} },
 });
 
+const isComment = (node: Node): node is Comment =>
+  node.nodeType === node.COMMENT_NODE;
+const isElement = (node: Node): node is Element =>
+  node.nodeType === node.ELEMENT_NODE;
+
 export const Head: FunctionalComponent<any> = ({ children }) => {
   const seo = useRef<SEO>({});
   const { head } = useContext(__DocContext);
@@ -294,7 +299,7 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
           )}
         </Fragment>
       )}
-    </Fragment>
+    </Fragment>,
   ];
 
   const _children = Array.isArray(children) ? children : [children];
@@ -315,24 +320,49 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
     })
   );
 
-  if (typeof window !== 'undefined') {
-    head.current.push(<meta name="microsite-end" />);
+  if (typeof window !== "undefined") {
+    if (!prevHead.current)
+      document.head.prepend(document.createComment("microsite:end"));
 
-    let html = renderToString(<Fragment>{head.current}</Fragment>, {}, { pretty: true });
+    let html = renderToString(
+      <Fragment>{head.current}</Fragment>,
+      {},
+      { pretty: true }
+    );
     if (prevHead.current !== html) {
+      // TODO: this side-effect doesn't run with Snowpack HMR with cached response
+      if (prevHead.current) {
+        let managed = false;
+        for (const node of Array.from(document.head.childNodes)) {
+          if (isComment(node)) {
+            if (node.nodeValue === "microsite:start") {
+              managed = true;
+              continue;
+            }
+            if (node.nodeValue === "microsite:end") return;
+          }
+          if (managed) {
+            if (
+              isElement(node) &&
+              node.nextSibling &&
+              isComment(node.nextSibling) &&
+              node.nextSibling.nodeValue === "microsite:end"
+            ) {
+              node.insertAdjacentHTML("afterend", html);
+            }
+            node.remove();
+          }
+        }
+      }
+    }
+    if (!prevHead.current) {
       const template = document.createElement("template");
       template.innerHTML = html;
-      if (prevHead.current) {
-        let el = document.head.firstElementChild;
-        while (el && el.getAttribute("name") !== 'microsite-end') {
-          el.remove();
-          el = document.head.firstElementChild;
-        }
-        el.remove();
-      }
       document.head.prepend(template.content.cloneNode(true));
-      prevHead.current = html;
+      document.head.prepend(document.createComment("microsite:start"));
     }
+
+    prevHead.current = html;
   }
 
   return null;
