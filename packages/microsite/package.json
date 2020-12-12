@@ -8,37 +8,33 @@
     "url": "https://natemoo.re"
   },
   "license": "MIT",
-  "main": "./dist/index.js",
+  "types": "./assets/microsite-env.d.ts",
   "bin": {
-    "microsite": "./dist/index.js"
+    "microsite": "./dist/bin/microsite.js"
   },
-  "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
+    "prebuild": "node ./scripts/clean.js",
     "build": "tsc -p tsconfig.json"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./runtime/*": "./dist/runtime/*.js",
     "./runtime/csr": "./dist/runtime/csr.js",
     "./runtime/hooks": "./dist/runtime/hooks.js",
     "./runtime/hydrate": "./dist/runtime/hydrate.js",
-    "./utils/*": "./dist/utils/*.js",
     "./document": "./dist/document.js",
     "./error": "./dist/error.js",
     "./global": "./dist/global.js",
     "./head": "./dist/head.js",
     "./hydrate": "./dist/hydrate.js",
     "./page": "./dist/page.js",
-    "./assets/openChrome.appleScript": "./assets/openChrome.appleScript",
     "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
     "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
     "./assets/init.js": "./assets/init.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "assets/**/*",
-    "dist/**/*.js",
+    "assets",
+    "dist",
     "base.json",
     "**/*.d.ts"
   ],
@@ -61,10 +57,12 @@
     "preact-render-to-string": "5.1.11",
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
+    "sirv": "^1.0.10",
     "snowpack": "^3.0.0-rc.2"
   },
   "devDependencies": {
-    "@types/node": "^14.14.2"
+    "@types/node": "^12.19.0",
+    "del": "^6.0.0"
   },
   "repository": {
     "type": "git",
@@ -77,5 +75,8 @@
   "homepage": "https://github.com/natemoo-re/microsite#readme",
   "volta": {
     "node": "12.19.0"
+  },
+  "engines": {
+    "node": ">=12.19.0"
   }
 }

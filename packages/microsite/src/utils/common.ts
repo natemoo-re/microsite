@@ -1,4 +1,4 @@
-import type { ManifestEntry } from '../scripts/build';
+import type { ManifestEntry } from '../utils/build';
 
 // This is an esbuild (?) bug where default exports are rewritten with a number appended
 // so we'll just remove any trailing numbers

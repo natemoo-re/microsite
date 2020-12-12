@@ -3,7 +3,7 @@ import { useContext, useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
 import { generateHydrateScript } from './utils/common.js';
-import type { ManifestEntry } from "./scripts/build";
+import type { ManifestEntry } from "./utils/build";
 
 export const __DocContext = createContext({
   head: { current: [] }

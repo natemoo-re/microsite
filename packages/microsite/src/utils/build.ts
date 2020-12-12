@@ -1,4 +1,3 @@
-import type { ManifestEntry, RouteDataEntry } from '../scripts/build';
 import crypto from "crypto";
 import { resolve, join } from 'path';
 import { writeFile, copyFile } from './fs.js';
@@ -14,6 +13,18 @@ export const CACHE_DIR = '.microsite/cache';
 export const STAGING_DIR = '.microsite/staging';
 export const SSR_DIR = '.microsite/ssr';
 export const OUT_DIR = './dist';
+
+export interface ManifestEntry {
+  name: string;
+  hydrateStyleBindings: string[] | null;
+  hydrateBindings: Record<string, string[]> | null;
+}
+
+export interface RouteDataEntry {
+  name: string;
+  route: string;
+  props: Record<string, object>;
+}
 
 export const getFileNameFromPath = (path: string) => {
   return path.split(STAGING_DIR)[1].replace(/^\/src\//, '').replace(/([\[\]])/gi, "_").replace(/\..*$/, '');
@@ -120,6 +131,7 @@ interface DataHandlers {
   getStaticPaths?: (ctx?: any) => any;
   getStaticProps?: (ctx?: any) => any;
 }
+
 
 export async function applyDataMethods(route: string, handlers: DataHandlers): Promise<RouteDataEntry[]> {
   const { getStaticPaths, getStaticProps } = handlers;

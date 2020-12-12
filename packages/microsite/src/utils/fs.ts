@@ -1,6 +1,20 @@
 import { promises as fsp } from 'fs';
 import { dirname, join } from 'path';
 
+export const fileExists = async (path: string) => {
+  try {
+    return (await fsp.stat(path)).isFile();
+  } catch (e) {}
+  return false;
+}
+
+export const dirExists = async (path: string) => {
+  try {
+    return (await fsp.stat(path)).isDirectory();
+  } catch (e) {}
+  return false;
+}
+
 export const readDir = async (path: string): Promise<string[]> => {
   const ents = await fsp.readdir(path, { withFileTypes: true });
   const results = await Promise.all(

@@ -1,11 +1,10 @@
 import execa from "execa";
 import { dirname, resolve } from "path";
 import glob from "globby";
-
+import arg from 'arg';
 import { rollup } from "rollup";
 import styles from "rollup-plugin-styles";
 import esbuild from 'esbuild';
-import type { BuildArgs } from '../index';
 
 import { createRequire, builtinModules as builtins } from "module";
 const require = createRequire(import.meta.url);
@@ -27,10 +26,23 @@ import {
   stripWithHydrate,
   preactToCDN,
 } from "../utils/build.js";
+import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
 
-export async function build(args: BuildArgs) {
+function parseArgs(argv: string[]) {
+  return arg(
+    {
+      "--debug-hydration": Boolean,
+      "--no-clean": Boolean
+    },
+    { permissive: true, argv }
+  );
+}
+
+export default async function build(argv: string[]) {
+  const args = parseArgs(argv);
+
   console.time('build');
   await Promise.all([prepare(), snowpackBuild()]);
 
@@ -103,11 +115,6 @@ async function copyHydrateAssets(globalStyle?: string | null) {
   return;
 }
 
-export interface RouteDataEntry {
-  name: string;
-  route: string;
-  props: Record<string, object>;
-}
 async function fetchRouteData(paths: string[]) {
   let routeData: RouteDataEntry[] = [];
   await Promise.all(paths.map(path => 
@@ -118,12 +125,6 @@ async function fetchRouteData(paths: string[]) {
       })
   ))
   return routeData;
-}
-
-export interface ManifestEntry {
-  name: string;
-  hydrateStyleBindings: string[] | null;
-  hydrateBindings: Record<string, string[]> | null;
 }
 
 /**
