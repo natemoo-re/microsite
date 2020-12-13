@@ -8,7 +8,7 @@
 <br />
 <br />
 
-`microsite` is a fast, opinionated static-site generator (SSG) built on top of [Snowpack](https://snowpack.dev). It outputs extremely minimal clientside code using **automatic partial hydration**.
+`microsite` is a fast, opinionated static-site generator (SSG) built on top of [Snowpack](https://snowpack.dev). It outputs extremely minimal clientside code using [**automatic partial hydration**](/docs/partial-hydration).
 
 ```bash
 npm init microsite <project>
