@@ -70,7 +70,7 @@ export default async function build(argv: string[]) {
     manifest = manifest.map((entry) => ({
       ...entry,
       hydrateStyleBindings: [
-        "hydrate/styles/_global.css",
+        "_hydrate/styles/_global.css",
         ...(entry.hydrateStyleBindings || []),
       ],
     }));
@@ -119,16 +119,19 @@ async function copyHydrateAssets(globalStyle?: string | null) {
     return result.code;
   };
   if (globalStyle) {
-    await copyFile(globalStyle, resolve(OUT_DIR, "hydrate/styles/_global.css"));
+    await copyFile(
+      globalStyle,
+      resolve(OUT_DIR, "_hydrate/styles/_global.css")
+    );
   }
 
   await copyFile(
     require.resolve("microsite/assets/init.js"),
-    resolve(OUT_DIR, "hydrate/init.js"),
+    resolve(OUT_DIR, "_hydrate/init.js"),
     { transform: preactToCDN }
   );
-  const jsAssets = await glob(resolve(SSR_DIR, "hydrate/**/*.js"));
-  const hydrateStyleAssets = await glob(resolve(SSR_DIR, "hydrate/**/*.css"));
+  const jsAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.js"));
+  const hydrateStyleAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.css"));
   await Promise.all([
     ...jsAssets.map((asset) => copyAssetToFinal(asset, transform)),
     ...hydrateStyleAssets.map((asset) => copyAssetToFinal(asset)),
@@ -216,7 +219,7 @@ async function bundlePagesForSSR(paths: string[]) {
       const isStyle = id.endsWith(".css");
       if (isStyle) return;
 
-      if (/web_modules/.test(info.id)) return `hydrate/chunks/vendor`;
+      if (/web_modules/.test(info.id)) return `_hydrate/chunks/vendor`;
 
       const dependentStaticEntryPoints = [];
       const dependentHydrateEntryPoints = [];
@@ -247,7 +250,7 @@ async function bundlePagesForSSR(paths: string[]) {
         dependentStaticEntryPoints.length > 1
       ) {
         const hash = hashContentSync(info.code, 7);
-        return `hydrate/chunks/shared-${hash}`;
+        return `_hydrate/chunks/shared-${hash}`;
       }
 
       if (dependentHydrateEntryPoints.length === 1) {
@@ -257,7 +260,7 @@ async function bundlePagesForSSR(paths: string[]) {
           dependentHydrateEntryPoints[0]
         ).replace(/^pages\//, "")}-${hash}`;
 
-        return `hydrate/chunks/${filename}`;
+        return `_hydrate/chunks/${filename}`;
       }
     },
   });
@@ -274,7 +277,7 @@ async function bundlePagesForSSR(paths: string[]) {
   await Promise.all(
     output.map((chunkOrAsset) => {
       if (chunkOrAsset.type === "asset") {
-        if (chunkOrAsset.name.startsWith("hydrate")) {
+        if (chunkOrAsset.name.startsWith("_hydrate")) {
           const finalAssetName = chunkOrAsset.name.replace(
             /\bchunks\b/,
             "styles"
@@ -293,7 +296,7 @@ async function bundlePagesForSSR(paths: string[]) {
           const inManifest = manifest.find((entry) => entry.name === entryName);
           const finalAssetName = chunkOrAsset.name.replace(
             /^pages/,
-            "hydrate/styles"
+            "_hydrate/styles"
           );
 
           if (inManifest) {
@@ -320,14 +323,14 @@ async function bundlePagesForSSR(paths: string[]) {
           return emitFile(finalAssetName, chunkOrAsset.source);
         }
       } else {
-        if (chunkOrAsset.name.startsWith("hydrate/")) {
+        if (chunkOrAsset.name.startsWith("_hydrate/")) {
           return emitFile(`${chunkOrAsset.name}.js`, chunkOrAsset.code);
         } else if (chunkOrAsset.isEntry) {
           let hydrateBindings = {};
           for (const [file, exports] of Object.entries(
             chunkOrAsset.importedBindings
           )) {
-            if (file.startsWith("hydrate/") && !file.endsWith("common.js")) {
+            if (file.startsWith("_hydrate/") && !file.endsWith("common.js")) {
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
               });
