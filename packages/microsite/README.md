@@ -8,7 +8,7 @@
 <br />
 <br />
 
-`microsite` is a fast, opinionated static-site generator (SSG) that outputs extremely minimal clientside code using **automatic partial hydration**. Pages are written with Preact, Typescript, and CSS Modules and compiled with `esbuild`.
+`microsite` is a fast, opinionated static-site generator (SSG) built on top of [Snowpack](https://snowpack.dev). It outputs extremely minimal clientside code using **automatic partial hydration**.
 
 ```bash
 npm init microsite <project>
@@ -20,54 +20,11 @@ npm init microsite <project>
 >
 > Ensure that your project includes `"type": "module"` in `package.json`, which will allow you to use ESM in your project's `node` scripts.
 
-## Automatic Partial Hydration (APH)
-
-The most exciting feature of Microsite is automatic partial hydration. Current solutions send the entire component tree, which has already been rendered server-side, to the client for hydration.
-Microsite, on the other hand, uses a hint from the author (the `withHydrate` HOC) to strip away any unnecessary code and ship highly optimized code to the client.
-
-```tsx
-import { withHydrate } from "microsite/hydrate";
-
-const Counter = () => {
-  const [count, setCount] = useState(0);
-
-  return (
-    <>
-      <button onClick={() => setCount((v) => v - 1)}>-</button>
-      <span>{count}</span>
-      <button onClick={() => setCount((v) => v + 1)}>+</button>
-    </>
-  );
-};
-
-export default withHydrate(Counter, { method: "idle" });
-```
-
-There are a few rules to keep in mind when leveraging APH:
-
-- Hydrated components cannot contain any other hydrated component, as hydration is controlled by the top-level component.
-
-- Hydrated components should be placed as deep as possible in your app's tree for the most efficient bundles.
-
-- Hydrated components can't accept _rich_ children, because it's non-trivial to serialize them, though I have some ideas to address this. For now, strings and numbers as children are fine.
-
-#### `withHydrate` Options
-
-**method**
-
-As a developer, you know exactly how your site is structured, so Microsite allows you to tweak how hydration occurs, optimizing for your specific use cases.
-
-- `idle` (default) hydrates the component as soon as possible, when the browser executes [`requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) code.
-
-- `visible` hydrates the component as soon as it enters the viewport, via [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
-
-- `interaction` hydrates the component as soon as the user interacts with it (via `focus` or `pointerenter` events.)
-
 ## Pages
 
-Microsite uses the file-system to generate your output, meaning each component in `src/pages` outputs a corresponding HTML file.
+Microsite uses the file-system to generate your static site, meaning each component in `src/pages` outputs a corresponding HTML file.
 
-Page templates are written as `.tsx` files with [Preact](https://preactjs.com/).
+Page templates are `.js`, `.jsx`, or `.tsx` files which export a `default` a [Preact](https://preactjs.com/) component.
 
 ## Styles
 
@@ -76,16 +33,15 @@ Per-page/per-component styles are also inject on the correct pages. They are mod
 
 ## Project structure
 
-Microsite cares about the structure of your project. It should look like this:
-
 ```
 project/
+├── public/             // copied to dist/
 ├── src/
-│   ├── global.css
-│   ├── global.ts       // shipped entirely to client, if present
+│   ├── global/
+│   │   └── index.css   // included in every generated page
+│   │   └── index.ts    // shipped entirely to client, if present
 │   ├── pages/          // fs-based routing like Next.js
 │   │   └── index.tsx
-│   └── public/         // copied to dist/
 └── tsconfig.json
 ```
 
