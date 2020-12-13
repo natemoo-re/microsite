@@ -8,46 +8,66 @@
     "url": "https://natemoo.re"
   },
   "license": "MIT",
-  "main": "./index.js",
+  "types": "./assets/microsite-env.d.ts",
   "bin": {
-    "microsite": "index.js"
+    "microsite": "./dist/bin/microsite.js"
   },
-  "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
+    "prebuild": "node ./scripts/clean.js",
     "build": "tsc -p tsconfig.json"
   },
+  "exports": {
+    "./base": "./base.json",
+    "./base.json": "./base.json",
+    "./client/csr": "./dist/client/csr.js",
+    "./client/hooks": "./dist/client/hooks.js",
+    "./client/hydrate": "./dist/client/hydrate.js",
+    "./server/fetch": "./dist/server/fetch.js",
+    "./document": "./dist/document.js",
+    "./error": "./dist/error.js",
+    "./global": "./dist/global.js",
+    "./head": "./dist/head.js",
+    "./hydrate": "./dist/hydrate.js",
+    "./page": "./dist/page.js",
+    "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
+    "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
+    "./assets/microsite-env.d.ts": "./assets/microsite-env.d.ts",
+    "./assets/init.js": "./assets/init.js",
+    "./package.json": "./package.json"
+  },
   "files": [
-    "**/*.js",
-    "**/*.d.ts",
-    "base.json"
+    "assets",
+    "dist",
+    "base.json",
+    "**/*.d.ts"
   ],
   "dependencies": {
-    "@rollup/plugin-alias": "^3.1.1",
-    "@rollup/plugin-commonjs": "^16.0.0",
-    "@rollup/plugin-inject": "^4.0.2",
-    "@rollup/plugin-node-resolve": "^9.0.0",
-    "@rollup/plugin-replace": "^2.3.4",
-    "@rollup/plugin-strip": "^2.0.0",
+    "prettier": "^2.1.2",
+    "@prefresh/snowpack": "^2.1.0",
+    "@snowpack/plugin-dotenv": "^2.0.5",
     "arg": "^5.0.0",
     "cacache": "^15.0.5",
-    "esbuild": "0.8.16",
+    "esbuild": "^0.8.16",
+    "execa": "^4.0.3",
     "globby": "^11.0.1",
     "http-cache-semantics": "^4.1.0",
+    "kleur": "^4.1.3",
     "node-fetch": "3.0.0-beta.9",
+    "open": "^7.3.0",
+    "path-browserify": "^1.0.1",
+    "polka": "^0.5.2",
     "postcss": "^8.1.2",
     "preact": "^10.5.5",
     "preact-render-to-string": "5.1.11",
     "rollup": "^2.32.1",
-    "rollup-plugin-auto-external": "^2.0.0",
-    "rollup-plugin-esbuild": "2.6.0",
-    "rollup-plugin-multi-input": "1.1.1",
     "rollup-plugin-styles": "^3.11.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript-paths": "^1.2.2"
+    "sirv": "^1.0.10",
+    "snowpack": "^3.0.0-rc.2"
   },
   "devDependencies": {
-    "@types/node": "^14.14.2"
+    "@types/node": "^12.19.0",
+    "del": "^6.0.0"
   },
   "repository": {
     "type": "git",
@@ -60,5 +80,8 @@
   "homepage": "https://github.com/natemoo-re/microsite#readme",
   "volta": {
     "node": "12.19.0"
+  },
+  "engines": {
+    "node": ">=12.19.0"
   }
 }

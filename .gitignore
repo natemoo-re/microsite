@@ -2,11 +2,14 @@ node_modules
 .DS_Store
 dist/
 .microsite
+*.tgz
+demo/
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts
-!packages/microsite/types/**/*.d.ts
-!packages/microsite/**/*.json
+!packages/microsite/base.json
+!packages/microsite/scripts/**/*
+!packages/microsite/assets/**/*
 
 packages/create-microsite/**/*.js
 packages/create-microsite/**/*.d.ts

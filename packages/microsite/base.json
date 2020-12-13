@@ -15,6 +15,6 @@
     "jsxFragmentFactory": "Fragment",
     "skipLibCheck": true
   },
-  "include": ["../../src", "./types/global.d.ts"],
+  "include": ["../../src", "./assets/microsite-env.d.ts"],
   "exclude": ["node_modules"]
 }
