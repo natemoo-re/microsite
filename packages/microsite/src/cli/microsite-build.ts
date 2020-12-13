@@ -1,12 +1,12 @@
 import execa from "execa";
 import { dirname, resolve } from "path";
 import glob from "globby";
-import arg from 'arg';
+import arg from "arg";
 import { rollup } from "rollup";
 import styles from "rollup-plugin-styles";
-import esbuild from 'esbuild';
-
-import { createRequire, builtinModules as builtins } from "module";
+import esbuild from "esbuild";
+import module from "module";
+const { createRequire, builtinModules: builtins } = module;
 const require = createRequire(import.meta.url);
 import {
   CACHE_DIR,
@@ -34,7 +34,7 @@ function parseArgs(argv: string[]) {
   return arg(
     {
       "--debug-hydration": Boolean,
-      "--no-clean": Boolean
+      "--no-clean": Boolean,
     },
     { permissive: true, argv }
   );
@@ -43,12 +43,12 @@ function parseArgs(argv: string[]) {
 export default async function build(argv: string[]) {
   const args = parseArgs(argv);
 
-  console.time('build');
+  console.time("build");
   await Promise.all([prepare(), snowpackBuild()]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
-  let globalEntryPoint = resolve(STAGING_DIR, 'src/global/index.js');
-  let globalStyle = resolve(STAGING_DIR, 'src/global/index.css');
+  let globalEntryPoint = resolve(STAGING_DIR, "src/global/index.js");
+  let globalStyle = resolve(STAGING_DIR, "src/global/index.css");
   try {
     globalEntryPoint = statSync(globalEntryPoint) ? globalEntryPoint : null;
   } catch (e) {
@@ -59,18 +59,30 @@ export default async function build(argv: string[]) {
   } catch (e) {
     globalStyle = null;
   }
-  
+
   pages = pages.filter((page) => !page.endsWith(".proxy.js"));
 
-  let [manifest, routeData] = await Promise.all([bundlePagesForSSR(globalEntryPoint ? [...pages, globalEntryPoint] : pages), fetchRouteData(pages)]);
+  let [manifest, routeData] = await Promise.all([
+    bundlePagesForSSR(globalEntryPoint ? [...pages, globalEntryPoint] : pages),
+    fetchRouteData(pages),
+  ]);
   if (globalStyle) {
-    manifest = manifest.map(entry => ({ ...entry, hydrateStyleBindings: ['hydrate/styles/_global.css', ...(entry.hydrateStyleBindings || [])] }));
+    manifest = manifest.map((entry) => ({
+      ...entry,
+      hydrateStyleBindings: [
+        "hydrate/styles/_global.css",
+        ...(entry.hydrateStyleBindings || []),
+      ],
+    }));
   }
-  await Promise.all([ssr(manifest, routeData), copyHydrateAssets(globalStyle)]);
-  
+  await Promise.all([
+    ssr(manifest, routeData, { debug: args["--debug-hydration"] }),
+    copyHydrateAssets(globalStyle),
+  ]);
+
   if (!args["--no-clean"]) await cleanup();
 
-  console.timeEnd('build');
+  console.timeEnd("build");
 }
 
 async function snowpackBuild() {
@@ -85,10 +97,13 @@ async function snowpackBuild() {
 
 async function prepare() {
   const paths = [SSR_DIR];
-  
+
   await Promise.all([...paths, OUT_DIR].map((p) => rmdir(p)));
   await Promise.all([...paths, CACHE_DIR].map((p) => mkdir(p)));
-  await copyDir(resolve(process.cwd(), './public'), resolve(process.cwd(), `./${OUT_DIR}`));
+  await copyDir(
+    resolve(process.cwd(), "./public"),
+    resolve(process.cwd(), `./${OUT_DIR}`)
+  );
 }
 
 // TODO: handle global assets
@@ -97,19 +112,26 @@ async function copyHydrateAssets(globalStyle?: string | null) {
   const transform = async (source: string) => {
     source = stripWithHydrate(source);
     source = preactToCDN(source);
-    const result = await service.transform(source, { minify: true, minifyIdentifiers: false });
+    const result = await service.transform(source, {
+      minify: true,
+      minifyIdentifiers: false,
+    });
     return result.code;
-  }
+  };
   if (globalStyle) {
-    await copyFile(globalStyle, resolve(OUT_DIR, 'hydrate/styles/_global.css'));
+    await copyFile(globalStyle, resolve(OUT_DIR, "hydrate/styles/_global.css"));
   }
 
-  await copyFile(require.resolve('microsite/assets/init.js'), resolve(OUT_DIR, 'hydrate/init.js'), { transform: preactToCDN });
+  await copyFile(
+    require.resolve("microsite/assets/init.js"),
+    resolve(OUT_DIR, "hydrate/init.js"),
+    { transform: preactToCDN }
+  );
   const jsAssets = await glob(resolve(SSR_DIR, "hydrate/**/*.js"));
   const hydrateStyleAssets = await glob(resolve(SSR_DIR, "hydrate/**/*.css"));
   await Promise.all([
-    ...jsAssets.map(asset => copyAssetToFinal(asset, transform)),
-    ...hydrateStyleAssets.map(asset => copyAssetToFinal(asset)),
+    ...jsAssets.map((asset) => copyAssetToFinal(asset, transform)),
+    ...hydrateStyleAssets.map((asset) => copyAssetToFinal(asset)),
   ]);
   service.stop();
   return;
@@ -117,24 +139,34 @@ async function copyHydrateAssets(globalStyle?: string | null) {
 
 async function fetchRouteData(paths: string[]) {
   let routeData: RouteDataEntry[] = [];
-  await Promise.all(paths.map(path => 
-    importDataMethods(path)
-      .then(handlers => applyDataMethods(path.replace(resolve(process.cwd(), `./${STAGING_DIR}/src/pages`), ''), handlers))
-      .then(entry => {
-        routeData = routeData.concat(...entry);
-      })
-  ))
+  await Promise.all(
+    paths.map((path) =>
+      importDataMethods(path)
+        .then((handlers) =>
+          applyDataMethods(
+            path.replace(
+              resolve(process.cwd(), `./${STAGING_DIR}/src/pages`),
+              ""
+            ),
+            handlers
+          )
+        )
+        .then((entry) => {
+          routeData = routeData.concat(...entry);
+        })
+    )
+  );
   return routeData;
 }
 
 /**
- * This function runs rollup on Snowpack's output to 
- * extract the hydrated chunks and prepare the pages to be 
+ * This function runs rollup on Snowpack's output to
+ * extract the hydrated chunks and prepare the pages to be
  * server-side rendered.
  */
 async function bundlePagesForSSR(paths: string[]) {
   const bundle = await rollup({
-    preserveEntrySignatures: 'strict',
+    preserveEntrySignatures: "strict",
     input: paths.reduce(
       (acc, page) => ({
         ...acc,
@@ -143,7 +175,9 @@ async function bundlePagesForSSR(paths: string[]) {
       {}
     ),
     external: (source: string) =>
-      builtins.includes(source) || source.startsWith("microsite") || source.startsWith('preact'),
+      builtins.includes(source) ||
+      source.startsWith("microsite") ||
+      source.startsWith("preact"),
     plugins: [
       rewriteCssProxies(),
       rewritePreact(),
@@ -169,14 +203,14 @@ async function bundlePagesForSSR(paths: string[]) {
     chunkFileNames: "[name].js",
     assetFileNames: "[name][extname]",
     /**
-      * This is where most of the magic happens...
-      * We loop through all the modules and group any hydrated components
-      * based on the entryPoint which imported them.
-      *
-      * Components reused for multiple routes are placed in a shared chunk.
-      *
-      * All code from 'web_modules' is placed in a vendor chunk.
-      */
+     * This is where most of the magic happens...
+     * We loop through all the modules and group any hydrated components
+     * based on the entryPoint which imported them.
+     *
+     * Components reused for multiple routes are placed in a shared chunk.
+     *
+     * All code from 'web_modules' is placed in a vendor chunk.
+     */
     manualChunks(id, { getModuleInfo }) {
       const info = getModuleInfo(id);
       const isStyle = id.endsWith(".css");
@@ -208,11 +242,14 @@ async function bundlePagesForSSR(paths: string[]) {
         for (const importerId of importers) idsToHandle.add(importerId);
       }
 
-      if (dependentHydrateEntryPoints.length > 1 || dependentStaticEntryPoints.length > 1) {
+      if (
+        dependentHydrateEntryPoints.length > 1 ||
+        dependentStaticEntryPoints.length > 1
+      ) {
         const hash = hashContentSync(info.code, 7);
         return `hydrate/chunks/shared-${hash}`;
       }
-      
+
       if (dependentHydrateEntryPoints.length === 1) {
         const { code } = getModuleInfo(dependentHydrateEntryPoints[0]);
         const hash = hashContentSync(code, 7);
@@ -228,17 +265,20 @@ async function bundlePagesForSSR(paths: string[]) {
   const manifest: ManifestEntry[] = [];
 
   /**
-    * Here we're manually emitting the files so we have a chance
-    * to generate a manifest detailing any dependent styles or 
-    * hydrated chunks per entry-point. 
-    *
-    * Later, we'll pass the manifest to the SSR function.
-    */
+   * Here we're manually emitting the files so we have a chance
+   * to generate a manifest detailing any dependent styles or
+   * hydrated chunks per entry-point.
+   *
+   * Later, we'll pass the manifest to the SSR function.
+   */
   await Promise.all(
     output.map((chunkOrAsset) => {
       if (chunkOrAsset.type === "asset") {
         if (chunkOrAsset.name.startsWith("hydrate")) {
-          const finalAssetName = chunkOrAsset.name.replace(/\bchunks\b/, 'styles');
+          const finalAssetName = chunkOrAsset.name.replace(
+            /\bchunks\b/,
+            "styles"
+          );
           manifest.forEach((entry) => {
             let binding = chunkOrAsset.name.replace(/\.css$/, ".js");
             if (entry.hydrateBindings && entry.hydrateBindings[binding]) {
@@ -251,13 +291,22 @@ async function bundlePagesForSSR(paths: string[]) {
         } else {
           const entryName = chunkOrAsset.name.replace(/\.css$/, ".js");
           const inManifest = manifest.find((entry) => entry.name === entryName);
-          const finalAssetName = chunkOrAsset.name.replace(/^pages/, 'hydrate/styles');
+          const finalAssetName = chunkOrAsset.name.replace(
+            /^pages/,
+            "hydrate/styles"
+          );
 
           if (inManifest) {
             manifest.forEach((entry) => {
               if (entry.name === entryName) {
                 entry.hydrateStyleBindings = Array.from(
-                  new Set([...entry.hydrateStyleBindings, `${finalAssetName}?m=${hashContentSync(chunkOrAsset.source.toString(), 8)}`])
+                  new Set([
+                    ...entry.hydrateStyleBindings,
+                    `${finalAssetName}?m=${hashContentSync(
+                      chunkOrAsset.source.toString(),
+                      8
+                    )}`,
+                  ])
                 );
               }
             });
@@ -326,7 +375,7 @@ async function bundlePagesForSSR(paths: string[]) {
 }
 
 /**
- * Snowpack rewrites CSS to a `.css.proxy.js` file. 
+ * Snowpack rewrites CSS to a `.css.proxy.js` file.
  * Great for dev, but we need to revert to the actual CSS file
  */
 const rewriteCssProxies = () => {
@@ -334,13 +383,16 @@ const rewriteCssProxies = () => {
     name: "@microsite/rollup-rewrite-css-proxies",
     resolveId(source: string, importer: string) {
       if (!proxyImportTransformer.filter(source)) return null;
-      return resolve(dirname(importer), proxyImportTransformer.transform(source));
+      return resolve(
+        dirname(importer),
+        proxyImportTransformer.transform(source)
+      );
     },
   };
 };
 
 /**
- * Snowpack rewrites CSS to a `.css.proxy.js` file. 
+ * Snowpack rewrites CSS to a `.css.proxy.js` file.
  * Great for dev, but we need to revert to the actual CSS file
  */
 const rewritePreact = () => {
@@ -353,13 +405,25 @@ const rewritePreact = () => {
   };
 };
 
-async function ssr(manifest: ManifestEntry[], routeData: RouteDataEntry[]) {
+async function ssr(
+  manifest: ManifestEntry[],
+  routeData: RouteDataEntry[],
+  { debug = false } = {}
+) {
   return Promise.all(
-    routeData.map(entry => renderPage(entry, manifest.find(route => route.name.replace(/^pages/, '') === entry.name))
-      .then(({ name, contents }) => {
-        return { name, contents };
-      })
-      .then(({ name, contents }) => emitFinalAsset(name, contents)))
+    routeData.map((entry) =>
+      renderPage(
+        entry,
+        manifest.find(
+          (route) => route.name.replace(/^pages/, "") === entry.name
+        ),
+        { debug }
+      )
+        .then(({ name, contents }) => {
+          return { name, contents };
+        })
+        .then(({ name, contents }) => emitFinalAsset(name, contents))
+    )
   );
 }
 

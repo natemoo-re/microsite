@@ -18,9 +18,10 @@
     "build": "tsc -p tsconfig.json"
   },
   "exports": {
-    "./runtime/csr": "./dist/runtime/csr.js",
-    "./runtime/hooks": "./dist/runtime/hooks.js",
-    "./runtime/hydrate": "./dist/runtime/hydrate.js",
+    "./client/csr": "./dist/client/csr.js",
+    "./client/hooks": "./dist/client/hooks.js",
+    "./client/hydrate": "./dist/client/hydrate.js",
+    "./server/fetch": "./dist/server/fetch.js",
     "./document": "./dist/document.js",
     "./error": "./dist/error.js",
     "./global": "./dist/global.js",

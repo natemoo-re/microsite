@@ -1,7 +1,7 @@
 import _fetch, { RequestInfo, RequestInit, Response, FetchError }  from "node-fetch";
 import { resolve } from 'path';
 import { promises as fsp } from 'fs';
-import { readDir } from "./fs.js";
+import { readDir } from "../utils/fs.js";
 
 const cwd = import.meta.url.slice('file:/'.length).split('node_modules')[0].slice(0, -1);
 

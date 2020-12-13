@@ -5,13 +5,13 @@ const EXTS = ['.js', '.jsx', '.ts', '.tsx', '.mjs'];
 module.exports = function plugin() {
   return {
     name: '@microsite/snowpack',
-    knownEntrypoints: ['microsite/runtime/hooks', 'microsite/runtime/csr', 'microsite/error', 'microsite/document', 'microsite/head'],
+    knownEntrypoints: ['microsite/client/hooks', 'microsite/client/csr', 'microsite/error', 'microsite/document', 'microsite/head'],
     async transform({ id, contents, isDev, fileExt }) {
       if (!EXTS.includes(fileExt)) return;
 
       if (!isDev) {
         // shim fetch for files that use it
-        if (/\bfetch\(/g.test(contents)) return `import fetch from 'microsite/utils/fetch';\n${contents}`;
+        if (/\bfetch\(/g.test(contents)) return `import fetch from 'microsite/server/fetch';\n${contents}`;
         return;
       }
 

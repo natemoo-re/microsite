@@ -1,4 +1,4 @@
-// Sourced from Snowpack 
+// Sourced from Snowpack
 // https://github.com/snowpackjs/snowpack/blob/2cbbdbbad1c4f842f86ff56d19f86afedf07d2e2/snowpack/src/util.ts#L156:L227
 
 /*
@@ -24,24 +24,24 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-import open from 'open';
-import execa from 'execa';
-import { dirname } from 'path';
+import open from "open";
+import execa from "execa";
+import { join } from "path";
 
-const __dirname = dirname(import.meta.url.slice('file:/'.length));
+const cwd = process.cwd();
 
 const appNames = {
   win32: {
-    brave: 'brave',
-    chrome: 'chrome',
+    brave: "brave",
+    chrome: "chrome",
   },
   darwin: {
-    brave: 'Brave Browser',
-    chrome: 'Google Chrome',
+    brave: "Brave Browser",
+    chrome: "Google Chrome",
   },
   linux: {
-    brave: 'brave',
-    chrome: 'google-chrome',
+    brave: "brave",
+    chrome: "google-chrome",
   },
 };
 
@@ -51,11 +51,19 @@ async function openInExistingChromeBrowser(url: string) {
     shell: true,
   });
   // use open Chrome tab if exists; create new Chrome tab if not
-  const openChrome = execa('osascript ../assets/openChrome.appleScript "' + encodeURI(url) + '"', {
-    cwd: __dirname,
-    stdio: 'ignore',
-    shell: true,
-  });
+  const openChrome = execa(
+    `osascript ${join(
+      "node_modules",
+      "microsite",
+      "assets",
+      "openChrome.appleScript"
+    )} "${encodeURI(url)}"`,
+    {
+      cwd,
+      stdio: "ignore",
+      shell: true,
+    }
+  );
   // if Chrome doesn’t respond within 3s, fall back to opening new tab in default browser
   let isChromeStalled = setTimeout(() => {
     openChrome.cancel();
@@ -63,8 +71,11 @@ async function openInExistingChromeBrowser(url: string) {
   try {
     await openChrome;
   } catch (err) {
+    console.error(err);
     if (err.isCanceled) {
-      console.warn(`Chrome not responding to Snowpack after 3s. Opening in new tab.`);
+      console.warn(
+        `Chrome not responding to Snowpack after 3s. Opening in new tab.`
+      );
     } else {
       console.error(err.toString() || err);
     }
@@ -77,18 +88,18 @@ export async function openInBrowser(
   protocol: string,
   hostname: string,
   port: number,
-  browser: string,
+  browser: string
 ): Promise<void> {
   const url = `${protocol}//${hostname}:${port}`;
   browser = /chrome/i.test(browser)
-    ? appNames[process.platform]['chrome']
+    ? appNames[process.platform]["chrome"]
     : /brave/i.test(browser)
-    ? appNames[process.platform]['brave']
+    ? appNames[process.platform]["brave"]
     : browser;
-  const isMac = process.platform === 'darwin';
+  const isMac = process.platform === "darwin";
   const isBrowserChrome = /chrome|default/i.test(browser);
   if (!isMac || !isBrowserChrome) {
-    await (browser === 'default' ? open(url) : open(url, { app: browser }));
+    await (browser === "default" ? open(url) : open(url, { app: browser }));
     return;
   }
 

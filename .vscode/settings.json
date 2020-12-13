@@ -1,12 +1,12 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "/node_modules/typescript/lib",
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/microsite/{bin,cli,runtime,utils}": true,
-    "**/microsite/*.d.ts": true,
+    "**/microsite/{bin,cli,client,server,utils}": true,
+    "**/microsite/*.d.ts": true
   }
 }
