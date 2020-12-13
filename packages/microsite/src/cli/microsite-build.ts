@@ -3,6 +3,8 @@ import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
 import { rollup } from "rollup";
+import { performance } from "perf_hooks";
+import { green, dim } from "kleur/colors";
 import styles from "rollup-plugin-styles";
 import esbuild from "esbuild";
 import module from "module";
@@ -35,6 +37,7 @@ function parseArgs(argv: string[]) {
     {
       "--debug-hydration": Boolean,
       "--no-clean": Boolean,
+      "--serve": Boolean,
     },
     { permissive: true, argv }
   );
@@ -43,7 +46,7 @@ function parseArgs(argv: string[]) {
 export default async function build(argv: string[]) {
   const args = parseArgs(argv);
 
-  console.time("build");
+  const buildStart = performance.now();
   await Promise.all([prepare(), snowpackBuild()]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
@@ -76,13 +79,26 @@ export default async function build(argv: string[]) {
     }));
   }
   await Promise.all([
-    ssr(manifest, routeData, { debug: args["--debug-hydration"] }),
+    ssr(manifest, routeData, {
+      debug: args["--debug-hydration"],
+      hasGlobalScript: globalEntryPoint !== null,
+    }),
     copyHydrateAssets(globalStyle),
   ]);
 
+  const buildEnd = performance.now();
+  console.log(
+    `${green("✔")} build complete ${dim(
+      `[${((buildEnd - buildStart) / 1000).toFixed(2)}s]`
+    )}`
+  );
+
   if (!args["--no-clean"]) await cleanup();
 
-  console.timeEnd("build");
+  if (args["--serve"])
+    return import("./microsite-serve.js").then(({ default: serve }) =>
+      serve([])
+    );
 }
 
 async function snowpackBuild() {
@@ -106,7 +122,6 @@ async function prepare() {
   );
 }
 
-// TODO: handle global assets
 async function copyHydrateAssets(globalStyle?: string | null) {
   const service = await esbuild.startService();
   const transform = async (source: string) => {
@@ -169,7 +184,6 @@ async function fetchRouteData(paths: string[]) {
  */
 async function bundlePagesForSSR(paths: string[]) {
   const bundle = await rollup({
-    preserveEntrySignatures: "strict",
     input: paths.reduce(
       (acc, page) => ({
         ...acc,
@@ -220,6 +234,8 @@ async function bundlePagesForSSR(paths: string[]) {
       if (isStyle) return;
 
       if (/web_modules/.test(info.id)) return `_hydrate/chunks/vendor`;
+      if (info.isEntry && /global/.test(info.id))
+        return `_hydrate/chunks/_global`;
 
       const dependentStaticEntryPoints = [];
       const dependentHydrateEntryPoints = [];
@@ -325,6 +341,8 @@ async function bundlePagesForSSR(paths: string[]) {
       } else {
         if (chunkOrAsset.name.startsWith("_hydrate/")) {
           return emitFile(`${chunkOrAsset.name}.js`, chunkOrAsset.code);
+        } else if (chunkOrAsset.name === "index") {
+          return emitFile(`_hydrate/chunks/_global.js`, chunkOrAsset.code);
         } else if (chunkOrAsset.isEntry) {
           let hydrateBindings = {};
           for (const [file, exports] of Object.entries(
@@ -411,7 +429,7 @@ const rewritePreact = () => {
 async function ssr(
   manifest: ManifestEntry[],
   routeData: RouteDataEntry[],
-  { debug = false } = {}
+  { debug = false, hasGlobalScript = false } = {}
 ) {
   return Promise.all(
     routeData.map((entry) =>
@@ -420,7 +438,7 @@ async function ssr(
         manifest.find(
           (route) => route.name.replace(/^pages/, "") === entry.name
         ),
-        { debug }
+        { debug, hasGlobalScript }
       )
         .then(({ name, contents }) => {
           return { name, contents };

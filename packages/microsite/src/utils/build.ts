@@ -9,6 +9,9 @@ const require = createRequire(import.meta.url);
 import { Document } from "../document.js";
 import { h } from "preact";
 import { renderToString } from "preact-render-to-string";
+import prettier from "prettier";
+import { generateStaticPropsContext } from "./router.js";
+// import { createPrefetch, getCacheEntry, getPreviousKey } from "./prefetch.js";
 
 export const CACHE_DIR = ".microsite/cache";
 export const STAGING_DIR = ".microsite/staging";
@@ -136,26 +139,33 @@ const importPage = (filename: string) =>
 export const renderPage = async (
   data: RouteDataEntry | null,
   manifest: ManifestEntry,
-  { debug = false } = {}
+  { debug = false, hasGlobalScript = false } = {}
 ): Promise<{ name: string; contents: string }> => {
   let Page = await importPage(manifest.name);
   Page = unwrapPage(Page);
   const props = data.props;
+
+  let contents = renderToString(
+    h(
+      Document,
+      {
+        manifest,
+        preload: manifest.hydrateBindings
+          ? Object.values(PREACT_CDN_SOURCES)
+          : [],
+        debug,
+        hasGlobalScript,
+      },
+      h(Page, props, null)
+    )
+  );
+  contents = prettier.format(contents, {
+    parser: "html",
+    embeddedLanguageFormatting: "off",
+  });
   return {
     name: `${data.route}.html`,
-    contents: renderToString(
-      h(
-        Document,
-        {
-          manifest,
-          preload: manifest.hydrateBindings
-            ? Object.values(PREACT_CDN_SOURCES)
-            : [],
-          debug,
-        },
-        h(Page, props, null)
-      )
-    ),
+    contents,
   };
 };
 
@@ -184,36 +194,44 @@ interface DataHandlers {
   getStaticProps?: (ctx?: any) => any;
 }
 
+// const hashFn = (s: (...args: any[]) => any) => s.toString().split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0);
+
 export async function applyDataMethods(
-  route: string,
+  fileName: string,
   handlers: DataHandlers
 ): Promise<RouteDataEntry[]> {
   const { getStaticPaths, getStaticProps } = handlers;
 
+  // TODO: prefetch
   let staticPaths = [];
-  const staticPathsCtx = { route };
-  // TODO: getStaticPaths context
-  staticPaths = await getStaticPaths(staticPathsCtx).then(
-    (res: any) => res?.paths ?? []
-  );
+  staticPaths = await getStaticPaths({}).then((res) => res?.paths ?? []);
 
   if (staticPaths.length === 0) {
-    let staticProps = await getStaticProps({}).then(
+    const ctx = generateStaticPropsContext(fileName, fileName);
+    const staticProps = await getStaticProps(ctx).then(
       (res: any) => res?.props ?? {}
     );
-    return [
-      { name: route, route: route.replace(/\.js$/, ""), props: staticProps },
-    ];
+    return [{ name: fileName, route: ctx.path, props: staticProps }];
   }
 
   return Promise.all(
-    staticPaths.map((path) => {
-      const ctx = { path };
-      // TODO: getStaticProps context
+    staticPaths.map((pathOrParams) => {
+      const ctx = generateStaticPropsContext(fileName, pathOrParams);
+
       return getStaticProps(ctx).then((res: any) => {
         let staticProps = res?.props ?? {};
-        return { name: route, route: path, props: staticProps };
+        return { name: fileName, route: ctx.path, props: staticProps };
       });
     })
   );
 }
+
+// export async function printManifest(manifest: ManifestEntry[]) {
+//   let tree = [];
+
+//   manifest.forEach(entry => {
+
+//     entry.name
+//   })
+
+// }

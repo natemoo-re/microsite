@@ -57,11 +57,6 @@ if (import.meta.hot) {
 }
         `;
       }
-      
-      // TODO: disable runtime hooks
-      // if (contents.indexOf('hydrate')) {
-        
-      // }
     },
     config(snowpackConfig) {
       snowpackConfig.mount = {

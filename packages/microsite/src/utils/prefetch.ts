@@ -1,8 +1,32 @@
 import fetch, { Request, Response, RequestInfo, RequestInit } from "node-fetch";
 import CachePolicy from "http-cache-semantics";
 import { promises as fsp } from "fs";
+import { CACHE_DIR } from "./build";
 import { join } from "path";
 import { createHash } from "crypto";
+import cache from "cacache";
+
+export type Prefetch = ReturnType<typeof createPrefetch>;
+export interface CacheEntry {
+  data: any;
+  meta: {
+    prefetch: string | null;
+    hash: string | null;
+  };
+}
+
+export async function getCacheEntry(
+  method: "getStaticPaths" | "getStaticProps",
+  fileName: string
+): Promise<CacheEntry> {
+  const cacheKey = `${method}:${fileName}`;
+  const {
+    data = null,
+    meta: { prefetch = null, hash = null } = {},
+  } = await cache.get(CACHE_DIR, cacheKey).catch(() => ({} as any));
+
+  return { data, meta: { prefetch, hash } };
+}
 
 export function createPrefetch(previousKey: string | null) {
   return async function prefetch(

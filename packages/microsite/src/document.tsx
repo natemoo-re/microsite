@@ -12,8 +12,17 @@ export const __DocContext = createContext({
 export const Document: FunctionalComponent<{
   manifest?: ManifestEntry;
   preload?: string[];
+  preconnect?: string[];
   debug?: boolean;
-}> = ({ manifest, preload = [], debug = false, children }) => {
+  hasGlobalScript?: boolean;
+}> = ({
+  manifest,
+  preload = [],
+  preconnect = [],
+  debug = false,
+  hasGlobalScript = false,
+  children,
+}) => {
   const head = useRef([]);
   const subtree = render(
     <__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>,
@@ -34,19 +43,32 @@ export const Document: FunctionalComponent<{
 
         <Fragment>{head.current}</Fragment>
 
+        {preconnect.map((href) => (
+          <link rel="preconnect" href={href} />
+        ))}
+        {hasGlobalScript && (
+          <link rel="modulepreload" href="/_hydrate/chunks/_global.js" />
+        )}
+        {preload.map((href) => (
+          <link rel="modulepreload" href={href} />
+        ))}
+        {styles &&
+          styles.map((href) => (
+            <link rel="preload" href={`/${href}`} as="style" />
+          ))}
+
         {styles &&
           styles.map((href) => <link rel="stylesheet" href={`/${href}`} />)}
 
         {scripts && (
-          <style
-            dangerouslySetInnerHTML={{
-              __html: "[data-hydrate]{display:contents;}",
-            }}
-          />
+          <Fragment>
+            <style
+              dangerouslySetInnerHTML={{
+                __html: "[data-hydrate]{display:contents;}",
+              }}
+            />
+          </Fragment>
         )}
-
-        {preload.length > 0 &&
-          preload.map((href) => <link rel="modulepreload" href={href} />)}
       </head>
       <body>
         <div id="__microsite" dangerouslySetInnerHTML={{ __html: subtree }} />
@@ -58,9 +80,18 @@ export const Document: FunctionalComponent<{
             }}
           />
         )}
+        {hasGlobalScript && (
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `import global from '/_hydrate/chunks/_global.js';\nglobal();`,
+            }}
+          />
+        )}
         {scripts && (
           <script
             type="module"
+            defer
             dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts) }}
           />
         )}

@@ -45,6 +45,8 @@ export default async function start(argv: string[]) {
       )}\n`
     );
   } else {
-    console.log(``);
+    console.log(
+      `No dist/ directory found. Did you run "microsite build" first?`
+    );
   }
 }

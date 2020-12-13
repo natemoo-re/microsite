@@ -24,7 +24,7 @@ const commands = {
 };
 
 async function run() {
-  let [command = "start", ...argv] = process.argv.slice(2);
+  let [command = "dev", ...argv] = process.argv.slice(2);
 
   if (command.startsWith("-")) argv = [command, ...argv];
   if (argv[0] === "--") argv = argv.slice(1);

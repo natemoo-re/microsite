@@ -18,6 +18,8 @@
     "build": "tsc -p tsconfig.json"
   },
   "exports": {
+    "./base": "./base.json",
+    "./base.json": "./base.json",
     "./client/csr": "./dist/client/csr.js",
     "./client/hooks": "./dist/client/hooks.js",
     "./client/hydrate": "./dist/client/hydrate.js",
@@ -30,6 +32,7 @@
     "./page": "./dist/page.js",
     "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
     "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
+    "./assets/microsite-env.d.ts": "./assets/microsite-env.d.ts",
     "./assets/init.js": "./assets/init.js",
     "./package.json": "./package.json"
   },
@@ -40,6 +43,7 @@
     "**/*.d.ts"
   ],
   "dependencies": {
+    "prettier": "^2.1.2",
     "@prefresh/snowpack": "^2.1.0",
     "@snowpack/plugin-dotenv": "^2.0.5",
     "arg": "^5.0.0",

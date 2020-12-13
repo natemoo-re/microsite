@@ -19,7 +19,9 @@ const pageScript = (
   props?: any
 ) => `import { csr } from '/web_modules/microsite/client/csr.js';
 import Page from '${page}';
-csr(${props ? `Page, ${JSON.stringify(props)}` : `Page`});`;
+csr("${page.replace(/\/src\/pages/, "").replace(/\.js$/, "")}", ${
+  props ? `Page, ${JSON.stringify(props)}` : `Page`
+});`;
 
 const errorScript = (
   props: any
