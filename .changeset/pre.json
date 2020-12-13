@@ -6,5 +6,8 @@
     "microsite": "0.7.6",
     "site": "0.0.9"
   },
-  "changesets": []
+  "changesets": [
+    "nice-planets-chew",
+    "wise-bananas-turn"
+  ]
 }

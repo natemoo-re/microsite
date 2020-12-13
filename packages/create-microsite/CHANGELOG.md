@@ -1,5 +1,11 @@
 # create-microsite
 
+## 0.1.4-next.0
+
+### Patch Changes
+
+- 2ae753d: Add next template and '--next' flag
+
 ## 0.1.3
 
 ### Patch Changes
