@@ -93,6 +93,8 @@ export default async function build(argv: string[]) {
     )}`
   );
 
+  // TODO: print tree of generated files
+
   if (!args["--no-clean"]) await cleanup();
 
   if (args["--serve"])
