@@ -2,12 +2,13 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
+    "skipDefaultLibCheck": true,
     "declaration": true,
     "declarationDir": "./",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "lib": ["dom", "ES2019"],
-    "outDir": "./",
+    "outDir": "./dist",
     "moduleResolution": "Node",
     "module": "ESNext",
     "target": "ES2017",
@@ -17,10 +18,7 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    }
   },
-  "include": ["src"],
+  "include": ["src", "./internal.d.ts"],
   "exclude": ["node_modules"]
 }

@@ -5,10 +5,11 @@ import { bold, green, cyan, underline, red, white } from "kleur/colors";
 import { resolve } from "path";
 
 const REPO = `natemoo-re/microsite-templates`;
-const TEMPLATES = ["default"];
+const TEMPLATES = ["default", "next"];
 
 type Args = arg.Result<{
   "--force": BooleanConstructor;
+  "--next": BooleanConstructor;
 }>;
 
 async function clone(
@@ -40,12 +41,14 @@ async function run() {
   const args = arg(
     {
       "--force": Boolean,
+      "--next": Boolean,
     },
     { argv }
   );
+  let template = args["--next"] ? "next" : "default";
 
   try {
-    await clone("default", resolve(name), args);
+    await clone(template, resolve(name), args);
   } catch (err) {
     if (err.code === "DEST_NOT_EMPTY") {
       console.log(
@@ -62,7 +65,7 @@ async function run() {
   console.log(
     `${bold(green("✓"))} Created ${underline(
       green("./" + name)
-    )} from template ${underline(cyan("default"))}`
+    )} from template ${underline(cyan(template))}`
   );
 }
 
