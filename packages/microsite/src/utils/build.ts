@@ -62,8 +62,8 @@ const pkg = require("microsite/package.json");
 const PREACT_VERSION = pkg.dependencies.preact.replace(/^\^/, "");
 
 const PREACT_CDN_SOURCES = {
-  preact: `https://unpkg.com/preact@${PREACT_VERSION}/dist/preact.module.js?module`,
-  "preact/hooks": `https://unpkg.com/preact@${PREACT_VERSION}/hooks/dist/hooks.module.js?module`,
+  preact: `https://cdn.skypack.dev/preact@${PREACT_VERSION}`,
+  "preact/hooks": `https://cdn.skypack.dev/preact@${PREACT_VERSION}/hooks`,
 };
 export const preactToCDN = (code: string) => {
   if (!FULL_PREACT_IMPORT_REGEX.test(code)) return code;
