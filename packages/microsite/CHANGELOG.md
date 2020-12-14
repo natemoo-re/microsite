@@ -1,5 +1,15 @@
 # microsite
 
+## 1.0.0-next.1
+
+### Patch Changes
+
+- Fixed issue with automatic environment typings.
+
+  Fixed issue where JSX pragma (`h`, `Fragment`) was not being automatically injected.
+
+  Enabled Snowpack to pick up on `tsconfig.json` or `jsconfig.json` `paths` aliases automatically.
+
 ## 1.0.0-next.0
 
 ### Major Changes
