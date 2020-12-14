@@ -9,6 +9,13 @@ module.exports = function plugin() {
     async transform({ id, contents, isDev, fileExt }) {
       if (!EXTS.includes(fileExt)) return;
 
+      let inject = [];
+      if (/\bh\(/g.test(contents) && /import\s*\{[\s\S]*?\bh\b[\s\S]*?\}/.test(contents)) inject.push('h');
+      if (/\bFragment\b/g.test(contents) && /import\s*\{[\s\S]*?\bFragment\b[\s\S]*?\}/.test(contents)) inject.push('Fragment');
+      if (inject.length > 0) {
+        contents = `import { ${inject.join(', ')} } from 'preact';\n` + contents;
+      }
+
       if (!isDev) {
         // shim fetch for files that use it
         if (/\bfetch\(/g.test(contents)) return `import fetch from 'microsite/server/fetch';\n${contents}`;
