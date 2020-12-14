@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Fix bug with JSX Pragma injection
+
 ## 1.0.0-next.1
 
 ### Patch Changes
