@@ -10,8 +10,8 @@ module.exports = function plugin() {
       if (!EXTS.includes(fileExt)) return;
 
       let inject = [];
-      if (/\bh\(/g.test(contents) && /import\s*\{[\s\S]*?\bh\b[\s\S]*?\}/.test(contents)) inject.push('h');
-      if (/\bFragment\b/g.test(contents) && /import\s*\{[\s\S]*?\bFragment\b[\s\S]*?\}/.test(contents)) inject.push('Fragment');
+      if (/\bh\(/g.test(contents) && !/import\s*\{[\s\S]*?\bh\b[\s\S]*?\}/.test(contents)) inject.push('h');
+      if (/\bFragment\b/g.test(contents) && !/import\s*\{[\s\S]*?\bFragment\b[\s\S]*?\}/.test(contents)) inject.push('Fragment');
       if (inject.length > 0) {
         contents = `import { ${inject.join(', ')} } from 'preact';\n` + contents;
       }
