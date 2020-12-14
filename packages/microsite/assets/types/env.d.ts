@@ -1,12 +1,3 @@
-import type preact from "preact";
-
-/* GLOBAL */
-declare global {
-  // h and Fragment are automatically injected
-  var h: typeof preact.h;
-  var Fragment: typeof preact.Fragment;
-}
-
 /* CSS MODULES */
 declare module '*.module.css' {
   const classes: { [key: string]: string };
@@ -61,5 +52,3 @@ declare module '*.png' {
   const ref: string;
   export default ref;
 }
-
-export {};
