@@ -32,7 +32,7 @@
     "./page": "./dist/page.js",
     "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
     "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
-    "./assets/microsite-env.d.ts": "./assets/microsite-env.d.ts",
+    "./assets/types/*": "./assets/types/*.d.ts",
     "./assets/init.js": "./assets/init.js",
     "./package.json": "./package.json"
   },
