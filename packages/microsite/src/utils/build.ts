@@ -164,7 +164,7 @@ export const renderPage = async (
     embeddedLanguageFormatting: "off",
   });
   return {
-    name: `${data.route}.html`,
+    name: `${data.route.replace(/\.js$/, '')}.html`,
     contents,
   };
 };

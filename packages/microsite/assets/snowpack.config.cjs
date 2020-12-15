@@ -1,3 +1,4 @@
+const { resolve } = require('path');
 const builtins = require('module').builtinModules;
 
 /** @type {import("snowpack").SnowpackUserConfig } */
@@ -22,5 +23,9 @@ module.exports = {
     out: '.microsite/staging',
     jsxFactory: 'h',
     jsxFragment: 'Fragment'
+  },
+  mount: {
+    [resolve('public')]: { url: '/', static: true, resolve: false },
+    [resolve('src')]: { url: '/src', static: false, resolve: true }
   }
 };
