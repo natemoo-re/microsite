@@ -1,25 +1,49 @@
 const { resolve } = require('path');
 
 const EXTS = ['.js', '.jsx', '.ts', '.tsx', '.mjs'];
+const IMPORT_REGEX = /import(?:['"\s]*([\w*${}\s,]+)from\s*)?['"\s]['"\s](.*[@\w_-]+)['"\s].*/gm;
+
+const scanImports = (contents) => {
+  let result;
+  let imports = [];
+  while (result = IMPORT_REGEX.exec(contents)) {
+    const [_, statement = null, specifier] = result;
+    imports.push({ statement, specifier });
+  }
+  return imports;
+}
+
+/** Automatically inject of `h` and `Fragment` */
+const injectJSX = (contents) => {
+  let toInject = [];
+  let imports = scanImports(contents);
+  const preactImports = imports.filter(i => i.specifier.indexOf('preact') > -1);
+  const imported = {
+    h: preactImports.some(({ statement }) => /\bh\b/.test(statement)),
+    Fragment: preactImports.some(({ statement }) => /\bFragment\b/.test(statement))
+  }
+  if (/\bh\(/g.test(contents) && !imported.h) toInject.push('h');
+  if (/\bFragment\b/g.test(contents) && !imported.Fragment) toInject.push('Fragment');
+  if (toInject.length > 0) {
+    contents = `import { ${toInject.join(', ')} } from 'preact';\n` + contents;
+  }
+
+  return contents;
+}
 
 module.exports = function plugin() {
   return {
     name: '@microsite/snowpack',
-    knownEntrypoints: ['microsite/client/hooks', 'microsite/client/csr', 'microsite/error', 'microsite/document', 'microsite/head'],
+    knownEntrypoints: ['preact', 'microsite/client/hooks', 'microsite/client/csr', 'microsite/error', 'microsite/document', 'microsite/head'],
     async transform({ id, contents, isDev, fileExt }) {
       if (!EXTS.includes(fileExt)) return;
 
-      let inject = [];
-      if (/\bh\(/g.test(contents) && !/import\s*\{[\s\S]*?\bh\b[\s\S]*?\}/.test(contents)) inject.push('h');
-      if (/\bFragment\b/g.test(contents) && !/import\s*\{[\s\S]*?\bFragment\b[\s\S]*?\}/.test(contents)) inject.push('Fragment');
-      if (inject.length > 0) {
-        contents = `import { ${inject.join(', ')} } from 'preact';\n` + contents;
-      }
+      contents = injectJSX(contents);
 
       if (!isDev) {
         // shim fetch for files that use it
         if (/\bfetch\(/g.test(contents)) return `import fetch from 'microsite/server/fetch';\n${contents}`;
-        return;
+        return contents;
       }
 
       if (id.endsWith('global/index.js')) {
@@ -66,10 +90,6 @@ if (import.meta.hot) {
       }
     },
     config(snowpackConfig) {
-      snowpackConfig.mount = {
-        [resolve('public')]: { url: '/', static: true, resolve: false },
-        [resolve('src')]: { url: '/src', static: false, resolve: true }
-      };
       snowpackConfig.devOptions.fallback = null;
       return snowpackConfig;
     },
