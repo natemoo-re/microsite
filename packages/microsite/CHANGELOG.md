@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- 7681446: Fixed a bug where automatic JSX inject would not always be triggered
+
 ## 1.0.0-next.2
 
 ### Patch Changes
