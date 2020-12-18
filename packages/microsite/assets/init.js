@@ -15,7 +15,7 @@ const createObserver = (hydrate) => {
   return io;
 }
 
-function attach($cmp, { name, source }) {
+function attach($cmp, { key, name, source }) {
   const method = $cmp.dataset.method;
 
   const hydrate = async () => {
@@ -71,7 +71,7 @@ export default (manifest) => {
     const key = $cmp.dataset.hydrate;
     const [name, source] = manifest[key];
     if (name && source) {
-      attach($cmp, { name, source });
+      attach($cmp, { key, name, source });
     }
   }
 }
