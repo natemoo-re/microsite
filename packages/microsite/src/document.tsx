@@ -92,6 +92,7 @@ export const Document: FunctionalComponent<{
           <script
             type="module"
             defer
+            async
             dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts) }}
           />
         )}

@@ -134,6 +134,7 @@ async function copyHydrateAssets(globalStyle?: string | null) {
     });
     return result.code;
   };
+
   if (globalStyle) {
     await copyFile(
       globalStyle,
@@ -141,10 +142,18 @@ async function copyHydrateAssets(globalStyle?: string | null) {
     );
   }
 
+  const transformInit = async (source: string) => {
+    source = preactToCDN(source);
+    const result = await service.transform(source, {
+      minify: true
+    });
+    return result.code;
+  };
+
   await copyFile(
     require.resolve("microsite/assets/init.js"),
     resolve(OUT_DIR, "_hydrate/init.js"),
-    { transform: preactToCDN }
+    { transform: transformInit }
   );
   const jsAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.js"));
   const hydrateStyleAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.css"));
