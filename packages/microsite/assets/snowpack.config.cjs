@@ -10,7 +10,17 @@ module.exports = {
   ],
   installOptions: {
     installTypes: true,
-    externalPackage: [...builtins, 'microsite']
+    externalPackage: [
+      ...builtins,
+      "preact",
+      "preact/hooks",
+      "microsite/server/fetch",
+      "microsite/document",
+      "microsite/error",
+      "microsite/head",
+      "microsite/hydrate",
+      "microsite/page"
+    ]
   },
   devOptions: {
     hmr: true,
