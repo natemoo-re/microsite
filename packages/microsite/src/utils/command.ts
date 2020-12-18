@@ -1,4 +1,3 @@
-import type { ManifestEntry } from "../utils/build";
 import { resolve, relative } from 'path';
 import module from 'module';
 const { createRequire } = module;
@@ -8,33 +7,14 @@ import { fileExists } from './fs.js';
 import { createConfiguration } from 'snowpack';
 const _config = require("microsite/assets/snowpack.config.cjs");
 
-// This is an esbuild (?) bug where default exports are rewritten with a number appended
-// so we'll just remove any trailing numbers
-const cleanComponentName = (cmp: string) => cmp.replace(/[0-9]+$/, "");
-
-export function generateHydrateScript(
-  hydrateBindings: ManifestEntry["hydrateBindings"]
-) {
-  const entries = Object.fromEntries(
-    Object.entries(hydrateBindings)
-      .map(([file, exports]) =>
-        exports.map((cmp) => [cleanComponentName(cmp), [cmp, `/${file}`]])
-      )
-      .flat(1)
-  );
-  return `import init from '/_hydrate/init.js';\ninit(${JSON.stringify(
-    entries
-  )})`;
-}
-
-const deps = Object.keys(require(resolve(process.cwd(), 'package.json')).dependencies);
+const deps = Object.keys(require(resolve(process.cwd(), 'package.json')).dependencies || {});
 
 export async function loadConfiguration(mode: 'dev' | 'build') {
   const tsconfigPath = await findTsOrJsConfig();
   const aliases = (tsconfigPath) ? resolveTsconfigPathsToAlias({ tsconfigPath }) : {};
 
   switch (mode) {
-    case 'dev': return createConfiguration({ ..._config, alias: { ...aliases, ...(_config.alias ?? {}), "microsite/hydrate": "microsite/client/hydrate" } });
+    case 'dev': return createConfiguration({ ..._config, alias: { ...aliases, ...(_config.alias ?? {}), "microsite/hydrate": "microsite/client/hydrate" }, installOptions: { ..._config.installOptions, externalPackage: ["/web_modules/microsite/_error.js"]} });
     case 'build': return createConfiguration({ ..._config, alias: { ...aliases, ...(_config.alias ?? {}) }, installOptions: { ..._config.installOptions, externalPackage: [..._config.installOptions.externalPackage, ...deps]} });
   }
 }

@@ -8,7 +8,7 @@ import { openInBrowser } from "../utils/open.js";
 import { readDir } from "../utils/fs.js";
 import { promises as fsp } from "fs";
 import { ErrorProps } from "error.js";
-import { loadConfiguration } from "../utils/common.js";
+import { loadConfiguration } from "../utils/command.js";
 
 const pageScript = (
   page: string,
@@ -81,12 +81,9 @@ export default async function dev(argv: string[]) {
 
   const [errs, config] = await loadConfiguration('dev');
   if (errs) {
-    errs.forEach((err) => console.error(err.message));
+    errs.forEach((err) => console.error(err));
     return;
   }
-  config.installOptions.externalPackage = ["/web_modules/microsite/_error.js"];
-  config.installOptions.polyfillNode = true;
-
 
   const snowpack = await startDevServer({
     cwd: process.cwd(),
