@@ -88,6 +88,8 @@ if (import.meta.hot) {
 }
         `;
       }
+
+      return contents;
     },
     config(snowpackConfig) {
       snowpackConfig.devOptions.fallback = null;
