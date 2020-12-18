@@ -40,8 +40,8 @@ export interface StaticPathsContext {
 }
 
 function getParamsFromPath(fileName: string, path: string): Params {
-  path = path.replace(/^\//, "");
-  const segments = pathToSegments(fileName.replace(/^\//, ""));
+  path = normalizePathName(path);
+  const segments = pathToSegments(normalizePathName(fileName));
   const parts = path.split("/");
   return parts.reduce((acc, part, i) => {
     const segment = segments[i] ?? segments[segments.length - 1];
@@ -57,8 +57,12 @@ function getParamsFromPath(fileName: string, path: string): Params {
   }, {});
 }
 
+const stripLeadingSlash = (str: string) => str.replace(/^\//, "");
+const stripTrailingExt = (str: string) => str.replace(/\..*$/, "");
+const normalizePathName = (str: string) => stripTrailingExt(stripLeadingSlash(str));
+
 export function getPathFromParams(fileName: string, params: Params): string {
-  const segments = pathToSegments(fileName.replace(/^\//, ""));
+  const segments = pathToSegments(normalizePathName(fileName));
 
   return (
     "/" +
@@ -80,7 +84,7 @@ export function generateStaticPropsContext(
 ): StaticPropsContext {
   if (typeof pathOrParams === "string") {
     return {
-      path: pathOrParams,
+      path: normalizePathName(pathOrParams),
       params: getParamsFromPath(fileName, pathOrParams),
     };
   } else if (typeof pathOrParams === "object") {

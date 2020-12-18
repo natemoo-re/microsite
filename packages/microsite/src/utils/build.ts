@@ -163,6 +163,7 @@ export const renderPage = async (
     parser: "html",
     embeddedLanguageFormatting: "off",
   });
+
   return {
     name: `${data.route.replace(/\.js$/, '')}.html`,
     contents,

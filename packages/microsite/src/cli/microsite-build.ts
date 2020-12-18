@@ -31,7 +31,7 @@ import {
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
-import { loadConfiguration } from "utils/common.js";
+import { loadConfiguration } from "../utils/command.js";
 
 function parseArgs(argv: string[]) {
   return arg(
@@ -192,10 +192,13 @@ async function bundlePagesForSSR(paths: string[]) {
       }),
       {}
     ),
-    external: (source: string) =>
-      builtins.includes(source) ||
-      source.startsWith("microsite") ||
-      source.startsWith("preact"),
+    external: (source: string) => {
+      if (source === 'microsite/global') return false;
+
+      return builtins.includes(source)
+        || source.startsWith("microsite")
+        || source.startsWith("preact");
+    },
     plugins: [
       rewriteCssProxies(),
       rewritePreact(),
@@ -210,6 +213,12 @@ async function bundlePagesForSSR(paths: string[]) {
         sourceMap: false,
       }),
     ],
+    onwarn(warning, handler) {
+      // unresolved import happens for anything just called server-side
+      if (warning.code === 'UNRESOLVED_IMPORT') return;
+
+      handler(warning);
+    },
   });
 
   const { output } = await bundle.generate({
@@ -235,7 +244,7 @@ async function bundlePagesForSSR(paths: string[]) {
       if (isStyle) return;
 
       if (/web_modules/.test(info.id)) return `_hydrate/chunks/vendor`;
-      if (info.isEntry && /global/.test(info.id))
+      if (info.isEntry && /global\//.test(info.id))
         return `_hydrate/chunks/_global`;
 
       const dependentStaticEntryPoints = [];
@@ -266,8 +275,9 @@ async function bundlePagesForSSR(paths: string[]) {
         dependentHydrateEntryPoints.length > 1 ||
         dependentStaticEntryPoints.length > 1
       ) {
-        const hash = hashContentSync(info.code, 7);
-        return `_hydrate/chunks/shared-${hash}`;
+        // All shared components should go in the same chunk (for now)
+        // Eventually this could be optimized to split into a few chunks based on how many entry points rely on them
+        return `_hydrate/chunks/_shared`;
       }
 
       if (dependentHydrateEntryPoints.length === 1) {
