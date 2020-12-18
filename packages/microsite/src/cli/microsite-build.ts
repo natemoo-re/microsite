@@ -1,4 +1,4 @@
-import { buildProject, createConfiguration } from "snowpack";
+import { buildProject } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
