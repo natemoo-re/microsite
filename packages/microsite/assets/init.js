@@ -1,7 +1,7 @@
 import { h, hydrate as mount } from 'preact';
 
 const createObserver = (hydrate) => {
-  if (!('IntersectionObserver') in window) return null;
+  if (!('IntersectionObserver' in window)) return null;
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -55,10 +55,10 @@ function attach($cmp, { key, name, source }) {
       break;
     }
     case 'visible': {
-      if (!('IntersectionObserver') in window) return hydrate();
+      if (!('IntersectionObserver' in window)) return hydrate();
 
       const observer = createObserver(hydrate);
-      Array.from($cmp.children).forEach(child => observer.observe(child))
+      Array.from($cmp.children).forEach(child => observer.observe(child));
       break;
     }
   }
