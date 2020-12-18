@@ -1,5 +1,19 @@
 # microsite
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- a3b38a8: Automatic JSX injection is fixed (I really mean it this time.)
+
+  Added automatic aliasing for `tsconfig` `paths`.
+
+  Fixed a bug where `microsite/global` was not included in the vendor bundle.
+
+  Fixed a bug where `shared` components would not be concatenated into a single chunk.
+
+  Added minification for the `init` hydration script.
+
 ## 1.0.0-next.3
 
 ### Patch Changes
