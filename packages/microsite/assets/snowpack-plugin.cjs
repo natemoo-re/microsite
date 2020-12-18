@@ -13,14 +13,14 @@ const scanImports = (contents) => {
   return imports;
 }
 
-/** Automatically inject of `h` and `Fragment` */
+/** Automatically inject `h` and `Fragment` */
 const injectJSX = (contents) => {
   let toInject = [];
   let imports = scanImports(contents);
   const preactImports = imports.filter(i => i.specifier.indexOf('preact') > -1);
   const imported = {
-    h: preactImports.some(({ statement }) => /\bh\b/.test(statement)),
-    Fragment: preactImports.some(({ statement }) => /\bFragment\b/.test(statement))
+    h: preactImports.length > 0 ? preactImports.some(({ statement }) => /\bh\b/.test(statement)) : false,
+    Fragment: preactImports.length > 0 ? preactImports.some(({ statement }) => /\bFragment\b/.test(statement)) : false
   }
   if (/\bh\(/g.test(contents) && !imported.h) toInject.push('h');
   if (/\bFragment\b/g.test(contents) && !imported.Fragment) toInject.push('Fragment');
