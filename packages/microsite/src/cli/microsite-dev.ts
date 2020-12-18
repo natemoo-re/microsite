@@ -1,19 +1,14 @@
-import { startDevServer, createConfiguration } from "snowpack";
+import { startDevServer } from "snowpack";
 import arg from "arg";
 import { join, resolve, extname } from "path";
 import type { IncomingMessage, ServerResponse } from "http";
 import { green, dim } from "kleur/colors";
 import polka from "polka";
 import { openInBrowser } from "../utils/open.js";
-import { fileExists, readDir } from "../utils/fs.js";
+import { readDir } from "../utils/fs.js";
 import { promises as fsp } from "fs";
 import { ErrorProps } from "error.js";
-import module from "module";
-import resolveTsconfigPathsToAlias from '../utils/tsconfigPathsToAlias.js';
-const { createRequire } = module;
-const require = createRequire(import.meta.url);
-
-const _config = require("microsite/assets/snowpack.config.cjs");
+import { loadConfiguration } from "../utils/common.js";
 
 const pageScript = (
   page: string,
@@ -79,24 +74,12 @@ function parseArgs(argv: string[]) {
   );
 }
 
-const findTsOrJsConfig = async () => {
-  const cwd = process.cwd();
-  const tsconfig = resolve(cwd, './tsconfig.json');
-  if (await fileExists(tsconfig)) return tsconfig;
-  const jsconfig = resolve(cwd, './jsconfig.json');
-  if (await fileExists(jsconfig)) return jsconfig;
-  return null;
-}
-
 export default async function dev(argv: string[]) {
   const cwd = process.cwd();
   const args = parseArgs(argv);
   let PORT = args["--port"] ?? 8888;
 
-  const tsconfigPath = await findTsOrJsConfig();
-  const aliases = (tsconfigPath) ? resolveTsconfigPathsToAlias({ tsconfigPath }) : {};
-
-  const [errs, config] = createConfiguration({ ..._config, alias: { ...aliases, ...(_config.alias ?? {}), "microsite/hydrate": "microsite/client/hydrate" } });
+  const [errs, config] = await loadConfiguration('dev');
   if (errs) {
     errs.forEach((err) => console.error(err.message));
     return;

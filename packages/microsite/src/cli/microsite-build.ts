@@ -1,4 +1,4 @@
-import execa from "execa";
+import { buildProject, createConfiguration } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
@@ -31,6 +31,7 @@ import {
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
+import { loadConfiguration } from "utils/common.js";
 
 function parseArgs(argv: string[]) {
   return arg(
@@ -43,11 +44,17 @@ function parseArgs(argv: string[]) {
   );
 }
 
+
 export default async function build(argv: string[]) {
   const args = parseArgs(argv);
 
+  const [errs, config] = await loadConfiguration('build');
+  if (errs) {
+    errs.forEach((err) => console.error(err.message));
+    return;
+  }
   const buildStart = performance.now();
-  await Promise.all([prepare(), snowpackBuild()]);
+  await Promise.all([prepare(), buildProject({ config, cwd: process.cwd(), lockfile: null })]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
   let globalEntryPoint = resolve(STAGING_DIR, "src/global/index.js");
@@ -101,16 +108,8 @@ export default async function build(argv: string[]) {
     return import("./microsite-serve.js").then(({ default: serve }) =>
       serve([])
     );
-}
-
-async function snowpackBuild() {
-  const configPath = require.resolve("microsite/assets/snowpack.config.cjs");
-  try {
-    await execa("snowpack", ["build", "--config", configPath]);
-  } catch (e) {
-    console.error(e);
-  }
-  return;
+  
+  process.exit(0);
 }
 
 async function prepare() {
