@@ -7,15 +7,14 @@
   },
   "type": "module",
   "scripts": {
-    "build": "node --experimental-specifier-resolution=node node_modules/microsite/index.js build -- --debug-hydration"
+    "start": "microsite",
+    "build": "microsite build --debug-hydration",
+    "serve": "microsite build --serve"
   },
   "dependencies": {
-    "gray-matter": "^4.0.2",
     "microsite": "1.0.0-next.4",
     "preact": "^10.5.7",
-    "quicklink": "^2.0.0",
-    "remark": "^13.0.0",
-    "remark-html": "^13.0.1"
+    "quicklink": "^2.0.0"
   },
   "devDependencies": {
     "@stylo/core": "1.0.0-next.15",

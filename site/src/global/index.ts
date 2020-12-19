@@ -1,5 +1,4 @@
-import "./global.css";
-import { listen } from "../node_modules/quicklink/dist/quicklink.mjs";
+import { listen } from "quicklink";
 
 if ("requestIdleCallback" in window) {
   window.addEventListener("load", () => {
