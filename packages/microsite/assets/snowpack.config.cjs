@@ -12,8 +12,6 @@ module.exports = {
     installTypes: true,
     externalPackage: [
       ...builtins,
-      "preact",
-      "preact/hooks",
       "microsite/server/fetch",
       "microsite/document",
       "microsite/error",
@@ -26,13 +24,14 @@ module.exports = {
     hmr: true,
     port: 3333,
     open: 'none',
-    output: 'stream'
+    output: 'stream',
   },
   buildOptions: {
     clean: true,
     out: '.microsite/staging',
     jsxFactory: 'h',
-    jsxFragment: 'Fragment'
+    jsxFragment: 'Fragment',
+    sourceMaps: false
   },
   mount: {
     [resolve('public')]: { url: '/', static: true, resolve: false },
