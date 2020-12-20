@@ -1,60 +1,111 @@
-import { resolve, relative } from 'path';
-import module from 'module';
+import { resolve, relative } from "path";
+import module from "module";
 const { createRequire } = module;
 const require = createRequire(import.meta.url);
 
-import { fileExists } from './fs.js';
-import { createConfiguration } from 'snowpack';
-import cc from 'cosmiconfig';
+import { fileExists } from "./fs.js";
+import { createConfiguration } from "snowpack";
+import cc from "cosmiconfig";
 const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
-const deps = Object.keys(require(resolve(process.cwd(), 'package.json')).dependencies || {});
+const deps = Object.keys(
+  require(resolve(process.cwd(), "package.json")).dependencies || {}
+);
 
 async function hasPostCSSConfig() {
   try {
-    const explorer = cosmiconfig('postcss');
+    const explorer = cosmiconfig("postcss");
     const result = await explorer.search();
     if (result.filepath) return true;
   } catch (e) {}
   return false;
 }
 
-export async function loadConfiguration(mode: 'dev' | 'build') {
-  const [tsconfigPath, usesPostCSS] = await Promise.all([findTsOrJsConfig(), hasPostCSSConfig()]);
-  const aliases = (tsconfigPath) ? resolveTsconfigPathsToAlias({ tsconfigPath }) : {};
+export async function loadConfiguration(mode: "dev" | "build") {
+  const [tsconfigPath, usesPostCSS] = await Promise.all([
+    findTsOrJsConfig(),
+    hasPostCSSConfig(),
+  ]);
+  const aliases = tsconfigPath
+    ? resolveTsconfigPathsToAlias({ tsconfigPath })
+    : {};
 
-  const additionalPlugins = usesPostCSS ? ['@snowpack/plugin-postcss'] : [];
+  const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
-    case 'dev': return createConfiguration({ ..._config, plugins: [...additionalPlugins ,..._config.plugins], alias: { ...aliases, ...(_config.alias ?? {}), "microsite/hydrate": "microsite/client/hydrate" }, installOptions: { ..._config.installOptions, externalPackage: ["/web_modules/microsite/_error.js"]} });
-    case 'build': return createConfiguration({ ..._config, plugins: [...additionalPlugins ,..._config.plugins], alias: { ...aliases, ...(_config.alias ?? {}) }, installOptions: { ..._config.installOptions, externalPackage: [..._config.installOptions.externalPackage, ...deps].filter(v => v !== 'preact') } });
+    case "dev":
+      return createConfiguration({
+        ..._config,
+        plugins: [...additionalPlugins, ..._config.plugins],
+        alias: {
+          ...aliases,
+          ...(_config.alias ?? {}),
+          "microsite/hydrate": "microsite/client/hydrate",
+        },
+        installOptions: {
+          ..._config.installOptions,
+          externalPackage: ["/web_modules/microsite/_error.js"],
+        },
+      });
+    case "build":
+      return createConfiguration({
+        ..._config,
+        plugins: [...additionalPlugins, ..._config.plugins],
+        alias: {
+          ...aliases,
+          ...(_config.alias ?? {}),
+        },
+        installOptions: {
+          ..._config.installOptions,
+          rollup: {
+            ...(_config.installOptions?.rollup ?? {}),
+            plugins: [
+              { 
+                name: '@microsite/auto-external',
+                options(opts) {
+                  return Object.assign({}, opts, { external: (source: string) => source.startsWith('preact') });
+                }
+              }
+            ],
+          },
+          externalPackage: [
+            ..._config.installOptions.externalPackage,
+            ...deps,
+          ].filter((v) => v !== "preact"),
+        },
+      });
   }
 }
 
 const findTsOrJsConfig = async () => {
   const cwd = process.cwd();
-  const tsconfig = resolve(cwd, './tsconfig.json');
+  const tsconfig = resolve(cwd, "./tsconfig.json");
   if (await fileExists(tsconfig)) return tsconfig;
-  const jsconfig = resolve(cwd, './jsconfig.json');
+  const jsconfig = resolve(cwd, "./jsconfig.json");
   if (await fileExists(jsconfig)) return jsconfig;
   return null;
-}
+};
 
 function resolveTsconfigPathsToAlias({
-    tsconfigPath = './tsconfig.json'
+  tsconfigPath = "./tsconfig.json",
 } = {}) {
-    let { baseUrl, paths } = require(tsconfigPath).compilerOptions;
-    baseUrl = resolve(process.cwd(), baseUrl);
+  let { baseUrl, paths } = require(tsconfigPath).compilerOptions;
+  baseUrl = resolve(process.cwd(), baseUrl);
 
-    const aliases = {};
+  const aliases = {};
 
-    Object.keys(paths).forEach((item) => {
-        const key = item.replace('/*', '');
-        const value = './' + relative(process.cwd(), resolve(baseUrl, paths[item][0].replace('/*', '').replace('*', '')));
+  Object.keys(paths).forEach((item) => {
+    const key = item.replace("/*", "");
+    const value =
+      "./" +
+      relative(
+        process.cwd(),
+        resolve(baseUrl, paths[item][0].replace("/*", "").replace("*", ""))
+      );
 
-        aliases[key] = value;
-    });
+    aliases[key] = value;
+  });
 
-    return aliases;
+  return aliases;
 }
