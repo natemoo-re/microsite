@@ -3,7 +3,7 @@ title: Data Fetching
 description: How to fetch content in Microsite
 ---
 
-Microsite exposes two functions to hook into **server-side rendering (SSR)** on a per-page basis. At build time, these hooks allow you to fetch dynamic data from the network or read local files.
+Microsite exposes two functions to hook into **static generation** on a per-page basis. At build time, these hooks allow you to fetch dynamic data from the network or read local files.
 
 - `getStaticProps`: Fetch data at build time
 - `getStaticPaths`: Specify dynamic routes to pre-render based on data.
