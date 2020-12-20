@@ -79,7 +79,7 @@ const BlogPost: FunctionComponent<{ post: any }> = ({ post }) => {
 
 export default definePage(BlogPost, {
     path: '/posts/[id]',
-    async getStaitcPaths() {
+    async getStaticPaths() {
         const res = await fetch('https://.../posts');
         const posts = await res.json();
         const paths = posts.map((post) => `/posts/${post.id}`);
