@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.2
+
+### Patch Changes
+
+- 9241da7: - Update @prefresh/snowpack to effectively update effects and memoization
+
 ## 1.0.1
 
 ### Patch Changes
