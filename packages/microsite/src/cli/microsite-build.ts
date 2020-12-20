@@ -11,7 +11,6 @@ import module from "module";
 const { createRequire, builtinModules: builtins } = module;
 const require = createRequire(import.meta.url);
 import {
-  CACHE_DIR,
   STAGING_DIR,
   SSR_DIR,
   OUT_DIR,
@@ -101,7 +100,6 @@ export default async function build(argv: string[]) {
   );
 
   // TODO: print tree of generated files
-
   if (!args["--no-clean"]) await cleanup();
 
   if (args["--serve"])
@@ -116,7 +114,7 @@ async function prepare() {
   const paths = [SSR_DIR];
 
   await Promise.all([...paths, OUT_DIR].map((p) => rmdir(p)));
-  await Promise.all([...paths, CACHE_DIR].map((p) => mkdir(p)));
+  await Promise.all([...paths].map((p) => mkdir(p)));
   await copyDir(
     resolve(process.cwd(), "./public"),
     resolve(process.cwd(), `./${OUT_DIR}`)
