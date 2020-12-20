@@ -5,7 +5,8 @@ const require = createRequire(import.meta.url);
 
 import { fileExists } from './fs.js';
 import { createConfiguration } from 'snowpack';
-import { cosmiconfig } from 'cosmiconfig';
+import cc from 'cosmiconfig';
+const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
 const deps = Object.keys(require(resolve(process.cwd(), 'package.json')).dependencies || {});
