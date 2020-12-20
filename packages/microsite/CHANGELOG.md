@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- 727fc04: Remove cache dir for now
+
 ## 1.0.0-next.6
 
 ### Patch Changes
