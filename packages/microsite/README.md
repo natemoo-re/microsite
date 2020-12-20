@@ -5,6 +5,12 @@
     <img src="https://raw.githubusercontent.com/natemoo-re/microsite/master/.github/assets/microsite.svg?sanitize=true&v=1" alt="microsite" width="375" height="101" />
 </div>
 
+<h4 align="center">
+    <a href="https://github.com/natemoo-re/microsite/tree/main/docs">Read the docs</a>
+    <span> | </span>
+    <a href="https://examples.microsite.page">See the live examples</a>
+</h4>
+
 <br />
 <br />
 
@@ -13,12 +19,6 @@
 ```bash
 npm init microsite <project>
 ```
-
-<h3 align="center">
-    <a href="https://github.com/natemoo-re/microsite/tree/main/docs">Read the docs</a>
-    <span> | </span>
-    <a href="https://examples.microsite.page">See the live examples</a>
-</h3>
 
 > Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0).
 >
