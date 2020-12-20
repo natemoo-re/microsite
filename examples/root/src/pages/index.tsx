@@ -18,7 +18,10 @@ const Index: FunctionalComponent<IndexProps> = ({ examples }) => {
       </Head>
 
       <main>
-        <h1>Welcome to Microsite!</h1>
+        <h1>Microsite Examples</h1>
+
+        <p>These examples are a work in progress, but more are on the way now that microsite@1.0.0 is out!</p>
+        <p>See the <a href="https://github.com/natemoo-re/microsite">GitHub</a> repo for the example source code.</p>
 
         <ul>
           {examples.map(example => (
