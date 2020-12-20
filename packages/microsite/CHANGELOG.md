@@ -1,5 +1,12 @@
 # microsite
 
+## 1.0.2
+
+### Patch Changes
+
+- 1559789: Fix bug with Snowpack's esinstall and Microsite's global state utility
+- 9241da7: - Update @prefresh/snowpack to effectively update effects and memoization
+
 ## 1.0.1
 
 ### Patch Changes
