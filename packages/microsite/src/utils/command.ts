@@ -28,7 +28,7 @@ export async function loadConfiguration(mode: 'dev' | 'build') {
 
   switch (mode) {
     case 'dev': return createConfiguration({ ..._config, plugins: [...additionalPlugins ,..._config.plugins], alias: { ...aliases, ...(_config.alias ?? {}), "microsite/hydrate": "microsite/client/hydrate" }, installOptions: { ..._config.installOptions, externalPackage: ["/web_modules/microsite/_error.js"]} });
-    case 'build': return createConfiguration({ ..._config, plugins: [...additionalPlugins ,..._config.plugins], alias: { ...aliases, ...(_config.alias ?? {}) }, installOptions: { ..._config.installOptions, externalPackage: [..._config.installOptions.externalPackage, ...deps]} });
+    case 'build': return createConfiguration({ ..._config, plugins: [...additionalPlugins ,..._config.plugins], alias: { ...aliases, ...(_config.alias ?? {}) }, installOptions: { ..._config.installOptions, externalPackage: [..._config.installOptions.externalPackage, ...deps].filter(v => v !== 'preact') } });
   }
 }
 
