@@ -89,7 +89,7 @@ export default async function build(argv: string[]) {
       debug: args["--debug-hydration"],
       hasGlobalScript: globalEntryPoint !== null,
     }),
-    copyHydrateAssets(globalStyle),
+    copyHydrateAssets(manifest, globalStyle),
   ]);
 
   const buildEnd = performance.now();
@@ -121,8 +121,9 @@ async function prepare() {
   );
 }
 
-async function copyHydrateAssets(globalStyle?: string | null) {
+async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string | null) {
   const service = await esbuild.startService();
+  let tasks: any = [];
   const transform = async (source: string) => {
     source = stripWithHydrate(source);
     source = preactToCDN(source);
@@ -134,28 +135,36 @@ async function copyHydrateAssets(globalStyle?: string | null) {
   };
 
   if (globalStyle) {
-    await copyFile(
-      globalStyle,
-      resolve(OUT_DIR, "_hydrate/styles/_global.css")
+    tasks.push(
+      copyFile(
+        globalStyle,
+        resolve(OUT_DIR, "_hydrate/styles/_global.css")
+      )
     );
   }
 
-  const transformInit = async (source: string) => {
-    source = preactToCDN(source);
-    const result = await service.transform(source, {
-      minify: true
-    });
-    return result.code;
-  };
+  if (manifest.some(entry => entry.hydrateBindings && Object.keys(entry.hydrateBindings).length > 0)) {
+    const transformInit = async (source: string) => {
+      source = preactToCDN(source);
+      const result = await service.transform(source, {
+        minify: true
+      });
+      return result.code;
+    };
 
-  await copyFile(
-    require.resolve("microsite/assets/init.js"),
-    resolve(OUT_DIR, "_hydrate/init.js"),
-    { transform: transformInit }
-  );
+    tasks.push(
+      copyFile(
+        require.resolve("microsite/assets/init.js"),
+        resolve(OUT_DIR, "_hydrate/init.js"),
+        { transform: transformInit }
+      )
+    )
+  }
+
   const jsAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.js"));
   const hydrateStyleAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.css"));
   await Promise.all([
+    ...tasks,
     ...jsAssets.map((asset) => copyAssetToFinal(asset, transform)),
     ...hydrateStyleAssets.map((asset) => copyAssetToFinal(asset)),
   ]);
