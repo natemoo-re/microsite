@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "start": "microsite",
+    "vercel-build": "echo 'build'",
     "build": "microsite build --debug-hydration",
     "serve": "microsite build --serve"
   },
