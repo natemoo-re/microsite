@@ -14,7 +14,9 @@
 npm init microsite <project>
 ```
 
-[See the demo](https://microsite-demo.nmoo.vercel.app/)
+<h3 align="center">
+    <a href="https://examples.microsite.page">See the live examples</a>
+</h3>
 
 > Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0).
 >
