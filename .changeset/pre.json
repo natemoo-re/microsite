@@ -7,6 +7,7 @@
     "site": "0.0.9"
   },
   "changesets": [
+    "four-bikes-camp",
     "green-points-worry",
     "lucky-papayas-deny",
     "nice-planets-chew",

@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 914bf18: Fix cosmicconfig CJS interop issue
+
 ## 1.0.0-next.5
 
 ### Patch Changes
