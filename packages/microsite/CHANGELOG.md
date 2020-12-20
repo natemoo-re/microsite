@@ -1,5 +1,13 @@
 # microsite
 
+## 1.0.1
+
+### Patch Changes
+
+- 41f0201: Remove init script if no hydrated components exist
+- fe2d1d7: Resolve exact version of Preact used in project
+- 712dc53: Fixes build issue where no esm dependencies would be found
+
 ## 1.0.0
 
 ### Major Changes
