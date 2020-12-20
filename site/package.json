@@ -7,16 +7,12 @@
   },
   "type": "module",
   "scripts": {
-    "build": "node --experimental-modules --experimental-specifier-resolution=node node_modules/microsite/index.js build -- --debug-hydration"
+    "start": "microsite",
+    "build": "microsite build --debug-hydration",
+    "serve": "microsite build --serve"
   },
   "dependencies": {
-    "gray-matter": "^4.0.2",
     "microsite": "1.0.0-next.6",
-    "preact": "^10.5.7",
-    "remark": "^13.0.0",
-    "remark-html": "^13.0.1"
-  },
-  "devDependencies": {
-    "typescript": "^4.1.0-beta"
+    "preact": "^10.5.7"
   }
 }
