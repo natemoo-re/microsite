@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Automatically use PostCSS if a postcss.config.cjs file is found
+
 ## 1.0.0-next.4
 
 ### Patch Changes

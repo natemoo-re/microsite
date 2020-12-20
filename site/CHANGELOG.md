@@ -1,5 +1,12 @@
 # site
 
+## 0.0.10-next.5
+
+### Patch Changes
+
+- Updated dependencies [undefined]
+  - microsite@1.0.0-next.5
+
 ## 0.0.10-next.4
 
 ### Patch Changes
