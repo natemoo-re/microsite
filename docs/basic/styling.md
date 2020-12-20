@@ -38,6 +38,8 @@ export function Button({ children }) {
 
 Microsite automatically detects if you have a PostCSS configuration file and will enable PostCSS accordingly.
 
+> **Note** Microsite projects use `"type": "module"` in `package.json`, so your config file needs to use the `.cjs` extension. PostCSS (and most tools) have yet to migrate to native Node ESM, so this allows you to use the CommonJS behavior inside of an otherwise ESM project.
+
 ## CSS-in-JS
 
 Microsite does not currently support CSS-in-JS solutions, but this is a high priority for the next release.
