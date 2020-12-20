@@ -1,0 +1,17 @@
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counter > button {
+  padding: 1rem;
+}
+
+.counter > p {
+  font-size: 4rem;
+  margin-inline: 3rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch;
+  text-align: center;
+}

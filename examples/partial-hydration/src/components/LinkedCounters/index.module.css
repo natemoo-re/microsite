@@ -1,0 +1,7 @@
+.flex {
+  margin-top: 4em;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+}
