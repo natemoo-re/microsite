@@ -1,0 +1,16 @@
+{
+  "name": "todo",
+  "type": "module",
+  "scripts": {
+    "start": "microsite",
+    "prebuild": "node scripts/generate-examples",
+    "build": "microsite build",
+    "serve": "microsite build --serve"
+  },
+  "devDependencies": {
+    "microsite": "^1.0.0"
+  },
+  "dependencies": {
+    "title": "^3.4.2"
+  }
+}
