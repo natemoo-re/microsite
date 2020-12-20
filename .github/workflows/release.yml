@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   release:
@@ -27,7 +27,7 @@ jobs:
       uses: changesets/action@master
       with:
         version: npx changeset version
-        publish: npx lerna exec --scope="{create-,}microsite" -- npm publish --tag latest
+        publish: npx lerna exec --scope="microsite" --scope="create-microsite" -- npm publish --tag latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
