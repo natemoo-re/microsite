@@ -1,7 +1,4 @@
 {
     "cleanUrls": true,
-    "trailingSlash": false,
-    "rewrites": [
-        { "source": "/partial-hydration", "destination": "https://partial-hydration.examples.microsite.page/" }
-    ]
+    "trailingSlash": false
 }
