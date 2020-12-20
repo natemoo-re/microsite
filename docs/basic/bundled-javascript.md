@@ -15,6 +15,7 @@ Microsite requires a hint from the author, the `withHydrate` HOC, to implement A
 **Example** Consider a simple counter component which uses `preact/hooks` and attaches `onClick` handlers to rendered `button` elements.
 
 ```tsx
+import { useState } from "preact/hooks";
 import { withHydrate } from "microsite/hydrate";
 
 const Counter = () => {
