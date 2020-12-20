@@ -61,8 +61,7 @@ export const preactImportTransformer = {
 };
 
 const FULL_PREACT_IMPORT_REGEX = /import.*['"]preact([\/\w]+)?['"]/gm;
-const pkg = require("microsite/package.json");
-const PREACT_VERSION = pkg.dependencies.preact.replace(/^\^/, "");
+const PREACT_VERSION = require("preact/package.json").version;
 
 const PREACT_CDN_SOURCES = {
   preact: `https://cdn.skypack.dev/preact@${PREACT_VERSION}`,
