@@ -20,8 +20,6 @@ Microsite supports pages with dynamic routes, which may be familiar if you've us
 
 **Example** If you create a file called `src/pages/posts/[id].tsx`, then it will be accessible at `posts/1`, `posts/2`, etc.
 
-> To learn more about dynamic routing, check the [Dynamic Routing documentation](./dynamic-routing).
-
 ## Static Generation
 
 Microsite is a **Static Site Generator**, meaning it generates HTML files at **build** time. This strategy works phenomenally well for for content-based sites. For highly dynamic _applications_, you may consider [Next.js](https://nextjs.org) as an alternative.
@@ -98,6 +96,6 @@ export default definePage(BlogPost, {
 });
 ```
 
-To learn more about how `getStaticPaths` works, check out the [Data Fetching documentation](./data-fetching).
+To learn more about how `getStaticPaths` works, check out the [Data Fetching documentation](./data-fetching.md).
 
 
