@@ -23,7 +23,7 @@ const Index: FunctionalComponent<IndexProps> = ({ examples }) => {
         <ul>
           {examples.map(example => (
             <li>
-              <a href={`/${example}`}>{title(example)}</a>
+              <a href={`/${example}`}>{title(example.replace(/-/g, ' '))}</a>
             </li>
           ))}
         </ul>

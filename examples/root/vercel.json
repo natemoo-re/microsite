@@ -2,7 +2,6 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
-        { "source": "/", "destination": "/index.html" },
-        { "source": "/:match*", "destination": "https://:match*.example.microsite.page" }
+        { "source": "/partial-hydration", "destination": "https://partial-hydration.examples.microsite.page" }
     ]
 }
