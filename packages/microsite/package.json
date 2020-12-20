@@ -43,7 +43,7 @@
     "**/*.d.ts"
   ],
   "dependencies": {
-    "@prefresh/snowpack": "^2.1.0",
+    "@prefresh/snowpack": "^3.0.0",
     "@snowpack/plugin-dotenv": "^2.0.5",
     "@snowpack/plugin-postcss": "^1.0.11",
     "arg": "^5.0.0",
