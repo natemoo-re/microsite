@@ -2,6 +2,6 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
-        { "source": "/:match*", "destination": "/partial-hydration/:match*" }
+        { "source": "/partial-hydration/:match*", "destination": "/:match*" }
     ]
 }
