@@ -1,4 +1,4 @@
-import { h, createContext, Fragment, FunctionalComponent } from "preact";
+import { h, createContext, Fragment, FunctionalComponent, JSX } from "preact";
 import { useContext, useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
@@ -101,10 +101,18 @@ export const Document: FunctionalComponent<{
   );
 };
 
-export const Head = () => {
+export const Html: FunctionalComponent<JSX.HTMLAttributes<HTMLHtmlElement>> = ({ lang = 'en', dir = 'ltr', ...props }) => (
+  <html lang={lang} dir={dir} {...props} />
+)
+
+export const Main: FunctionalComponent<Omit<JSX.HTMLAttributes<HTMLDivElement>, 'id'|'dangerouslySetInnerHTML'|'children'>> = (props) => (
+  <div {...props} id="__microsite" />
+)
+
+export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({ children, ...props }) => {
   const { head } = useContext(__DocContext);
   return (
-    <head>
+    <head {...props}>
       <meta {...({ charset: "utf-8" } as any)} />
       <meta
         name="viewport"
@@ -112,6 +120,8 @@ export const Head = () => {
       />
 
       <Fragment>{head.current}</Fragment>
+
+      { children }
     </head>
   );
 };

@@ -1,4 +1,7 @@
 {
     "cleanUrls": true,
-    "trailingSlash": false
+    "trailingSlash": false,
+    "rewrites": [
+        { "source": "/:example/:match*", "destination": "https://:example.examples.microsite.page/:match*" }
+    ]
 }

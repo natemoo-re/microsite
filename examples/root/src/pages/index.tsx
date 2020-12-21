@@ -26,7 +26,7 @@ const Index: FunctionalComponent<IndexProps> = ({ examples }) => {
         <ul>
           {examples.map(example => (
             <li>
-              <a href={`https://${example}.examples.microsite.page`}>{title(example.replace(/-/g, ' '))}</a>
+              <a href={`/${example}`}>{title(example.replace(/-/g, ' '))}</a>
             </li>
           ))}
         </ul>
