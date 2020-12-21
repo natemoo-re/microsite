@@ -2,9 +2,11 @@
     <style>
       .text { fill: #333; }
       @media (prefers-color-scheme: dark) {
+        .bg { fill: #0d1117; }
         .text { fill: #FFF; }
       }
     </style>
+    <rect class="bg" x="0" y="0" width="123" height="33" />
     <path fill="#FF998B" d="M8 13v12h12L8 13z"/>
     <path fill="#BDBDBD" d="M11 10v12h12V10H11z"/>
     <path fill="#828282" d="M11 10v12h12L11 10z"/>
