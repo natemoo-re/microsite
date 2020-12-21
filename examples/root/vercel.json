@@ -2,6 +2,6 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
-        { "source": "/:example/:match*", "destination": "https://:example.examples.microsite.page/:match*" }
+        { "source": "/:match*", "destination": "https://:match*.examples.microsite.page" }
     ]
 }

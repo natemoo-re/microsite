@@ -1,4 +1,4 @@
-// import { promises as fsp } from 'fs';
+import { promises as fsp } from 'fs';
 
 async function run() {
     // const ents = await fsp.readdir('../', { withFileTypes: true });
