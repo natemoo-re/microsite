@@ -1,0 +1,14 @@
+{
+  "name": "@example/tailwind",
+  "type": "module",
+  "scripts": {
+    "start": "microsite",
+    "build": "microsite build",
+    "serve": "microsite build --serve"
+  },
+  "devDependencies": {
+    "microsite": "^1.0.0",
+    "tailwindcss": "^2.0.2",
+    "autoprefixer": "^10.1.0"
+  }
+}
