@@ -28,22 +28,12 @@ export function withHydrate<T extends FunctionComponent<any>>(
         `withHydrate() is unable to serialize complex \`children\`. Please inline these children into <${name} />.`
       );
 
+    const data = isServer ? JSON.stringify(props) : '';
     return (
       <HydrateContext.Provider value={name}>
-        <div
-          {...(isServer
-            ? {
-                "data-hydrate": name,
-                "data-props":
-                  Object.keys(props).length > 0
-                    ? btoa(JSON.stringify(props))
-                    : null,
-                "data-method": method,
-              }
-            : {})}
-        >
-          <Component {...{ ...props, ref }} />
-        </div>
+        {isServer && (<noscript dangerouslySetInnerHTML={{ __html: `<!--$_h:${name}-->` }} />)}
+        <Component {...{ ...props, ref }} />
+        {isServer && (<noscript dangerouslySetInnerHTML={{ __html: `<!--$h:${method}:${data}-->` }} />)}
       </HydrateContext.Provider>
     );
   };

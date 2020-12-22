@@ -158,6 +158,7 @@ export const renderPage = async (
       h(Page, props, null)
     )
   );
+  contents = contents.replace(/<noscript>(<!--[\s\S]*?-->)<\/noscript>/g, '$1');
   contents = prettier.format(contents, {
     parser: "html",
     embeddedLanguageFormatting: "off",
