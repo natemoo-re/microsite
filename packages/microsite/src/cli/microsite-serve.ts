@@ -10,6 +10,7 @@ function parseArgs(argv: string[]) {
   return arg(
     {
       "--port": Number,
+      "--base-path": String,
 
       // Aliases
       "-p": "--port",
@@ -38,7 +39,7 @@ export default async function start(argv: string[]) {
 
     let protocol = "http:";
     let hostname = "localhost";
-    await openInBrowser(protocol, hostname, PORT, "chrome");
+    await openInBrowser(protocol, hostname, PORT, args['--base-path'] ?? '/', "chrome");
     console.log(
       `${green("✔")} Microsite started on ${green(
         `${protocol}//${hostname}:${PORT}`

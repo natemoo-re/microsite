@@ -108,10 +108,12 @@ export default async function build(argv: string[]) {
   // TODO: print tree of generated files
   if (!args["--no-clean"]) await cleanup();
 
-  if (args["--serve"])
+  if (args["--serve"]) {
+    const forwardArgs = args['--base-path'] ? [`--base-path=${args["--base-path"]}`] : [];
     return import("./microsite-serve.js").then(({ default: serve }) =>
-      serve([])
+      serve(forwardArgs)
     );
+  }
   
   process.exit(0);
 }
