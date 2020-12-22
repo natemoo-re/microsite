@@ -42,6 +42,7 @@ export const Document: FunctionalComponent<{
           name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
         />
+        <base href={basePath} />
 
         <Fragment>{head.current}</Fragment>
 
@@ -49,18 +50,18 @@ export const Document: FunctionalComponent<{
           <link rel="preconnect" href={href} />
         ))}
         {hasGlobalScript && (
-          <link rel="modulepreload" href={`${basePath}_hydrate/chunks/_global.js`} />
+          <link rel="modulepreload" href={`./_hydrate/chunks/_global.js`} />
         )}
         {preload.map((href) => (
           <link rel="modulepreload" href={href} />
         ))}
         {styles &&
           styles.map((href) => (
-            <link rel="preload" href={`${basePath}${href}`} as="style" />
+            <link rel="preload" href={`./${href}`} as="style" />
           ))}
 
         {styles &&
-          styles.map((href) => <link rel="stylesheet" href={`${basePath}${href}`} />)}
+          styles.map((href) => <link rel="stylesheet" href={`./${href}`} />)}
 
         {scripts && (
           <Fragment>

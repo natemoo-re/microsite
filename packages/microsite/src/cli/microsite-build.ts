@@ -32,7 +32,7 @@ import {
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
-import { loadConfiguration } from "../utils/command.js";
+import { resolveNormalizedBasePath, loadConfiguration } from "../utils/command.js";
 
 function parseArgs(argv: string[]) {
   return arg(
@@ -49,8 +49,8 @@ function parseArgs(argv: string[]) {
 
 export default async function build(argv: string[]) {
   const args = parseArgs(argv);
-
-  if (args['--base-path']) setBasePath(`${args['--base-path'].replace(/\/$/, '')}/`);
+  let basePath = resolveNormalizedBasePath(args);
+  setBasePath(basePath);
 
   const [errs, config] = await loadConfiguration('build');
   if (errs) {
@@ -91,7 +91,7 @@ export default async function build(argv: string[]) {
   }
   await Promise.all([
     ssr(manifest, routeData, {
-      basePath: args["--base-path"],
+      basePath,
       debug: args["--debug-hydration"],
       hasGlobalScript: globalEntryPoint !== null,
     }),

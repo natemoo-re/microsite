@@ -91,7 +91,7 @@ export async function openInBrowser(
   basePath: string,
   browser: string
 ): Promise<void> {
-  const url = `${protocol}//${hostname}:${port}${basePath === '/' ? '' : basePath}`;
+  const url = `${protocol}//${hostname}:${port}${basePath.replace(/\/$/, '')}`;
   browser = /chrome/i.test(browser)
     ? appNames[process.platform]["chrome"]
     : /brave/i.test(browser)

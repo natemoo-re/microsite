@@ -19,7 +19,7 @@ export const SSR_DIR = ".microsite/ssr";
 export const OUT_DIR_NO_BASE = "./dist";
 export let OUT_DIR = "./dist";
 
-export const setBasePath = (p: string) => OUT_DIR = join(OUT_DIR, p);
+export const setBasePath = (p: string) => OUT_DIR = p === '/' ? OUT_DIR : join(OUT_DIR, ...p.replace(/^\//, '').replace(/\/$/, '').split('/'));
 
 export interface ManifestEntry {
   name: string;
