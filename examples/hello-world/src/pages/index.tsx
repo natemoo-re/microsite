@@ -2,7 +2,7 @@ import { FunctionalComponent } from 'preact';
 import { definePage } from 'microsite/page';
 import { Head, seo } from 'microsite/head';
 
-import Counter from '@/components/Counter';
+import Counter from '../components/Counter';
 
 interface IndexProps {}
 
