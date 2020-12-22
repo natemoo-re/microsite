@@ -1,9 +1,3 @@
 {
-  "extends": "microsite/base",
-  "compilerOptions": {
-    "baseUrl": "src",
-    "paths": {
-      "@/*": ["./*"]
-    }
-  }
+  "extends": "microsite/base"
 }
