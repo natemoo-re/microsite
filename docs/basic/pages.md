@@ -14,6 +14,8 @@ const About: FunctionComponent = () => {
 export default About;
 ```
 
+> **Note** Currently, [Automatic Partial Hydration](https://github.com/natemoo-re/microsite/blob/main/docs/basic/bundled-javascript.md) uses a code-splitting technique which extracts **components** but not top-level files within `src/pages/**`. This ensures that your entire `Page` component and all its children are not included in the final client bundle. See [**Caveats**](https://github.com/natemoo-re/microsite/blob/main/docs/basic/bundled-javascript.md#caveats) for more detail.
+
 ## Pages with Dynamic Routing
 
 Microsite supports pages with dynamic routes, which may be familiar if you've used something like [Next.js](https://nextjs.org/).
