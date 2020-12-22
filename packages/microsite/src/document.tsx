@@ -15,12 +15,14 @@ export const Document: FunctionalComponent<{
   preconnect?: string[];
   debug?: boolean;
   hasGlobalScript?: boolean;
+  basePath?: string;
 }> = ({
   manifest,
   preload = [],
   preconnect = [],
   debug = false,
   hasGlobalScript = false,
+  basePath = '/',
   children,
 }) => {
   const head = useRef([]);
@@ -47,18 +49,18 @@ export const Document: FunctionalComponent<{
           <link rel="preconnect" href={href} />
         ))}
         {hasGlobalScript && (
-          <link rel="modulepreload" href="/_hydrate/chunks/_global.js" />
+          <link rel="modulepreload" href={`${basePath}_hydrate/chunks/_global.js`} />
         )}
         {preload.map((href) => (
           <link rel="modulepreload" href={href} />
         ))}
         {styles &&
           styles.map((href) => (
-            <link rel="preload" href={`/${href}`} as="style" />
+            <link rel="preload" href={`${basePath}${href}`} as="style" />
           ))}
 
         {styles &&
-          styles.map((href) => <link rel="stylesheet" href={`/${href}`} />)}
+          styles.map((href) => <link rel="stylesheet" href={`${basePath}${href}`} />)}
 
         {scripts && (
           <Fragment>
@@ -84,7 +86,7 @@ export const Document: FunctionalComponent<{
           <script
             type="module"
             dangerouslySetInnerHTML={{
-              __html: `import global from '/_hydrate/chunks/_global.js';\nglobal();`,
+              __html: `import global from '${basePath}_hydrate/chunks/_global.js';\nglobal();`,
             }}
           />
         )}
@@ -93,7 +95,7 @@ export const Document: FunctionalComponent<{
             type="module"
             defer
             async
-            dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts) }}
+            dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts, { basePath }) }}
           />
         )}
       </body>
