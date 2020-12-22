@@ -1,4 +1,4 @@
-import { h, createContext, Fragment, FunctionalComponent, JSX, options } from "preact";
+import { h, createContext, Fragment, FunctionalComponent, JSX } from "preact";
 import { useContext, useRef } from "preact/hooks";
 import render from "preact-render-to-string";
 
@@ -8,13 +8,6 @@ import type { ManifestEntry } from "./utils/build";
 export const __DocContext = createContext({
   head: { current: [] },
 });
-
-let vnodeHook;
-const oldVnode = options.vnode;
-options.vnode = vnode => {
-	if (oldVnode) oldVnode(vnode);
-	if (vnodeHook) vnodeHook(vnode);
-};
 
 export const Document: FunctionalComponent<{
   manifest?: ManifestEntry;
@@ -32,18 +25,11 @@ export const Document: FunctionalComponent<{
   basePath = '/',
   children,
 }) => {
-  vnodeHook = ({ type, props }) => {
-    if (basePath === '/') return;
-    if (type === 'a' && props && props.href && props.href.startsWith('/')) {
-      props.href = `${basePath.replace(/\/$/, '')}${props.href}`;
-    }
-  }
   const head = useRef([]);
   const subtree = render(
     <__DocContext.Provider value={{ head }}>{children}</__DocContext.Provider>,
     {}
   );
-  vnodeHook = null;
 
   const styles = manifest.hydrateStyleBindings;
   const scripts = manifest.hydrateBindings;

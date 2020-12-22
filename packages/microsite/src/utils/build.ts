@@ -7,7 +7,7 @@ const { createRequire } = module;
 const require = createRequire(import.meta.url);
 
 import { Document } from "../document.js";
-import { h, options } from "preact";
+import { h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import prettier from "prettier";
 import { generateStaticPropsContext } from "./router.js";
@@ -138,29 +138,14 @@ const importPage = (filename: string) =>
   import(resolve(process.cwd(), join(SSR_DIR, filename))).then(
     (mod) => mod.default
   );
-
-let vnodeHook: typeof options['vnode'];
-const oldVnode = options.vnode;
-options.vnode = vnode => {
-	if (oldVnode) oldVnode(vnode);
-	if (vnodeHook) vnodeHook(vnode);
-};
-
 export const renderPage = async (
   data: RouteDataEntry | null,
   manifest: ManifestEntry,
   { basePath = '/', debug = false, hasGlobalScript = false } = {}
-): Promise<{ name: string; contents: string, links: any[] }> => {
+): Promise<{ name: string; contents: string }> => {
   let Page = await importPage(manifest.name);
   Page = unwrapPage(Page);
   const props = data.props;
-
-  let links = new Set();
-  vnodeHook = ({ type, props }: any) => {
-		if (type === 'a' && props && props.href && (!props.target || props.target === '_self')) {
-      links.add(props.href);
-		}
-	};
 
   let contents = renderToString(
     h(
@@ -182,12 +167,9 @@ export const renderPage = async (
     embeddedLanguageFormatting: "off",
   });
 
-  vnodeHook = null;
-
   return {
     name: `${data.route.replace(/\.js$/, '')}.html`,
     contents,
-    links: Array.from(links)
   };
 };
 
