@@ -90,7 +90,9 @@ const findTsOrJsConfig = async () => {
 function resolveTsconfigPathsToAlias({
   tsconfigPath = "./tsconfig.json",
 } = {}) {
-  let { baseUrl, paths } = require(tsconfigPath).compilerOptions;
+  let { baseUrl, paths } = require(tsconfigPath)?.compilerOptions ?? {};
+  if (!(baseUrl && paths)) return {};
+
   baseUrl = resolve(process.cwd(), baseUrl);
 
   const aliases = {};
