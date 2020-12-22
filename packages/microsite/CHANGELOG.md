@@ -1,5 +1,11 @@
 # microsite
 
+## 1.0.3
+
+### Patch Changes
+
+- b94b6a9: Fix handling of js/tsconfig.json without a "paths" option
+
 ## 1.0.2
 
 ### Patch Changes
