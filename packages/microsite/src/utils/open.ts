@@ -90,6 +90,9 @@ export async function openInBrowser(
   port: number,
   browser: string
 ): Promise<void> {
+  if (process.env.BROWSER === 'false') {
+    return;
+  }
   const url = `${protocol}//${hostname}:${port}`;
   browser = /chrome/i.test(browser)
     ? appNames[process.platform]["chrome"]
