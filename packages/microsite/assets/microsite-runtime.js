@@ -32,49 +32,26 @@ function attach(fragment, data, { key, name, source }) {
         !("requestIdleCallback" in window) ||
         !("requestAnimationFrame" in window)
       )
-        return hydrate();
+        return setTimeout(hydrate, 0);
 
       requestIdleCallback(
         () => {
           requestAnimationFrame(hydrate);
         },
-        { timeout: 2000 }
+        { timeout: 500 }
       );
-      break;
-    }
-    case "interaction": {
-      const events = ["focus", "click", "touchstart", "pointerenter"];
-      function handleEvent(event) {
-        hydrate().then(() => {
-          if (event.type === "focus") event.target.focus();
-          for (const e of events) {
-            event.target.removeEventListener(e, handleEvent);
-          }
-        });
-      }
-
-      const children = fragment.childNodes.filter(
-        (node) => node.nodeType === node.ELEMENT_NODE
-      );
-      for (const e of events) {
-        for (const child of children) {
-          child.addEventListener(e, handleEvent, {
-            once: true,
-            passive: true,
-            capture: true,
-          });
-        }
-      }
       break;
     }
     case "visible": {
       if (!("IntersectionObserver" in window)) return hydrate();
 
       const observer = createObserver(hydrate);
-      const child = fragment.childNodes.find(
+      const childElements = fragment.childNodes.filter(
         (node) => node.nodeType === node.ELEMENT_NODE
       );
-      observer.observe(child);
+      for (const child of childElements) {
+        observer.observe(child);
+      }
       break;
     }
   }
@@ -83,7 +60,9 @@ function attach(fragment, data, { key, name, source }) {
 function createPersistentFragment(parentNode, childNodes) {
   const last = childNodes && childNodes[childNodes.length - 1].nextSibling;
   function insert(child, before) {
-    parentNode.insertBefore(child, before || last);
+    try {
+      parentNode.insertBefore(child, before || last);
+    } catch (e) {}
   }
   return {
     parentNode,
@@ -166,7 +145,7 @@ export default (manifest) => {
       const { c: Component } = data;
       const [name, source] = manifest[Component];
       if (name && source) {
-        attach(fragment, data, { name, source });
+        attach(fragment, data, { key: Component, name, source });
       }
 
       requestIdleCallback(() => {

@@ -14,7 +14,7 @@ export function generateHydrateScript(
       )
       .flat(1)
   );
-  return `import init from '/_hydrate/init.js';\ninit(${JSON.stringify(
+  return `import init from "/_hydrate/microsite-runtime.js";\ninit(${JSON.stringify(
     entries
   )})`;
 }
