@@ -5,7 +5,7 @@ const isServer = typeof window === "undefined";
 export const HydrateContext = createContext<string | false>(false);
 
 export interface HydrationProps {
-  method?: "idle" | "visible" | "interaction";
+  method?: "idle" | "visible";
 }
 
 export function withHydrate<T extends FunctionComponent<any>>(
