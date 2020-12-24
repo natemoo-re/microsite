@@ -15,12 +15,14 @@ export const Document: FunctionalComponent<{
   preconnect?: string[];
   debug?: boolean;
   hasGlobalScript?: boolean;
+  basePath?: string;
 }> = ({
   manifest,
   preload = [],
   preconnect = [],
   debug = false,
   hasGlobalScript = false,
+  basePath = '/',
   children,
 }) => {
   const head = useRef([]);
@@ -40,6 +42,7 @@ export const Document: FunctionalComponent<{
           name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
         />
+        <base href={basePath} />
 
         <Fragment>{head.current}</Fragment>
 
@@ -47,18 +50,18 @@ export const Document: FunctionalComponent<{
           <link rel="preconnect" href={href} />
         ))}
         {hasGlobalScript && (
-          <link rel="modulepreload" href="/_hydrate/chunks/_global.js" />
+          <link rel="modulepreload" href={`./_hydrate/chunks/_global.js`} />
         )}
         {preload.map((href) => (
           <link rel="modulepreload" href={href} />
         ))}
         {styles &&
           styles.map((href) => (
-            <link rel="preload" href={`/${href}`} as="style" />
+            <link rel="preload" href={`./${href}`} as="style" />
           ))}
 
         {styles &&
-          styles.map((href) => <link rel="stylesheet" href={`/${href}`} />)}
+          styles.map((href) => <link rel="stylesheet" href={`./${href}`} />)}
 
         {scripts && (
           <Fragment>
@@ -84,7 +87,7 @@ export const Document: FunctionalComponent<{
           <script
             type="module"
             dangerouslySetInnerHTML={{
-              __html: `import global from '/_hydrate/chunks/_global.js';\nglobal();`,
+              __html: `import global from '${basePath}_hydrate/chunks/_global.js';\nglobal();`,
             }}
           />
         )}
@@ -93,7 +96,7 @@ export const Document: FunctionalComponent<{
             type="module"
             defer
             async
-            dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts) }}
+            dangerouslySetInnerHTML={{ __html: generateHydrateScript(scripts, { basePath }) }}
           />
         )}
       </body>
