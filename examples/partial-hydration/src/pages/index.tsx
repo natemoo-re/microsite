@@ -3,10 +3,10 @@ import { definePage } from "microsite/page";
 import { Head, seo } from "microsite/head";
 
 import Idle from "@/components/Idle";
-import Interaction from "@/components/Interaction";
 import Visible from "@/components/Visible";
 import Static from "@/components/Static";
 import Clock from "@/components/Clock";
+import LinkedCounter from "@/components/LinkedCounter";
 import LinkedCounters from "@/components/LinkedCounters";
 
 const Index: FunctionalComponent<any> = ({ renderedAt }) => {
@@ -21,13 +21,13 @@ const Index: FunctionalComponent<any> = ({ renderedAt }) => {
           <Clock initialDate={renderedAt} />
         </Static>
         <Idle />
-        <Interaction />
         <Visible />
 
         <LinkedCounters />
 
-        <Interaction initialCount={10} />
         <Visible initialCount={10} />
+
+        <LinkedCounter name="omega" />
       </main>
     </>
   );

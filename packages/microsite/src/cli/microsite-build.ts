@@ -13,6 +13,7 @@ const require = createRequire(import.meta.url);
 import {
   STAGING_DIR,
   SSR_DIR,
+  OUT_DIR_NO_BASE,
   OUT_DIR,
   importDataMethods,
   applyDataMethods,
@@ -26,11 +27,12 @@ import {
   copyAssetToFinal,
   stripWithHydrate,
   preactToCDN,
+  setBasePath,
 } from "../utils/build.js";
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
-import { loadConfiguration } from "../utils/command.js";
+import { resolveNormalizedBasePath, loadConfiguration } from "../utils/command.js";
 
 function parseArgs(argv: string[]) {
   return arg(
@@ -38,6 +40,7 @@ function parseArgs(argv: string[]) {
       "--debug-hydration": Boolean,
       "--no-clean": Boolean,
       "--serve": Boolean,
+      "--base-path": String,
     },
     { permissive: true, argv }
   );
@@ -46,6 +49,8 @@ function parseArgs(argv: string[]) {
 
 export default async function build(argv: string[]) {
   const args = parseArgs(argv);
+  let basePath = resolveNormalizedBasePath(args);
+  setBasePath(basePath);
 
   const [errs, config] = await loadConfiguration('build');
   if (errs) {
@@ -86,6 +91,7 @@ export default async function build(argv: string[]) {
   }
   await Promise.all([
     ssr(manifest, routeData, {
+      basePath,
       debug: args["--debug-hydration"],
       hasGlobalScript: globalEntryPoint !== null,
     }),
@@ -102,10 +108,12 @@ export default async function build(argv: string[]) {
   // TODO: print tree of generated files
   if (!args["--no-clean"]) await cleanup();
 
-  if (args["--serve"])
+  if (args["--serve"]) {
+    const forwardArgs = args['--base-path'] ? [`--base-path=${args["--base-path"]}`] : [];
     return import("./microsite-serve.js").then(({ default: serve }) =>
-      serve([])
+      serve(forwardArgs)
     );
+  }
   
   process.exit(0);
 }
@@ -113,7 +121,7 @@ export default async function build(argv: string[]) {
 async function prepare() {
   const paths = [SSR_DIR];
 
-  await Promise.all([...paths, OUT_DIR].map((p) => rmdir(p)));
+  await Promise.all([...paths, OUT_DIR_NO_BASE].map((p) => rmdir(p)));
   await Promise.all([...paths].map((p) => mkdir(p)));
   await copyDir(
     resolve(process.cwd(), "./public"),
@@ -154,8 +162,8 @@ async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string
 
     tasks.push(
       copyFile(
-        require.resolve("microsite/assets/init.js"),
-        resolve(OUT_DIR, "_hydrate/init.js"),
+        require.resolve("microsite/assets/microsite-runtime.js"),
+        resolve(OUT_DIR, "_hydrate/microsite-runtime.js"),
         { transform: transformInit }
       )
     )
@@ -456,7 +464,7 @@ const rewritePreact = () => {
 async function ssr(
   manifest: ManifestEntry[],
   routeData: RouteDataEntry[],
-  { debug = false, hasGlobalScript = false } = {}
+  { basePath = '/', debug = false, hasGlobalScript = false } = {}
 ) {
   return Promise.all(
     routeData.map((entry) =>
@@ -465,7 +473,7 @@ async function ssr(
         manifest.find(
           (route) => route.name.replace(/^pages/, "") === entry.name
         ),
-        { debug, hasGlobalScript }
+        { basePath, debug, hasGlobalScript }
       )
         .then(({ name, contents }) => {
           return { name, contents };

@@ -9,9 +9,16 @@ import cc from "cosmiconfig";
 const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
+const pkg = require(resolve(process.cwd(), "package.json"));
 const deps = Object.keys(
-  require(resolve(process.cwd(), "package.json")).dependencies || {}
+  pkg.dependencies || {}
 );
+const DEFAULT_BASE_PATH = pkg.homepage || '/';
+
+export function resolveNormalizedBasePath(args: { ['--base-path']?: string, [key: string]: any }) {
+  let basePath = args['--base-path'] ?? DEFAULT_BASE_PATH;
+  return basePath === '/' ? basePath : `/${basePath.replace(/^\//, '').replace(/\/$/, '')}/`;
+} 
 
 async function hasPostCSSConfig() {
   try {

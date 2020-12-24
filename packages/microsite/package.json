@@ -1,6 +1,6 @@
 {
   "name": "microsite",
-  "version": "1.0.3",
+  "version": "1.1.0-next.0",
   "type": "module",
   "author": {
     "name": "Nate Moore",
@@ -33,7 +33,7 @@
     "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
     "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
     "./assets/types/*": "./assets/types/*.d.ts",
-    "./assets/init.js": "./assets/init.js",
+    "./assets/microsite-runtime.js": "./assets/microsite-runtime.js",
     "./package.json": "./package.json"
   },
   "files": [

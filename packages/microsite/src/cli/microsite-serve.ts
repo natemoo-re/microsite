@@ -1,4 +1,5 @@
 import { dirExists } from "../utils/fs.js";
+import { resolveNormalizedBasePath } from '../utils/command.js';
 import { openInBrowser } from "../utils/open.js";
 import { OUT_DIR } from "../utils/build.js";
 import { green } from "kleur/colors";
@@ -10,6 +11,7 @@ function parseArgs(argv: string[]) {
   return arg(
     {
       "--port": Number,
+      "--base-path": String,
 
       // Aliases
       "-p": "--port",
@@ -21,6 +23,8 @@ function parseArgs(argv: string[]) {
 export default async function start(argv: string[]) {
   const args = parseArgs(argv);
   const PORT = args["--port"] ?? 8888;
+  const basePath = resolveNormalizedBasePath(args);
+  
 
   if (await dirExists(OUT_DIR)) {
     const assets = sirv("dist", {
@@ -38,7 +42,7 @@ export default async function start(argv: string[]) {
 
     let protocol = "http:";
     let hostname = "localhost";
-    await openInBrowser(protocol, hostname, PORT, "chrome");
+    await openInBrowser(protocol, hostname, PORT, basePath, "chrome");
     console.log(
       `${green("✔")} Microsite started on ${green(
         `${protocol}//${hostname}:${PORT}`

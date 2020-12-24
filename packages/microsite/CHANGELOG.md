@@ -1,5 +1,17 @@
 # microsite
 
+## 1.1.0-next.0
+
+### Minor Changes
+
+- 889da9a: Implements fragment-based hydration. This is a **breaking change**&mdash;the previous behavior was to wrap any hydrated components in a `div` with `display: contents` but this new behavior has the benefit of not modifying the document flow at all.
+
+  **Breaking change**: The `interaction` hydration strategy has been removed. In practice it tended to actually _cause_ interaction delays because hydration work would occur in an input-blocking fashion. Use `idle` or `visible`.
+
+### Patch Changes
+
+- 889da9a: Add support for deployment to a relative subdirectory. To enable this behavior, either set `"homepage": "/subdir"` in `package.json` or pass `--base-path=/subdir` to `microsite build`.
+
 ## 1.0.3
 
 ### Patch Changes
