@@ -1,5 +1,5 @@
 {
-  "name": "todo",
+  "name": "@example/root",
   "type": "module",
   "scripts": {
     "start": "microsite",
