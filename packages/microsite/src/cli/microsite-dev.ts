@@ -66,6 +66,7 @@ function parseArgs(argv: string[]) {
   return arg(
     {
       "--port": Number,
+      "--no-open": Boolean,
 
       // Aliases
       "-p": "--port",
@@ -74,9 +75,9 @@ function parseArgs(argv: string[]) {
   );
 }
 
-export default async function dev(argv: string[]) {
+export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof parseArgs>) {
   const cwd = process.cwd();
-  const args = parseArgs(argv);
+  const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
   let PORT = args["--port"] ?? 8888;
 
   const [errs, config] = await loadConfiguration('dev');
@@ -268,7 +269,11 @@ export default async function dev(argv: string[]) {
 
   let protocol = "http:";
   let hostname = "localhost";
-  await openInBrowser(protocol, hostname, PORT, '/', "chrome");
+
+  if (!args["--no-open"]) {
+    await openInBrowser(protocol, hostname, PORT, '/', "chrome");  
+  }
+
   console.log(
     `${dim("[microsite]")} ${green("✔")} Microsite started on ${green(
       `${protocol}//${hostname}:${PORT}`

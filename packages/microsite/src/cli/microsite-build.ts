@@ -39,6 +39,8 @@ function parseArgs(argv: string[]) {
     {
       "--debug-hydration": Boolean,
       "--no-clean": Boolean,
+      "--no-open": Boolean,
+
       "--serve": Boolean,
       "--base-path": String,
     },
@@ -47,8 +49,8 @@ function parseArgs(argv: string[]) {
 }
 
 
-export default async function build(argv: string[]) {
-  const args = parseArgs(argv);
+export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof parseArgs>) {
+  const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
   let basePath = resolveNormalizedBasePath(args);
   setBasePath(basePath);
 
@@ -109,7 +111,11 @@ export default async function build(argv: string[]) {
   if (!args["--no-clean"]) await cleanup();
 
   if (args["--serve"]) {
-    const forwardArgs = args['--base-path'] ? [`--base-path=${args["--base-path"]}`] : [];
+    const toForward = ['--base-path', '--no-open'];
+    let forwardArgs = {} as any;
+    for (const arg of toForward) {
+      forwardArgs[arg] = args[arg];
+    }
     return import("./microsite-serve.js").then(({ default: serve }) =>
       serve(forwardArgs)
     );
