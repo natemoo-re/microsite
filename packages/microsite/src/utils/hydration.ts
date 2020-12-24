@@ -5,16 +5,19 @@ import type { ManifestEntry } from "./build";
 const cleanComponentName = (cmp: string) => cmp.replace(/[0-9]+$/, "");
 
 export function generateHydrateScript(
-  hydrateBindings: ManifestEntry["hydrateBindings"]
+  hydrateBindings: ManifestEntry["hydrateBindings"],
+  opts: { basePath?: string } = {}
 ) {
+  const { basePath = '/' } = opts;
   const entries = Object.fromEntries(
     Object.entries(hydrateBindings)
       .map(([file, exports]) =>
-        exports.map((cmp) => [cleanComponentName(cmp), [cmp, `/${file}`]])
+        exports.map((cmp) => [cleanComponentName(cmp), [cmp, `${basePath}${file}`]])
       )
       .flat(1)
   );
-  return `import init from "/_hydrate/microsite-runtime.js";\ninit(${JSON.stringify(
+
+  return `import init from "${basePath}_hydrate/microsite-runtime.js";\ninit(${JSON.stringify(
     entries
   )})`;
 }

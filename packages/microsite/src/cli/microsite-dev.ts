@@ -268,7 +268,7 @@ export default async function dev(argv: string[]) {
 
   let protocol = "http:";
   let hostname = "localhost";
-  await openInBrowser(protocol, hostname, PORT, "chrome");
+  await openInBrowser(protocol, hostname, PORT, '/', "chrome");
   console.log(
     `${dim("[microsite]")} ${green("✔")} Microsite started on ${green(
       `${protocol}//${hostname}:${PORT}`

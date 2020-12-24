@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "create-microsite": "0.1.4",
+    "microsite": "1.0.3",
+    "site": "0.0.13"
+  },
+  "changesets": []
+}
