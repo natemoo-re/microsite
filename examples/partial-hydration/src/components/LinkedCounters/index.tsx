@@ -14,7 +14,7 @@ const LinkedCounters: FunctionalComponent = () => {
 
       <div class={css.flex}>
         <LinkedCounter name="alpha" />
-        <LinkedCounter name="omega" />
+        <LinkedCounter name="beta" />
       </div>
     </section>
   );
