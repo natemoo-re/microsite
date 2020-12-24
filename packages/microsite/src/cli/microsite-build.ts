@@ -162,8 +162,8 @@ async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string
 
     tasks.push(
       copyFile(
-        require.resolve("microsite/assets/init.js"),
-        resolve(OUT_DIR, "_hydrate/init.js"),
+        require.resolve("microsite/assets/microsite-runtime.js"),
+        resolve(OUT_DIR, "_hydrate/microsite-runtime.js"),
         { transform: transformInit }
       )
     )
