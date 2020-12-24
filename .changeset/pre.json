@@ -6,5 +6,8 @@
     "microsite": "1.0.3",
     "site": "0.0.13"
   },
-  "changesets": []
+  "changesets": [
+    "long-dots-flash",
+    "nine-chicken-retire"
+  ]
 }
