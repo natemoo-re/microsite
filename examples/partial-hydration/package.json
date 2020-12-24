@@ -1,5 +1,6 @@
 {
   "name": "@example/partial-hydration",
+  "version": "0.0.0",
   "private": true,
   "volta": {
     "node": "12.19.0"

@@ -1,6 +1,7 @@
 {
   "name": "@example/hello-world",
   "type": "module",
+  "version": "0.0.0",
   "scripts": {
     "start": "microsite",
     "build": "microsite build",

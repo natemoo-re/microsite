@@ -1,5 +1,6 @@
 {
   "name": "@example/relative-paths",
+  "version": "0.0.0",
   "homepage": "/subdir/",
   "type": "module",
   "scripts": {
