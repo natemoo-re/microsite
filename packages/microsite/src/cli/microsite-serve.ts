@@ -12,6 +12,7 @@ function parseArgs(argv: string[]) {
     {
       "--port": Number,
       "--base-path": String,
+      "--no-open": Boolean,
 
       // Aliases
       "-p": "--port",
@@ -20,8 +21,8 @@ function parseArgs(argv: string[]) {
   );
 }
 
-export default async function start(argv: string[]) {
-  const args = parseArgs(argv);
+export default async function start(argvOrParsedArgs: string[]|ReturnType<typeof parseArgs>) {
+  const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
   const PORT = args["--port"] ?? 8888;
   const basePath = resolveNormalizedBasePath(args);
   
@@ -42,7 +43,10 @@ export default async function start(argv: string[]) {
 
     let protocol = "http:";
     let hostname = "localhost";
-    await openInBrowser(protocol, hostname, PORT, basePath, "chrome");
+
+    if (!args['--no-open']) {
+      await openInBrowser(protocol, hostname, PORT, basePath, "chrome");
+    }
     console.log(
       `${green("✔")} Microsite started on ${green(
         `${protocol}//${hostname}:${PORT}`
