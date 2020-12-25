@@ -26,7 +26,10 @@ const commands = {
 async function run() {
   let [command = "dev", ...argv] = process.argv.slice(2);
 
-  if (command.startsWith("-")) argv = [command, ...argv];
+  if (command.startsWith("-")) {
+    argv = [command, ...argv];
+    command = 'dev';
+  }
   if (argv[0] === "--") argv = argv.slice(1);
 
   const args = parseArgs(argv);
