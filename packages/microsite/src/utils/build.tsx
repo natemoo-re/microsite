@@ -1,12 +1,12 @@
 import crypto from "crypto";
 import { resolve, join } from "path";
-import { writeFile, copyFile } from "./fs.js";
+import { writeFile, copyFile, fileExists } from "./fs.js";
 
 import module from "module";
 const { createRequire } = module;
 const require = createRequire(import.meta.url);
 
-import { Document } from "../document.js";
+import { Document as InternalDocument, HeadProvider, __InternalDocContext } from "../document.js";
 import { h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import prettier from "prettier";
@@ -138,30 +138,51 @@ const importPage = (filename: string) =>
   import(resolve(process.cwd(), join(SSR_DIR, filename))).then(
     (mod) => mod.default
   );
+
+let UserDocument = null;
+const getDocument = async (): Promise<typeof InternalDocument> => {
+  if (UserDocument) return UserDocument;
+  else if (UserDocument === false) return InternalDocument;
+  else if (await fileExists(resolve(process.cwd(), join(SSR_DIR, 'pages', '_document.js')))) {
+    UserDocument = await importPage(join('pages', '_document.js'));
+    return UserDocument;
+  }
+  UserDocument = false;
+  return InternalDocument;
+}
+
 export const renderPage = async (
   data: RouteDataEntry | null,
   manifest: ManifestEntry,
   { basePath = '/', debug = false, hasGlobalScript = false } = {}
 ): Promise<{ name: string; contents: string }> => {
+  const Document = await getDocument();
   let Page = await importPage(manifest.name);
   Page = unwrapPage(Page);
-  const props = data.props;
+  const pageProps = data.props;
 
-  let contents = renderToString(
-    h(
-      Document,
-      {
-        manifest,
-        preload: manifest.hydrateBindings
-          ? Object.values(PREACT_CDN_SOURCES)
-          : [],
-        debug,
-        basePath,
-        hasGlobalScript,
-      },
-      h(Page, props, null)
-    )
-  );
+  const { __renderPageResult, ...docProps } = await Document.prepare({
+    renderPage: async () => ({
+      __renderPageResult: renderToString(<HeadProvider><Page {...pageProps} /></HeadProvider>)
+    })
+  });
+
+
+  const docContext = {
+    manifest,
+    styles: manifest.hydrateStyleBindings,
+    scripts: manifest.hydrateBindings,
+    preload: manifest.hydrateBindings
+        ? Object.values(PREACT_CDN_SOURCES)
+        : [],
+    preconnect: [],
+    debug,
+    hasGlobalScript,
+    basePath,
+    __renderPageResult
+  };
+
+  let contents = renderToString(<__InternalDocContext.Provider value={docContext}><Document {...(docProps as any)} /></__InternalDocContext.Provider>);
   contents = contents.replace(/<hydrate-marker>(\?h[\s\S]*?\?)<\/hydrate-marker>/g, '<$1>\n');
   contents = prettier.format(contents, {
     parser: "html",
