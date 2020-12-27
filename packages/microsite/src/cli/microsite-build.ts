@@ -33,7 +33,10 @@ import {
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
 import { statSync } from "fs";
-import { resolveNormalizedBasePath, loadConfiguration } from "../utils/command.js";
+import {
+  resolveNormalizedBasePath,
+  loadConfiguration,
+} from "../utils/command.js";
 
 function parseArgs(argv: string[]) {
   return arg(
@@ -49,19 +52,25 @@ function parseArgs(argv: string[]) {
   );
 }
 
-
-export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof parseArgs>) {
-  const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
+export default async function build(
+  argvOrParsedArgs: string[] | ReturnType<typeof parseArgs>
+) {
+  const args = Array.isArray(argvOrParsedArgs)
+    ? parseArgs(argvOrParsedArgs)
+    : argvOrParsedArgs;
   let basePath = resolveNormalizedBasePath(args);
   setBasePath(basePath);
 
-  const [errs, config] = await loadConfiguration('build');
+  const [errs, config] = await loadConfiguration("build");
   if (errs) {
     errs.forEach((err) => console.error(err.message));
     return;
   }
   const buildStart = performance.now();
-  await Promise.all([prepare(), buildProject({ config, cwd: process.cwd(), lockfile: null })]);
+  await Promise.all([
+    prepare(),
+    buildProject({ config, cwd: process.cwd(), lockfile: null }),
+  ]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
   let globalEntryPoint = resolve(STAGING_DIR, "src/global/index.js");
@@ -81,7 +90,7 @@ export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof
 
   let [manifest, routeData] = await Promise.all([
     bundlePagesForSSR(globalEntryPoint ? [...pages, globalEntryPoint] : pages),
-    fetchRouteData(pages.filter(page => !page.endsWith('_document.js'))),
+    fetchRouteData(pages.filter((page) => !page.endsWith("_document.js"))),
   ]);
   if (globalStyle) {
     manifest = manifest.map((entry) => ({
@@ -112,7 +121,7 @@ export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof
   if (!args["--no-clean"]) await cleanup();
 
   if (args["--serve"]) {
-    const toForward = ['--base-path', '--no-open'];
+    const toForward = ["--base-path", "--no-open"];
     let forwardArgs = {} as any;
     for (const arg of toForward) {
       forwardArgs[arg] = args[arg];
@@ -121,7 +130,7 @@ export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof
       serve(forwardArgs)
     );
   }
-  
+
   process.exit(0);
 }
 
@@ -136,7 +145,10 @@ async function prepare() {
   );
 }
 
-async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string | null) {
+async function copyHydrateAssets(
+  manifest: ManifestEntry[],
+  globalStyle?: string | null
+) {
   const service = await esbuild.startService();
   let tasks: any = [];
   const transform = async (source: string) => {
@@ -151,18 +163,20 @@ async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string
 
   if (globalStyle) {
     tasks.push(
-      copyFile(
-        globalStyle,
-        resolve(OUT_DIR, "_hydrate/styles/_global.css")
-      )
+      copyFile(globalStyle, resolve(OUT_DIR, "_hydrate/styles/_global.css"))
     );
   }
 
-  if (manifest.some(entry => entry.hydrateBindings && Object.keys(entry.hydrateBindings).length > 0)) {
+  if (
+    manifest.some(
+      (entry) =>
+        entry.hydrateBindings && Object.keys(entry.hydrateBindings).length > 0
+    )
+  ) {
     const transformInit = async (source: string) => {
       source = preactToCDN(source);
       const result = await service.transform(source, {
-        minify: true
+        minify: true,
       });
       return result.code;
     };
@@ -173,7 +187,7 @@ async function copyHydrateAssets(manifest: ManifestEntry[], globalStyle?: string
         resolve(OUT_DIR, "_hydrate/microsite-runtime.js"),
         { transform: transformInit }
       )
-    )
+    );
   }
 
   const jsAssets = await glob(resolve(SSR_DIR, "_hydrate/**/*.js"));
@@ -224,9 +238,11 @@ async function bundlePagesForSSR(paths: string[]) {
       {}
     ),
     external: (source: string) => {
-      return builtins.includes(source)
-        || source.startsWith("microsite")
-        || source.startsWith("preact");
+      return (
+        builtins.includes(source) ||
+        source.startsWith("microsite") ||
+        source.startsWith("preact")
+      );
     },
     plugins: [
       rewriteCssProxies(),
@@ -244,7 +260,7 @@ async function bundlePagesForSSR(paths: string[]) {
     ],
     onwarn(warning, handler) {
       // unresolved import happens for anything just called server-side
-      if (warning.code === 'UNRESOLVED_IMPORT') return;
+      if (warning.code === "UNRESOLVED_IMPORT") return;
 
       handler(warning);
     },
@@ -311,7 +327,7 @@ async function bundlePagesForSSR(paths: string[]) {
 
       if (dependentHydrateEntryPoints.length === 1) {
         const { code } = getModuleInfo(dependentHydrateEntryPoints[0]);
-        const hash = hashContentSync(code, 7);
+        const hash = hashContentSync(code, 8);
         const filename = `${getFileNameFromPath(
           dependentHydrateEntryPoints[0]
         ).replace(/^pages\//, "")}-${hash}`;
@@ -388,7 +404,10 @@ async function bundlePagesForSSR(paths: string[]) {
           for (const [file, exports] of Object.entries(
             chunkOrAsset.importedBindings
           )) {
-            if (file.startsWith("_hydrate/") && !(file.endsWith("_vendor.js") || file.endsWith("_shared.js"))) {
+            if (
+              file.startsWith("_hydrate/") &&
+              !(file.endsWith("_vendor.js") || file.endsWith("_shared.js"))
+            ) {
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
               });
@@ -426,13 +445,15 @@ async function bundlePagesForSSR(paths: string[]) {
     })
   );
 
-  return manifest.filter(({ name }) => name !== 'pages/_document.js').map((entry) => {
-    if (Object.keys(entry.hydrateBindings).length === 0)
-      entry.hydrateBindings = null;
-    if (entry.hydrateStyleBindings.length === 0)
-      entry.hydrateStyleBindings = null;
-    return entry;
-  });
+  return manifest
+    .filter(({ name }) => name !== "pages/_document.js")
+    .map((entry) => {
+      if (Object.keys(entry.hydrateBindings).length === 0)
+        entry.hydrateBindings = null;
+      if (entry.hydrateStyleBindings.length === 0)
+        entry.hydrateStyleBindings = null;
+      return entry;
+    });
 }
 
 /**
@@ -469,7 +490,7 @@ const rewritePreact = () => {
 async function ssr(
   manifest: ManifestEntry[],
   routeData: RouteDataEntry[],
-  { basePath = '/', debug = false, hasGlobalScript = false } = {}
+  { basePath = "/", debug = false, hasGlobalScript = false } = {}
 ) {
   return Promise.all(
     routeData.map((entry) =>
