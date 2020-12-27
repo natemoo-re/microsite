@@ -30,44 +30,54 @@ async function hasPostCSSConfig() {
 }
 
 export async function loadConfiguration(mode: "dev" | "build") {
-  const [tsconfigPath, usesPostCSS] = await Promise.all([
+  const [snowpackconfigPath, tsconfigPath, usesPostCSS] = await Promise.all([
+    findSnowpackConfig(),
     findTsOrJsConfig(),
     hasPostCSSConfig(),
   ]);
   const aliases = tsconfigPath
     ? resolveTsconfigPathsToAlias({ tsconfigPath })
     : {};
+  const userConfig = snowpackconfigPath ? require(snowpackconfigPath) : {};
 
   const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
     case "dev":
       return createConfiguration({
+        ...userConfig,
         ..._config,
-        plugins: [...additionalPlugins, ..._config.plugins],
+        plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
+          ...(userConfig.aliases ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
         },
         installOptions: {
+          ...(userConfig.installOptions ?? {}),
           ..._config.installOptions,
           externalPackage: ["/web_modules/microsite/_error.js"],
         },
       });
     case "build":
       return createConfiguration({
+        ...userConfig,
         ..._config,
-        plugins: [...additionalPlugins, ..._config.plugins],
+        plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
+          ...(userConfig.aliases ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
         },
         installOptions: {
+          ...(userConfig.installOptions ?? {}),
           ..._config.installOptions,
           rollup: {
+            ...(userConfig.installOptions?.rollup ?? {}),
             ...(_config.installOptions?.rollup ?? {}),
             plugins: [
+              ...(userConfig.installOptions?.rollup?.plugins ?? []),
               { 
                 name: '@microsite/auto-external',
                 options(opts) {
@@ -77,12 +87,20 @@ export async function loadConfiguration(mode: "dev" | "build") {
             ],
           },
           externalPackage: [
+            ...(userConfig.installOptions?.externalPackage ?? []),
             ..._config.installOptions.externalPackage,
             ...deps,
           ].filter((v) => v !== "preact"),
         },
       });
   }
+}
+
+const findSnowpackConfig = async () => {
+  const cwd = process.cwd();
+  const snowpack = resolve(cwd, './snowpack.config.cjs');
+  if (await fileExists(snowpack)) return snowpack;
+  return null;
 }
 
 const findTsOrJsConfig = async () => {
