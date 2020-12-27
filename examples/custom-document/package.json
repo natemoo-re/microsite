@@ -1,0 +1,13 @@
+{
+  "name": "@example/custom-document",
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "microsite",
+    "build": "microsite build",
+    "serve": "microsite build --serve"
+  },
+  "devDependencies": {
+    "microsite": "^1.0.3"
+  }
+}

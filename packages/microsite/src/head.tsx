@@ -1,6 +1,6 @@
 import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useRef, useContext, Ref } from "preact/hooks";
-import { __DocContext } from "./document.js";
+import { __HeadContext } from "./document.js";
 
 import render, { renderToString } from "preact-render-to-string";
 
@@ -80,7 +80,7 @@ const isElement = (node: Node): node is Element =>
 
 export const Head: FunctionalComponent<any> = ({ children }) => {
   const seo = useRef<SEO>({});
-  const { head } = useContext(__DocContext);
+  const { head } = useContext(__HeadContext);
   const prevHead = useRef(null);
 
   render(

@@ -10,9 +10,9 @@ const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
 const pkg = require(resolve(process.cwd(), "package.json"));
-const deps = Object.keys(
-  pkg.dependencies || {}
-);
+// const deps = Object.keys(
+//   pkg.dependencies || {}
+// );
 const DEFAULT_BASE_PATH = pkg.homepage || '/';
 
 export function resolveNormalizedBasePath(args: { ['--base-path']?: string, [key: string]: any }) {
@@ -89,7 +89,6 @@ export async function loadConfiguration(mode: "dev" | "build") {
           externalPackage: [
             ...(userConfig.installOptions?.externalPackage ?? []),
             ..._config.installOptions.externalPackage,
-            ...deps,
           ].filter((v) => v !== "preact"),
         },
       });

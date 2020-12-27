@@ -28,6 +28,7 @@ import {
   stripWithHydrate,
   preactToCDN,
   setBasePath,
+  CACHE_DIR,
 } from "../utils/build.js";
 import type { ManifestEntry, RouteDataEntry } from "../utils/build";
 import { rmdir, mkdir, copyDir, copyFile } from "../utils/fs.js";
@@ -80,7 +81,7 @@ export default async function build(argvOrParsedArgs: string[]|ReturnType<typeof
 
   let [manifest, routeData] = await Promise.all([
     bundlePagesForSSR(globalEntryPoint ? [...pages, globalEntryPoint] : pages),
-    fetchRouteData(pages),
+    fetchRouteData(pages.filter(page => !page.endsWith('_document.js'))),
   ]);
   if (globalStyle) {
     manifest = manifest.map((entry) => ({
@@ -223,8 +224,6 @@ async function bundlePagesForSSR(paths: string[]) {
       {}
     ),
     external: (source: string) => {
-      if (source === 'microsite/global') return false;
-
       return builtins.includes(source)
         || source.startsWith("microsite")
         || source.startsWith("preact");
@@ -273,7 +272,7 @@ async function bundlePagesForSSR(paths: string[]) {
       const isStyle = id.endsWith(".css");
       if (isStyle) return;
 
-      if (/web_modules/.test(info.id)) return `_hydrate/chunks/vendor`;
+      if (/web_modules/.test(info.id)) return `_hydrate/chunks/_vendor`;
       if (info.isEntry && /global\//.test(info.id))
         return `_hydrate/chunks/_global`;
 
@@ -389,7 +388,7 @@ async function bundlePagesForSSR(paths: string[]) {
           for (const [file, exports] of Object.entries(
             chunkOrAsset.importedBindings
           )) {
-            if (file.startsWith("_hydrate/") && !file.endsWith("common.js")) {
+            if (file.startsWith("_hydrate/") && !(file.endsWith("_vendor.js") || file.endsWith("_shared.js"))) {
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
               });
@@ -427,7 +426,7 @@ async function bundlePagesForSSR(paths: string[]) {
     })
   );
 
-  return manifest.map((entry) => {
+  return manifest.filter(({ name }) => name !== 'pages/_document.js').map((entry) => {
     if (Object.keys(entry.hydrateBindings).length === 0)
       entry.hydrateBindings = null;
     if (entry.hydrateStyleBindings.length === 0)
@@ -490,6 +489,6 @@ async function ssr(
 }
 
 async function cleanup() {
-  const paths = [STAGING_DIR, SSR_DIR];
+  const paths = [STAGING_DIR, SSR_DIR, CACHE_DIR];
   await Promise.all(paths.map((p) => rmdir(p)));
 }
