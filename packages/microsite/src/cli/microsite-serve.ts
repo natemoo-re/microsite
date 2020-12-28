@@ -29,8 +29,7 @@ export default async function start(argvOrParsedArgs: string[]|ReturnType<typeof
 
   if (await dirExists(OUT_DIR)) {
     const assets = sirv("dist", {
-      maxAge: 31536000, // 1Y
-      immutable: true,
+      etag: true
     });
     const server = polka().use(assets);
 

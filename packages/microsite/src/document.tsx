@@ -70,7 +70,7 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
   ...props
 }) => {
   const { head } = useContext(__HeadContext);
-  const { preconnect = [], hasGlobalScript = false, preload = [], styles = [] } = useContext(
+  const { preconnect = [], basePath = '/', hasGlobalScript = false, preload = [], styles = [] } = useContext(
     __InternalDocContext
   );
   return (
@@ -80,6 +80,8 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
         name="viewport"
         content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
       />
+
+      <base href={basePath} />
 
       <Fragment>{head.current}</Fragment>
 

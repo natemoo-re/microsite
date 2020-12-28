@@ -230,12 +230,20 @@ async function fetchRouteData(paths: string[]) {
  */
 async function bundlePagesForSSR(paths: string[]) {
   const bundle = await rollup({
-    input: paths.reduce(
-      (acc, page) => ({
-        ...acc,
-        [page.slice(page.indexOf("pages/"), -3)]: page,
-      }),
-      {}
+    input: paths.reduce((acc, page) => {
+        if (/pages\//.test(page)) {
+          return {
+            ...acc,
+            [page.slice(page.indexOf("pages/"), -3)]: page,
+          }
+        }
+        if (/global\/index\.js/.test(page)) {
+          return {
+            ...acc,
+            '_hydrate/chunks/_global': page,
+          }
+        }
+      }, {}
     ),
     external: (source: string) => {
       return (
@@ -288,9 +296,11 @@ async function bundlePagesForSSR(paths: string[]) {
       const isStyle = id.endsWith(".css");
       if (isStyle) return;
 
-      if (/web_modules/.test(info.id)) return `_hydrate/chunks/_vendor`;
-      if (info.isEntry && /global\//.test(info.id))
-        return `_hydrate/chunks/_global`;
+      if (info.importers.length === 1) {
+        // If we only import this module in global/index.js, inline to _global chunk
+        if (/global\/index\.js$/.test(info.importers[0])) return `_hydrate/chunks/_vendor/global`;
+      }
+      if (/web_modules/.test(info.id)) return `_hydrate/chunks/_vendor/index`;
 
       const dependentStaticEntryPoints = [];
       const dependentHydrateEntryPoints = [];
@@ -397,8 +407,6 @@ async function bundlePagesForSSR(paths: string[]) {
       } else {
         if (chunkOrAsset.name.startsWith("_hydrate/")) {
           return emitFile(`${chunkOrAsset.name}.js`, chunkOrAsset.code);
-        } else if (chunkOrAsset.name === "index") {
-          return emitFile(`_hydrate/chunks/_global.js`, chunkOrAsset.code);
         } else if (chunkOrAsset.isEntry) {
           let hydrateBindings = {};
           for (const [file, exports] of Object.entries(
