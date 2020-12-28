@@ -1,5 +1,15 @@
 # microsite
 
+## 1.1.0-next.1
+
+### Patch Changes
+
+- 53ea544: Fixed a bug when using any --flag with "microsite" CLI
+- c3e1ec5: Always output hashed files with an 8 character hash
+- 06f439b: Add `--no-open` flag to `microsite dev` and `microsite build --serve`. This flag allows you to skip the default behavior of automatically opening your browser.
+- efdc433: Add support for custom "pages/\_document.tsx" file
+- db45d3b: Add support for custom "snowpack.config.cjs" files
+
 ## 1.1.0-next.0
 
 ### Minor Changes
@@ -269,7 +279,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx

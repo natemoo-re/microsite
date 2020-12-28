@@ -9,10 +9,16 @@
     "@example/partial-hydration": "0.0.0",
     "@example/relative-paths": "0.0.0",
     "@example/root": "0.0.0",
-    "@example/tailwind": "0.0.0"
+    "@example/tailwind": "0.0.0",
+    "@example/custom-document": "0.0.0"
   },
   "changesets": [
+    "beige-rockets-unite",
     "blue-rockets-fold",
-    "itchy-rules-hear"
+    "brave-rockets-shave",
+    "funny-apes-jam",
+    "itchy-rules-hear",
+    "moody-scissors-deliver",
+    "two-windows-move"
   ]
 }
