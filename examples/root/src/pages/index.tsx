@@ -2,6 +2,8 @@ import { FunctionalComponent } from 'preact';
 import { definePage } from 'microsite/page';
 import { Head, seo } from 'microsite/head';
 import title from 'title';
+import { resolve } from 'path';
+import { promises as fsp } from 'fs';
 
 interface IndexProps {
   examples: string[]
@@ -37,8 +39,8 @@ const Index: FunctionalComponent<IndexProps> = ({ examples }) => {
 
 export default definePage(Index, {
   async getStaticProps() {
-    let examples = await fetch('./examples/root/src/examples.json').then(res => res.json());
-    console.log(examples)
+    const text = await fsp.readFile(resolve(process.cwd(), './examples/root/src/examples.json')).then(res => res.toString());
+    const examples = JSON.parse(text);
 
     return { props: { examples } }
   }
