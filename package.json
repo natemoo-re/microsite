@@ -1,11 +1,11 @@
 {
   "name": "@microsite/root",
   "private": true,
-  "version": "0.6.10",
+  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "npx lerna run build --sort"
+    "build": "npx lerna run build --scope=microsite --scope=create-microsite --sort"
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
