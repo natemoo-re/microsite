@@ -92,10 +92,10 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
       {preload.map((href) => (
         <link rel="modulepreload" href={href} />
       ))}
-      {styles.map((href) => (
+      {styles && styles.map((href) => (
         <link rel="preload" href={`./${href}`} as="style" />
       ))}
-      {styles.map((href) => <link rel="stylesheet" href={`./${href}`} />)}
+      {styles && styles.map((href) => <link rel="stylesheet" href={`./${href}`} />)}
 
       {children}
     </head>
