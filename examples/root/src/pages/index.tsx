@@ -39,7 +39,7 @@ const Index: FunctionalComponent<IndexProps> = ({ examples }) => {
 
 export default definePage(Index, {
   async getStaticProps() {
-    const text = await fsp.readFile(resolve(process.cwd(), './src/examples.json')).then(res => res.toString());
+    const text = await fsp.readFile('./src/examples.json').then(res => res.toString());
     const examples = JSON.parse(text);
 
     return { props: { examples } }
