@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.2
+
+### Patch Changes
+
+- Fixed a bug with custom document rendering
+
 ## 1.1.0-next.1
 
 ### Patch Changes
@@ -279,7 +285,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
