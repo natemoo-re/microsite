@@ -1,7 +1,7 @@
 {
   "name": "@example/relative-paths",
   "version": "0.0.0",
-  "homepage": "/subdir/",
+  "homepage": "/relative-paths",
   "type": "module",
   "scripts": {
     "start": "microsite",

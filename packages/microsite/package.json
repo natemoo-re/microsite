@@ -15,7 +15,7 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "node ./scripts/clean.js",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json --skipLibCheck"
   },
   "exports": {
     "./base": "./base.json",

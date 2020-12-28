@@ -1,5 +1,6 @@
 {
   "name": "@example/custom-document",
+  "homepage": "/custom-document",
   "type": "module",
   "version": "0.0.0",
   "scripts": {
