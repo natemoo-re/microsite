@@ -7,8 +7,9 @@
   "scripts": {
     "bootstrap:ci": "npx lerna bootstrap --ci --hoist",
     "build": "npx lerna run build --scope=microsite --scope=create-microsite --sort",
+    "prebuild:examples": "node scripts/generate-examples",
     "build:examples": "npx lerna run build --scope='@example/*' --parallel",
-    "postbuild:examples": "node copy-examples"
+    "postbuild:examples": "node scripts/copy-examples"
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",

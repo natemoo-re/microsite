@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "start": "microsite",
-    "prebuild": "node scripts/generate-examples",
     "build": "microsite build",
     "serve": "microsite build --serve"
   },
