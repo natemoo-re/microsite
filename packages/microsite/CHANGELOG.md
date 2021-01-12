@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.3
+
+### Patch Changes
+
+- 2468a3a: Dev server now uses `etag` for caching and chunk behavior for `global/index.ts` files has been fixed
+
 ## 1.1.0-next.2
 
 ### Patch Changes
