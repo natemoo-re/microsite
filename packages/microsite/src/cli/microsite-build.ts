@@ -1,4 +1,4 @@
-import { build as snowpackBuild } from "snowpack";
+import { build as snowpackBuild, SnowpackConfig } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
@@ -61,9 +61,11 @@ export default async function build(
   let basePath = resolveNormalizedBasePath(args);
   setBasePath(basePath);
 
-  const [errs, config] = await loadConfiguration("build");
-  if (errs) {
-    errs.forEach((err) => console.error(err.message));
+  let config: SnowpackConfig;
+  try {
+    config = await loadConfiguration("build");
+  } catch (err) {
+    console.error(err);
     return;
   }
   const buildStart = performance.now();

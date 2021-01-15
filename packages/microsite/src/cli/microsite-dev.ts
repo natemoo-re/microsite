@@ -1,4 +1,4 @@
-import { startServer } from "snowpack";
+import { SnowpackConfig, startServer } from "snowpack";
 import arg from "arg";
 import { join, resolve, extname } from "path";
 import type { IncomingMessage, ServerResponse } from "http";
@@ -80,9 +80,11 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
   const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
   let PORT = args["--port"] ?? 8888;
 
-  const [errs, config] = await loadConfiguration('dev');
-  if (errs) {
-    errs.forEach((err) => console.error(err));
+  let config: SnowpackConfig;
+  try {
+    config = await loadConfiguration("dev");
+  } catch (err) {
+    console.error(err);
     return;
   }
 
