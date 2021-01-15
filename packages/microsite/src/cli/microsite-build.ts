@@ -1,4 +1,4 @@
-import { buildProject } from "snowpack";
+import { build as snowpackBuild } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
@@ -69,7 +69,7 @@ export default async function build(
   const buildStart = performance.now();
   await Promise.all([
     prepare(),
-    buildProject({ config, cwd: process.cwd(), lockfile: null }),
+    snowpackBuild({ config, lockfile: null }),
   ]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
