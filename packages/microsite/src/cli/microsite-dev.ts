@@ -1,4 +1,4 @@
-import { startDevServer } from "snowpack";
+import { startServer } from "snowpack";
 import arg from "arg";
 import { join, resolve, extname } from "path";
 import type { IncomingMessage, ServerResponse } from "http";
@@ -86,8 +86,7 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
     return;
   }
 
-  const snowpack = await startDevServer({
-    cwd: process.cwd(),
+  const snowpack = await startServer({
     config,
     lockfile: null,
   });
