@@ -39,7 +39,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
     ? resolveTsconfigPathsToAlias({ tsconfigPath })
     : {};
   const userConfig = snowpackconfigPath ? require(snowpackconfigPath) : {};
-
+  
   const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
