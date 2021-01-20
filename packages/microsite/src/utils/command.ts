@@ -6,6 +6,7 @@ const require = createRequire(import.meta.url);
 import { fileExists } from "./fs.js";
 import { createConfiguration } from "snowpack";
 import cc from "cosmiconfig";
+import { yellow } from "kleur/colors";
 const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
@@ -40,6 +41,21 @@ export async function loadConfiguration(mode: "dev" | "build") {
     : {};
   const userConfig = snowpackconfigPath ? require(snowpackconfigPath) : {};
   
+  if (usesPostCSS) {
+    const missing = [];
+    const deps = ['@snowpack/plugin-postcss', 'postcss', 'postcss-cli'];
+    deps.forEach(dependency => {
+      try {
+        require.resolve(dependency);
+      } catch (e) {
+        missing.push(dependency);
+      }
+    });
+    if (missing.length > 0) {
+      console.error(yellow(`It looks like you're trying to use PostCSS!\nMicrosite will automatically use your configuration, but requires some 'devDependencies' to do so.\n\nPlease run 'npm install --save-dev ${missing.join(' ')}'\n`));
+      process.exit(1);
+    }
+  }
   const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
