@@ -285,7 +285,7 @@ async function bundlePagesForSSR(paths: string[]) {
      *
      * Components reused for multiple routes are placed in a shared chunk.
      *
-     * All code from 'web_modules' is placed in a vendor chunk.
+     * All code from '_snowpack/pkg' is placed in a vendor chunk.
      */
     manualChunks(id, { getModuleInfo }) {
       const info = getModuleInfo(id);
@@ -296,7 +296,7 @@ async function bundlePagesForSSR(paths: string[]) {
         // If we only import this module in global/index.js, inline to _global chunk
         if (/global\/index\.js$/.test(info.importers[0])) return `_hydrate/chunks/_vendor/global`;
       }
-      if (/web_modules/.test(info.id)) return `_hydrate/chunks/_vendor/index`;
+      if (/_snowpack\/pkg/.test(info.id)) return `_hydrate/chunks/_vendor/index`;
 
       const dependentStaticEntryPoints = [];
       const dependentHydrateEntryPoints = [];
