@@ -47,6 +47,11 @@ export async function loadConfiguration(mode: "dev" | "build") {
       return createConfiguration({
         ...userConfig,
         ..._config,
+        buildOptions: {
+          ...userConfig.buildOptions,
+          ..._config.buildOptions,
+          ssr: true
+        },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
           ...(userConfig.aliases ?? {}),
@@ -54,25 +59,32 @@ export async function loadConfiguration(mode: "dev" | "build") {
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
         },
-        installOptions: {
-          ...(userConfig.installOptions ?? {}),
-          ..._config.installOptions,
-          externalPackage: ["/web_modules/microsite/_error.js"],
+        packageOptions: {
+          ..._config.packageOptions,
+          external: ["/web_modules/microsite/_error.js"],
         },
       });
     case "build":
       return createConfiguration({
         ...userConfig,
         ..._config,
+        buildOptions: {
+          ...userConfig.buildOptions,
+          ..._config.buildOptions,
+          ssr: true
+        },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
           ...(userConfig.aliases ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
         },
-        installOptions: {
-          ...(userConfig.installOptions ?? {}),
-          ..._config.installOptions,
+        packageOptions: {
+          ..._config.packageOptions,
+          external: [
+            ...(userConfig.packageOptions?.external ?? []),
+            ..._config.packageOptions.external,
+          ].filter((v) => v !== "preact"),
           rollup: {
             ...(userConfig.installOptions?.rollup ?? {}),
             ...(_config.installOptions?.rollup ?? {}),
@@ -85,11 +97,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
                 }
               }
             ],
-          },
-          externalPackage: [
-            ...(userConfig.installOptions?.externalPackage ?? []),
-            ..._config.installOptions.externalPackage,
-          ].filter((v) => v !== "preact"),
+          }
         },
       });
   }

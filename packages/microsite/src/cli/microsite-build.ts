@@ -1,4 +1,4 @@
-import { buildProject } from "snowpack";
+import { build as buildProject } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
@@ -61,15 +61,11 @@ export default async function build(
   let basePath = resolveNormalizedBasePath(args);
   setBasePath(basePath);
 
-  const [errs, config] = await loadConfiguration("build");
-  if (errs) {
-    errs.forEach((err) => console.error(err.message));
-    return;
-  }
+  const config = await loadConfiguration("build");
   const buildStart = performance.now();
   await Promise.all([
     prepare(),
-    buildProject({ config, cwd: process.cwd(), lockfile: null }),
+    buildProject({ config, lockfile: null }),
   ]);
 
   let pages = await glob(resolve(STAGING_DIR, "src/pages/**/*.js"));
