@@ -43,7 +43,7 @@
     "**/*.d.ts"
   ],
   "dependencies": {
-    "@prefresh/snowpack": "^3.0.0",
+    "@prefresh/snowpack": "^3.0.1",
     "@snowpack/plugin-dotenv": "^2.0.5",
     "@snowpack/plugin-postcss": "^1.0.11",
     "arg": "^5.0.0",
@@ -68,7 +68,7 @@
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
     "sirv": "^1.0.10",
-    "snowpack": "^3.0.0-rc.2"
+    "snowpack": "^3.0.5"
   },
   "devDependencies": {
     "@types/node": "^12.19.0",

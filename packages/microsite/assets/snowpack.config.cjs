@@ -8,9 +8,9 @@ module.exports = {
     '@prefresh/snowpack',
     'microsite/assets/snowpack-plugin.cjs'
   ],
-  installOptions: {
-    installTypes: true,
-    externalPackage: [
+  packageOptions: {
+    source: 'local',
+    external: [
       ...builtins,
       "microsite/server/fetch",
       "microsite/document",
