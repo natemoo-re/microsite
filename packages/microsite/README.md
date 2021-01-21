@@ -20,7 +20,7 @@
 npm init microsite <project>
 ```
 
-> Microsite is output as ESM, so it needs to run in a Node environment which supports it (node@12.19.0).
+> Microsite is an **ESM node package**, so it needs to run in a Node environment which supports ESM. We support the latest version of [`node` v12.x LTS (Erbium)](https://nodejs.org/download/release/latest-v12.x/) — see [Engines](https://github.com/natemoo-re/microsite/blob/main/docs/engines.md) for more details.
 >
 > Ensure that your project includes `"type": "module"` in `package.json`, which will allow you to use ESM in your project's `node` scripts.
 
