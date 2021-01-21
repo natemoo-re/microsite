@@ -229,8 +229,13 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
         const result = await snowpack.loadUrl(req.url);
         if (result.contentType)
           res.setHeader("Content-Type", result.contentType);
-
-        if (req.url.indexOf("/_snowpack/pkg/microsite") === -1) {
+        
+        const MIME_EXCLUDE = ["image", "font"];
+        if (
+            req.url.indexOf("/_snowpack/pkg/microsite") === -1 &&
+            result.contentType &&
+            !MIME_EXCLUDE.includes(result.contentType.split("/")[0])
+        ) {
           result.contents = result.contents
             .toString()
             .replace(/preact\/hooks/, "microsite/client/hooks");
