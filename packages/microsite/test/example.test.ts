@@ -18,7 +18,7 @@ a.run();
 const b = suite('b');
 
 b('a test', () => {
-  assert.is(1, 12);
+  assert.is(1, 1);
 });
 
 b.run();
