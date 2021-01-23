@@ -71,3 +71,16 @@ This is a monorepo, set up with [Lerna](https://github.com/lerna/lerna), you sho
 
 4. Install and link dependencies in sub-packages: `npx lerna bootstrap`. <!-- Note for review: I actually have no idea which command is preferred here, each one I've tried has still produced changes to most or all `package-lock.json` files in the project. -->
 
+### Running tests
+
+**Shell:**
+
+```bash
+npx lerna run test
+
+# Or watch mode...
+
+npx lerna run test:watch
+```
+
+**VSCode:** There are launch actions included for both single-run and watch mode.

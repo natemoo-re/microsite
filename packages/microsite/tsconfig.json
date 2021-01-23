@@ -19,6 +19,6 @@
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./src",
   },
-  "include": ["src", "./internal.d.ts"],
+  "include": ["src", "test", "./internal.d.ts"],
   "exclude": ["node_modules"]
 }

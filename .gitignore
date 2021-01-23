@@ -1,3 +1,4 @@
+lerna-debug.log
 node_modules
 .DS_Store
 dist/
@@ -15,3 +16,4 @@ packages/create-microsite/**/*.js
 packages/create-microsite/**/*.d.ts
 
 .vercel
+/packages/microsite/.test
