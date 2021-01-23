@@ -38,6 +38,6 @@
     "url": "https://github.com/natemoo-re/microsite/issues"
   },
   "volta": {
-    "node": "12.19.0"
+    "node": "12.20.1"
   }
 }
