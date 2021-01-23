@@ -2,6 +2,7 @@
 
 import del      from 'del';
 import estrella from 'estrella';
+import fs       from 'fs';
 import globby   from 'globby';
 import path     from 'path';
 
@@ -22,6 +23,12 @@ const [ args ] = estrella.cliopts.parse([
 ]);
 
 const isWatch = !args.once;
+;
+const resultsPath = path.join(testDir, 'results.json');
+const testCommand = [
+  `npx uvu ${JSON.stringify(testDir)}`,
+  `echo true > ${JSON.stringify(resultsPath)}`,
+].join(' && ');
 
 const runTests = () => {
   return estrella.build({
@@ -29,7 +36,7 @@ const runTests = () => {
     entry:     globby.sync(entriesGlob),
     minify:    false,
     outdir:    outDir,
-    run:       `npx uvu ${JSON.stringify(testDir)}`,
+    run:       testCommand,
     sourcemap: 'inline',
     watch:     false,
   });
@@ -51,7 +58,9 @@ const main = async () => {
 
     await testProcess;
   }
-  catch {
+  catch (error) {
+    console.error('Unexpected error:', error);
+
     if (!isWatch) {
       process.exit(1);
     }
@@ -70,7 +79,19 @@ const main = async () => {
       }
     }
     else {
-      process.exit(0);
+      /** @type {number | null} */
+      let exitCode = null;
+
+      try {
+        exitCode = JSON.parse(fs.readFileSync(resultsPath).toString()) === true
+          ? 0
+          : 1;
+      }
+      catch {
+        exitCode = 1;
+      }
+
+      process.exit(exitCode);
     }
   }
 };
