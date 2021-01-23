@@ -6,8 +6,21 @@ We officially support the latest version of [`node` v12 LTS (Erbium)](https://no
 
 ## Setup Guide
 
-**TODO**
+There are many different tools to manage `node` versions. While [`nvm`](https://github.com/nvm-sh/nvm) is among the most popular, we really love the speed and simplicity of [`volta`](https://volta.sh/) and highly recommend it!
 
-- Volta
-- NVM 
-- Others??
+The following guides assume that you have [installed `volta`](https://docs.volta.sh/guide/getting-started) or [installed `nvm`](https://github.com/nvm-sh/nvm#install--update-script).
+
+**Volta**
+Inside of your Microsite project, run the following command:
+
+```shell
+volta pin node@lts
+```
+
+**NVM**
+Inside of your Microsite project, run the following commands:
+
+```shell
+echo "lts/*" > .nvmrc
+nvm use
+```
