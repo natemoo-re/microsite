@@ -9,7 +9,9 @@
     "build": "npx lerna run build --scope=microsite --scope=create-microsite --sort",
     "prebuild:examples": "node scripts/generate-examples",
     "build:examples": "npx lerna run build --scope='@example/*' --parallel",
-    "postbuild:examples": "node scripts/copy-examples"
+    "postbuild:examples": "node scripts/copy-examples",
+    "test": "SWC_NODE_PROJECT=./tsconfig.test.json uvu -r @swc-node/register packages test",
+    "test:watch": "watchlist packages -- npm run test"
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
@@ -18,7 +20,10 @@
     "lerna": "^3.22.1",
     "lint-staged": "^10.4.2",
     "prettier": "^2.1.2",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.2",
+    "@swc-node/register": "1.0.3",
+    "uvu": "^0.5.0",
+    "watchlist": "0.2.3"
   },
   "volta": {
     "node": "12.20.1"
