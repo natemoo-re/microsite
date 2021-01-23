@@ -3,7 +3,7 @@
 The documentation for Microsite is still in progress. If you have any questions at all, please consider posting on [GitHub Discussions](https://github.com/natemoo-re/microsite/discussions).
 
 ## System Requirements
-- [Node.js 12.19](https://nodejs.org/en/) or later
+- Latest [`node` v12 LTS (Erbium)](https://nodejs.org/download/release/latest-v12.x/) or [`node` v14 LTS (Fermium)](https://nodejs.org/download/release/latest-v14.x/)
 - MacOS, Windows (including WSL), or Linux
 
 ## Setup
