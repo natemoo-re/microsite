@@ -77,7 +77,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
         },
         packageOptions: {
           ..._config.packageOptions,
-          external: ["/web_modules/microsite/_error.js"],
+          external: ["/_snowpack/pkg/microsite/_error.js"],
         },
       });
     case "build":

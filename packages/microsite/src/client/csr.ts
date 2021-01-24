@@ -35,7 +35,7 @@ async function csr(fileName: string, Page: any, initialProps: any = {}) {
 
   if (paths && !match) {
     /// @ts-expect-error
-    const ErrorPage = await import("/web_modules/microsite/_error.js").then(
+    const ErrorPage = await import("/_snowpack/pkg/microsite/_error.js").then(
       (mod) => mod.default
     );
     render(h(ErrorPage, { statusCode: 404 }, null), root);

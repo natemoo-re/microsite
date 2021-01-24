@@ -151,7 +151,7 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
       next();
     })
     .use(async (req: IncomingMessage, res: ServerResponse, next: any) => {
-      if (!(req.url.endsWith(".html") || req.url.indexOf(".") === -1))
+      if (req.url !== '/' && !(req.url.endsWith(".html") || req.url.indexOf(".") === -1))
         return next();
 
       let base = req.url.slice(1);
