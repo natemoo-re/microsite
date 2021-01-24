@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Run tests",
+          "request": "launch",
+          "console": "integratedTerminal",
+          "autoAttachChildProcesses": true,
+          "runtimeArgs": [
+              "run-script",
+              "test"
+          ],
+          "runtimeExecutable": "npm",
+          "skipFiles": [
+              "<node_internals>/**"
+          ],
+          "type": "pwa-node"
+      },
+      {
+          "name": "Watch tests",
+          "request": "launch",
+          "console": "integratedTerminal",
+          "autoAttachChildProcesses": true,
+          "runtimeArgs": [
+              "run-script",
+              "test:watch"
+          ],
+          "runtimeExecutable": "npm",
+          "skipFiles": [
+              "<node_internals>/**"
+          ],
+          "type": "pwa-node"
+      },
+  ]
+}
