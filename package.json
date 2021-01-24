@@ -10,18 +10,19 @@
     "prebuild:examples": "node scripts/generate-examples",
     "build:examples": "npx lerna run build --scope='@example/*' --parallel",
     "postbuild:examples": "node scripts/copy-examples",
-    "test": "SWC_NODE_PROJECT=./tsconfig.test.json uvu -r @swc-node/register packages test",
+    "test": "SWC_NODE_PROJECT=./tsconfig.test.json uvu packages test -r @swc-node/register -i _fixtures",
     "test:watch": "watchlist packages -- npm run test"
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
+    "@swc-node/register": "1.0.3",
     "fs-extra": "^9.0.1",
     "husky": "^4.3.0",
+    "jsdom": "^16.4.0",
     "lerna": "^3.22.1",
     "lint-staged": "^10.4.2",
     "prettier": "^2.1.2",
     "typescript": "^4.1.2",
-    "@swc-node/register": "1.0.3",
     "uvu": "^0.5.0",
     "watchlist": "0.2.3"
   },

@@ -1,6 +1,7 @@
+/** @jsx h */
 import { h, createContext, Fragment, FunctionalComponent, JSX, ComponentType, ComponentProps } from "preact";
 import { useContext, useRef } from "preact/hooks";
-import { generateHydrateScript } from "./utils/hydration.js";
+import { generateHydrateScript } from "./utils/hydration";
 
 export const __HeadContext = createContext({
   head: { current: [] },
