@@ -62,7 +62,11 @@
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
     "sirv": "^1.0.10",
+<<<<<<< HEAD
     "snowpack": "~3.0.13"
+=======
+    "snowpack": "^3.0.11"
+>>>>>>> 30de425 (fix(dev): implements a few more snowpack@3.0.0 changes)
   },
   "devDependencies": {
     "@types/node": "^12.19.0",
