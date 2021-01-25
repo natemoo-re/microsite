@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.11.2",
-    "@swc-node/register": "1.0.3",
+    "@swc-node/register": "1.0.4",
     "fs-extra": "^9.0.1",
     "husky": "^4.3.0",
     "jsdom": "^16.4.0",

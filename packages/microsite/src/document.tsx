@@ -1,4 +1,3 @@
-/** @jsx h */
 import { h, createContext, Fragment, FunctionalComponent, JSX, ComponentType, ComponentProps } from "preact";
 import { useContext, useRef } from "preact/hooks";
 import { generateHydrateScript } from "./utils/hydration";
