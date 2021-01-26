@@ -322,13 +322,14 @@ async function bundlePagesForSSR(paths: string[]) {
         for (const importerId of importers) idsToHandle.add(importerId);
       }
 
-      if (
-        dependentHydrateEntryPoints.length > 1 ||
-        dependentStaticEntryPoints.length > 1
-      ) {
+      if (dependentHydrateEntryPoints.length > 1) {
         // All shared components should go in the same chunk (for now)
         // Eventually this could be optimized to split into a few chunks based on how many entry points rely on them
         return `_hydrate/chunks/_shared`;
+      }
+
+      if (dependentStaticEntryPoints.length > 1) {
+        return '_hydrate/chunks/_static_shared';
       }
 
       if (dependentHydrateEntryPoints.length === 1) {
@@ -410,7 +411,7 @@ async function bundlePagesForSSR(paths: string[]) {
           )) {
             if (
               file.startsWith("_hydrate/") &&
-              !(file.endsWith("_vendor.js") || file.endsWith("_shared.js"))
+              !(file.endsWith("_vendor.js") || file.endsWith("_static_shared.js"))
             ) {
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
