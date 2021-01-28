@@ -1,5 +1,5 @@
 import { h, createContext, Fragment, FunctionalComponent, JSX, ComponentType, ComponentProps } from "preact";
-import { useContext, useRef } from "preact/hooks";
+import { useContext } from "preact/hooks";
 import { generateHydrateScript } from "./utils/hydration.js";
 
 export const __HeadContext = createContext({
@@ -9,15 +9,6 @@ export const __HeadContext = createContext({
 /** @internal */
 export const __InternalDocContext = createContext<any>({});
 
-/** @internal */
-export const HeadProvider: FunctionalComponent = ({ children }) => {
-  const head = useRef([]);
-  return (
-    <__HeadContext.Provider value={{ head }}>
-      { children }
-    </__HeadContext.Provider>
-  );
-}
 
 const _Document = () => {
   return (
