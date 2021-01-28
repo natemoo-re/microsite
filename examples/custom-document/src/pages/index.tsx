@@ -10,8 +10,8 @@ const Index: FunctionalComponent<IndexProps> = () => {
       <Head>
         <seo.title>Microsite</seo.title>
 
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+        <link rel="alternate icon" href="./favicon.ico" />
       </Head>
 
       <main>
