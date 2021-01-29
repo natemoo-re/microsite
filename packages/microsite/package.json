@@ -57,7 +57,7 @@
     "open": "^7.3.0",
     "path-browserify": "^1.0.1",
     "polka": "^0.5.2",
-    "preact": "^10.5.5",
+    "preact": "10.5.10",
     "preact-render-to-string": "5.1.11",
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
