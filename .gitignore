@@ -4,6 +4,7 @@ dist/
 .microsite
 *.tgz
 demo/
+*.log
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts
