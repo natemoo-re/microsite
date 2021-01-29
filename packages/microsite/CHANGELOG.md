@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.5
+
+### Patch Changes
+
+- Pin `preact@10.5.10` and `snowpack@~3.0.11`
+
 ## 1.1.0-next.4
 
 ### Patch Changes
