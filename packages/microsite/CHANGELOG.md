@@ -1,5 +1,13 @@
 # microsite
 
+## 1.1.0-next.4
+
+### Patch Changes
+
+- 4c63780: Fix <Head> component bug
+- 669eab2: Remove prettier from core dependencies
+- 1eb8733: Remove PostCSS logic from core dependencies. Microsite will prompt users to install PostCSS locally if detected.
+
 ## 1.1.0-next.3
 
 ### Patch Changes
