@@ -8,6 +8,7 @@ demo/
 .next
 
 benchmark/gatsby-simple/public
+*.log
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts
