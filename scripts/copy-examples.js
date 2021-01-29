@@ -1,15 +1,19 @@
 import { promises as fsp } from 'fs';
 import fse from 'fs-extra';
-import { resolve } from 'path'
+import { join } from 'path'
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const { copy } = fse;
 
 async function run() {
-    const ents = await fsp.readdir('./examples', { withFileTypes: true });
+    const base = join(require.resolve('lerna').split('/node_modules')[0], 'examples');
+    const ents = await fsp.readdir(base, { withFileTypes: true });
     let results = ents.map((ent) => ent.isDirectory() ? ent.name : null).filter(name => name && !['dist', '.microsite', 'root'].includes(name))
 
-    await copy(resolve(process.cwd(), `./examples/root/dist`), resolve(process.cwd(), `./examples/dist`), { recursive: true });
-    await Promise.all(results.map((example) => copy(resolve(process.cwd(), `./examples/${example}/dist/${example}`), resolve(process.cwd(), `./examples/dist/${example}`), { recursive: true })));
+    await copy(join(base, 'root/dist'), join(base, 'dist'), { recursive: true });
+    await Promise.all(results.map((example) => copy(join(base, `${example}/dist/${example}`), join(base, `dist/${example}`), { recursive: true })));
 }
 
 run();
