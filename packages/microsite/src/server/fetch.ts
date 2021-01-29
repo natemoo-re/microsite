@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { promises as fsp } from 'fs';
 import { readDir } from "../utils/fs.js";
 
-const cwd = import.meta.url.slice('file:/'.length).split('node_modules')[0].slice(0, -1);
+const cwd = import.meta.url.slice('file:/'.length).split('microsite')[0].slice(0, -1);
 
 /// @ts-expect-error
 type Url<S extends string> = S extends `http${infer A}` ? S : never;
@@ -20,7 +20,7 @@ interface DirOptions {
 async function fetch<T extends string, Opts = IsUrl<T> extends true ? RequestInit : HasExt<T> extends true ? never : DirOptions>(url: T, opts?: Opts): Promise<Response>;
 async function fetch(url: RequestInfo, init?: RequestInit|DirOptions): Promise<Response> {
     if (typeof url === 'string' && !url.startsWith('http')) {
-        url = resolve(cwd, `.${url}`);
+        url = resolve(cwd, `../.${url}`);
         try {
             const stat = await fsp.stat(url);
 
