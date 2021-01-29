@@ -13,7 +13,6 @@
     "serve": "microsite build --serve"
   },
   "dependencies": {
-    "microsite": "1.1.0-next.5",
-    "preact": "^10.5.5"
+    "microsite": "1.1.0-next.5"
   }
 }
