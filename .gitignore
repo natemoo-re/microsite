@@ -15,3 +15,4 @@ packages/create-microsite/**/*.js
 packages/create-microsite/**/*.d.ts
 
 .vercel
+examples/examples.json
