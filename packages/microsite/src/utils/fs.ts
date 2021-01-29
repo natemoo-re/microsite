@@ -48,11 +48,15 @@ export const copyFile = async (
   dest: string,
   { transform }: CopyFileOpts = {}
 ) => {
-  let content = await fsp.readFile(src).then((res) => res.toString());
   if (transform) {
+    let content = await fsp.readFile(src).then((res) => res.toString());
     content = await transform(content);
+    await writeFile(dest, content);
   }
-  await writeFile(dest, content);
+  else {
+    await mkdir(dirname(dest));
+    await fsp.copyFile(src, dest);
+  }
 };
 
 export const copyDir = async (src: string, dest: string) => {
