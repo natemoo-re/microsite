@@ -9,44 +9,52 @@ import { readDir } from "../utils/fs.js";
 import { promises as fsp } from "fs";
 import { ErrorProps } from "error.js";
 import { loadConfiguration } from "../utils/command.js";
-import { h, FunctionalComponent } from 'preact';
-import { Document as InternalDocument, __HeadContext, __InternalDocContext } from "../document.js";
+import { h, FunctionalComponent } from "preact";
+import {
+  Document as InternalDocument,
+  __HeadContext,
+  __InternalDocContext,
+} from "../document.js";
 import { generateStaticPropsContext } from "../utils/router.js";
-
-let runtime: SSRLoader;
-// const pageScript = (
-//   page: string,
-//   props?: any
-// ) => `import { csr } from '/_snowpack/pkg/microsite/client/csr.js';
-// import Page from '${page}';
-// csr("${page.replace(/\/src\/pages/, "").replace(/\.js$/, "")}", ${
-//   props ? `Page, ${JSON.stringify(props)}` : `Page`
-// });`;
-
-const errorScript = (
-  props: any
-) => `import { h, render } from '/_snowpack/pkg/preact.js';
-import Page from '/_snowpack/pkg/microsite/error.js';
-
-const root = document.querySelector('#__microsite');
-render(h(Page, ${JSON.stringify(props)}, null), root);`;
 
 const noop = () => Promise.resolve();
 
-let Document: any;
+let runtime: SSRLoader;
 let renderToString: any;
+let Document: any;
+let ErrorPage: any;
+let errorSrc: string;
 
-// TODO: Document.prepare
-const renderPage = async (
-  page: string,
-  initialProps?: any
-) => {
+const loadErrorPage = async () => {
+  if (!ErrorPage) {
+    try {
+      const {
+        exports: { default: UserErrorPage },
+      } = await runtime.importModule("/src/pages/_error.js");
+      ErrorPage = UserErrorPage;
+      errorSrc = "/src/pages/_error.js";
+    } catch (e) {
+      const {
+        exports: { default: InternalErrorPage },
+      } = await runtime.importModule("/_snowpack/pkg/microsite/error.js");
+      ErrorPage = InternalErrorPage;
+      errorSrc = "/_snowpack/pkg/microsite/error.js";
+    }
+  }
+  return [ErrorPage, errorSrc];
+};
+
+const renderPage = async (page: string, initialProps?: any) => {
   if (!renderToString) {
-    renderToString = await runtime.importModule('/_snowpack/pkg/preact-render-to-string.js').then(({ exports: { default: mod }}) => mod);
+    renderToString = await runtime
+      .importModule("/_snowpack/pkg/preact-render-to-string.js")
+      .then(({ exports: { default: mod } }) => mod);
   }
   if (!Document) {
     try {
-      const { exports: { default: UserDocument }} = await runtime.importModule('/src/pages/_document.js');
+      const {
+        exports: { default: UserDocument },
+      } = await runtime.importModule("/src/pages/_document.js");
       Document = UserDocument;
     } catch (e) {
       Document = InternalDocument;
@@ -54,87 +62,103 @@ const renderPage = async (
   }
 
   try {
-  let pathname = page.replace('/src/pages/', '');
-  let Component = null;
-  let getStaticProps: any = noop;
-  let getStaticPaths: any = noop;
-  let { exports: { default: Page }} = await runtime.importModule(page);
-  if (typeof Page === "function") Component = Page;
+    let pathname = page.replace("/src/pages/", "");
+    let Component = null;
+    let getStaticProps: any = noop;
+    let getStaticPaths: any = noop;
+    let pageProps = initialProps ?? {};
+    let paths = [];
 
-  let pageProps = initialProps ?? {};
-  let paths = [];
-  if (Page.Component) {
-    Component = Page.Component;
-    getStaticProps = Page.getStaticProps ?? noop;
-    getStaticPaths = Page.getStaticPaths ?? noop;
-  }
+    try {
+      let {
+        exports: { default: Page },
+      } = await runtime.importModule(page);
+      if (typeof Page === "function") Component = Page;
 
-  paths = await getStaticPaths({}).then((res) => res && res.paths);
-  paths =
-    paths &&
-    paths.map((pathOrParams) =>
-      generateStaticPropsContext(pathname, pathOrParams)
-    );
-  const match =
-    paths &&
-    paths.find(
-      (ctx) =>
-        ctx.path === pathname ||
-        ctx.path === `${pathname}/index`
-    );
+      if (Page.Component) {
+        Component = Page.Component;
+        getStaticProps = Page.getStaticProps ?? noop;
+        getStaticPaths = Page.getStaticPaths ?? noop;
+      }
+    } catch (e) {
+      const [Page, errorSrc] = await loadErrorPage();
+      Component = ErrorPage;
+      pageProps = initialProps?.statusCode ? initialProps : { statusCode: 404 };
+      page = errorSrc;
+      pathname = "/_error";
 
-  if (paths && !match) {
-    console.log('Error page');
-    // render(h(ErrorPage, { statusCode: 404 }, null), root);
-  } else {
-    let ctx = paths
-      ? match
-      : generateStaticPropsContext(pathname, pathname);
-    pageProps = await getStaticProps(ctx).then((res) => res && res.props);
-    if (!pageProps) pageProps = initialProps;
-  }
-  
-  const headContext = {
-    head: {
-      current: [],
-    },
-  };
+      if (typeof Page === "function") Component = Page;
 
-  const HeadProvider: FunctionalComponent = ({ children }) => {
-    return <__HeadContext.Provider value={headContext} {...{ children }} />;
-  };
+      if (Page.Component) {
+        Component = Page.Component;
+        getStaticProps = Page.getStaticProps ?? noop;
+        getStaticPaths = Page.getStaticPaths ?? noop;
+      }
+    }
 
-  try {
+    paths = await getStaticPaths({}).then((res) => res && res.paths);
+    paths =
+      paths &&
+      paths.map((pathOrParams) =>
+        generateStaticPropsContext(pathname, pathOrParams)
+      );
+    const match =
+      paths &&
+      paths.find(
+        (ctx) => ctx.path === pathname || ctx.path === `${pathname}/index`
+      );
+
+    if (paths && !match) {
+      const [ErrorPage, errorSrc] = await loadErrorPage();
+      Component = ErrorPage;
+      pageProps = { statusCode: 404 };
+      page = errorSrc;
+    } else {
+      let ctx = paths ? match : generateStaticPropsContext(pathname, pathname);
+      pageProps = await getStaticProps(ctx).then((res) => res && res.props);
+      if (!pageProps) pageProps = initialProps;
+    }
+
+    const headContext = {
+      head: {
+        current: [],
+      },
+    };
+
+    const HeadProvider: FunctionalComponent = ({ children }) => {
+      return <__HeadContext.Provider value={headContext} {...{ children }} />;
+    };
+
     const { __renderPageResult, ...docProps } = await Document.prepare({
       renderPage: async () => ({
-        __renderPageResult: renderToString(<HeadProvider><Component {...pageProps} /></HeadProvider>)
-      })
+        __renderPageResult: renderToString(
+          <HeadProvider>
+            <Component {...pageProps} />
+          </HeadProvider>
+        ),
+      }),
     });
 
     const docContext = {
       dev: page,
       devProps: pageProps ?? {},
-      __renderPageResult
+      __renderPageResult,
     };
 
-    let contents = renderToString(<HeadProvider><__InternalDocContext.Provider value={docContext} children={<Document {...(docProps as any)} />} /></HeadProvider>);
-    return `<!DOCTYPE html>\n<!-- Generated by microsite -->\n${contents}`
+    let contents = renderToString(
+      <HeadProvider>
+        <__InternalDocContext.Provider
+          value={docContext}
+          children={<Document {...(docProps as any)} />}
+        />
+      </HeadProvider>
+    );
+    return `<!DOCTYPE html>\n<!-- Generated by microsite -->\n${contents}`;
   } catch (e) {
     console.error(e);
-    return `<!DOCTYPE html>\n<!-- Generated by microsite --><head></head><body><h1>Something went wrong</h1></body></html>`
-  }
-  } catch (e) {
-    console.error(e);
+    return 
   }
 };
-
-const errorPage = (
-  props: any
-) => `<!doctype html>\n<!-- Generated by microsite -->\n<html lang="en" dir="ltr">\n\t<head></head>\n\t<body>
-\t\t<div id="__microsite"></div>
-\t\t<script data-csr="true">window.HMR_WEBSOCKET_URL = 'ws://localhost:3333';</script>
-\t\t<script type="module" src="/_snowpack/hmr-client.js"></script>
-\t\t<script type="module" data-microsite="page">${errorScript(props)}</script>`;
 
 const EXTS = [".js", ".jsx", ".ts", ".tsx", ".mjs"];
 
@@ -151,45 +175,26 @@ function parseArgs(argv: string[]) {
   );
 }
 
-export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof parseArgs>) {
+export default async function dev(
+  argvOrParsedArgs: string[] | ReturnType<typeof parseArgs>
+) {
   const cwd = process.cwd();
-  const args = Array.isArray(argvOrParsedArgs) ? parseArgs(argvOrParsedArgs) : argvOrParsedArgs;
+  const args = Array.isArray(argvOrParsedArgs)
+    ? parseArgs(argvOrParsedArgs)
+    : argvOrParsedArgs;
   let PORT = args["--port"] ?? 8888;
 
-  const config = await loadConfiguration('dev');
-  
+  const config = await loadConfiguration("dev");
+
   const snowpack = await startServer({
     config,
     lockfile: null,
   });
   runtime = snowpack.getServerRuntime();
 
-  const loadErrorPage = async (contentType: string, props?: ErrorProps) => {
-    try {
-      const url = `/src/pages/_error.js`;
-      const result = await snowpack.loadUrl(url);
-      if (!result) throw new Error();
-      if (contentType === "text/html")
-        return renderPage("/src/pages/_error.js", props);
-      if (contentType === "application/javascript")
-        return result.contents.toString();
-    } catch (e) {}
-
-    try {
-      const url = `/_snowpack/pkg/microsite/error.js`;
-      const result = await snowpack.loadUrl(url);
-      if (!result) throw new Error();
-      if (contentType === "text/html") return errorPage(props);
-      if (contentType === "application/javascript")
-        return result.contents.toString();
-    } catch (e) {}
-
-    return null;
-  };
-
   const sendErr = async (res: ServerResponse, props?: ErrorProps) => {
-    const contents = await loadErrorPage("text/html", props);
-    res.writeHead(props.statusCode ?? 500, {
+    const contents = await renderPage(`/_error`, props);
+    res.writeHead(props?.statusCode ?? 500, {
       "Content-Type": "text/html",
     });
     res.end(contents);
@@ -214,19 +219,10 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
       next();
     })
     .use(async (req: IncomingMessage, res: ServerResponse, next: any) => {
-      if (req.url?.indexOf("microsite") > -1) {
-        if (req.url.endsWith("_error.js")) {
-          const contents = await loadErrorPage("application/javascript");
-          res.setHeader("Content-Type", "application/javascript");
-          res.end(contents);
-        } else {
-          req.url.replace("_microsite", "microsite");
-        }
-      }
-      next();
-    })
-    .use(async (req: IncomingMessage, res: ServerResponse, next: any) => {
-      if (req.url !== '/' && !(req.url.endsWith(".html") || req.url.indexOf(".") === -1))
+      if (
+        req.url !== "/" &&
+        !(req.url.endsWith(".html") || req.url.indexOf(".") === -1)
+      )
         return next();
 
       let base = req.url.slice(1);
@@ -242,9 +238,7 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
           res.setHeader("Content-Type", "text/html");
           res.end(await renderPage(url));
           return true;
-        } catch (err) {
-          // console.error(err);
-        }
+        } catch (err) {}
         return false;
       };
 
@@ -304,12 +298,12 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
         const result = await snowpack.loadUrl(req.url);
         if (result.contentType)
           res.setHeader("Content-Type", result.contentType);
-        
+
         const MIME_EXCLUDE = ["image", "font"];
         if (
-            req.url.indexOf("/_snowpack/pkg/microsite") === -1 &&
-            result.contentType &&
-            !MIME_EXCLUDE.includes(result.contentType.split("/")[0])
+          req.url.indexOf("/_snowpack/pkg/microsite") === -1 &&
+          result.contentType &&
+          !MIME_EXCLUDE.includes(result.contentType.split("/")[0])
         ) {
           result.contents = result.contents
             .toString()
@@ -348,7 +342,7 @@ export default async function dev(argvOrParsedArgs: string[]|ReturnType<typeof p
   let hostname = "localhost";
 
   if (!args["--no-open"]) {
-    await openInBrowser(protocol, hostname, PORT, '/', "chrome");  
+    await openInBrowser(protocol, hostname, PORT, "/", "chrome");
   }
 
   console.log(

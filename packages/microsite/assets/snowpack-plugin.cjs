@@ -34,7 +34,7 @@ const injectJSX = (contents) => {
 module.exports = function plugin() {
   return {
     name: '@microsite/snowpack',
-    knownEntrypoints: ['preact', 'preact-render-to-string', 'microsite/client/hooks', 'microsite/client/csr', 'microsite/error', 'microsite/document', 'microsite/head'],
+    knownEntrypoints: ['preact', 'preact-render-to-string', 'microsite/client/hooks', 'microsite/error', 'microsite/document', 'microsite/head'],
     async transform({ id, contents, isDev, fileExt }) {
       if (!EXTS.includes(fileExt)) return;
 
