@@ -1,5 +1,12 @@
 # microsite
 
+## 1.1.0-next.6
+
+### Patch Changes
+
+- ddd48ea: Include shim for `requestIdleCallback` for Safari
+- d486147: Update hydration method to be compatible with `preact@10.5.11+`. Allows `preact@^10.5.12`.
+
 ## 1.1.0-next.5
 
 ### Patch Changes
