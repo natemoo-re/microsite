@@ -83,6 +83,7 @@ function createPersistentFragment(parentNode, childNodes) {
   }
   return {
     parentNode,
+    firstChild: childNodes[0],
     childNodes,
     appendChild: insert,
     insertBefore: insert,
