@@ -148,9 +148,13 @@ export default (manifest) => {
         attach(fragment, data, { key: Component, name, source });
       }
 
-      requestIdleCallback(() => {
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => {
+          markers.forEach((marker) => marker.remove());
+        });
+      } else {
         markers.forEach((marker) => marker.remove());
-      });
+      }
     }
   };
   if ("requestIdleCallback" in window) {
