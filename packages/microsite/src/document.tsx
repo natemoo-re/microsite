@@ -115,11 +115,21 @@ export const MicrositeScript: FunctionalComponent = () => {
             type="module"
             dangerouslySetInnerHTML={{
               __html: `import { h, render } from '/_snowpack/pkg/preact.js';
-  import Page from '${dev}';
-  let Component = Page;
-  if (Page.Component) Component = Page.Component;
-  render(h(Component, ${JSON.stringify(devProps)}, null), document.getElementById('__microsite'));
-  `,
+\timport Page from '${dev}';
+\tconst Component = Page.Component ? Page.Component : Page;
+\trender(h(Component, ${JSON.stringify(devProps)}, null), document.getElementById('__microsite'));`,
+            }}
+          />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `(async () => {
+\ttry { await import('/src/global/index.css.proxy.js'); } catch (e) {}
+\ttry {
+\t\tconst global = await import('/src/global/index.js').then(mod => mod.default);
+\t\tif (global) global();
+\t} catch (e) {}
+})()`,
             }}
           />
         </Fragment>
