@@ -1,6 +1,6 @@
 import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useRef, useContext, Ref } from "preact/hooks";
-import { __HeadContext } from "./document.js";
+import { __HeadContext, __InternalDocContext } from "./document.js";
 
 import render from "preact-render-to-string";
 
@@ -73,9 +73,13 @@ export const __SeoContext = createContext<{ seo: Ref<SEO> }>({
   seo: { current: {} },
 });
 
+const isElement = (node: Node): node is Element =>
+  node.nodeType === node.ELEMENT_NODE;
+
 export const Head: FunctionalComponent<any> = ({ children }) => {
   const seo = useRef<SEO>({});
   const { head } = useContext(__HeadContext);
+  const prevHead = useRef(null);
 
   render(
     <__SeoContext.Provider value={{ seo }}>{children}</__SeoContext.Provider>,
@@ -313,6 +317,41 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
       return child;
     })
   );
+
+  if (typeof window !== "undefined") {
+    let html = render(
+      <Fragment>{head.current}</Fragment>,
+      {},
+      { pretty: true }
+    );
+
+    if (prevHead.current !== html) {
+      let marker: Element = null;
+      let managed = false;
+      for (const node of Array.from(document.head.childNodes)) {
+        if (
+          isElement(node) &&
+          node.tagName.toLowerCase() === "meta" &&
+          node.getAttribute("name")?.startsWith("microsite")
+        ) {
+          if (node.getAttribute("name").endsWith("start")) {
+            managed = true;
+            marker = node;
+            continue;
+          } else {
+            break;
+          }
+        }
+        if (managed) {
+          node.remove();
+        }
+      }
+
+      marker!.insertAdjacentHTML("afterend", html);
+    }
+
+    prevHead.current = html;
+  }
 
   return null;
 };

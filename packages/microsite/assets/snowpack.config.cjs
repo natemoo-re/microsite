@@ -5,7 +5,7 @@ const builtins = require('module').builtinModules;
 module.exports = {
   plugins: [
     '@snowpack/plugin-dotenv',
-    // TODO: add '@prefresh/snowpack' once snowpack@3.0.12 lands
+    '@prefresh/snowpack',
     'microsite/assets/snowpack-plugin.cjs'
   ],
   packageOptions: {
