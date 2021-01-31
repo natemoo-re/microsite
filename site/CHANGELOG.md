@@ -1,5 +1,13 @@
 # site
 
+## 0.0.14-next.6
+
+### Patch Changes
+
+- Updated dependencies [ddd48ea]
+- Updated dependencies [d486147]
+  - microsite@1.1.0-next.6
+
 ## 0.0.14-next.5
 
 ### Patch Changes
