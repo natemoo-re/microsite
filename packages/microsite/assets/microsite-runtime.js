@@ -1,5 +1,23 @@
 import { h, hydrate as mount } from "preact";
 
+if (!("requestIdleCallback" in window)) {
+  window.requestIdleCallback = function (cb) {
+      return setTimeout(function () {
+        var start = Date.now();
+        cb({
+          didTimeout: false,
+          timeRemaining: function () {
+            return Math.max(0, 50 - (Date.now() - start));
+          },
+        });
+      }, 1);
+    };
+
+  window.cancelIdleCallback = function (id) {
+    clearTimeout(id);
+  };
+}
+
 const createObserver = (hydrate) => {
   if (!("IntersectionObserver" in window)) return null;
 
@@ -29,7 +47,6 @@ function attach(fragment, data, { key, name, source }) {
   switch (method) {
     case "idle": {
       if (
-        !("requestIdleCallback" in window) ||
         !("requestAnimationFrame" in window)
       )
         return setTimeout(hydrate, 0);
@@ -153,9 +170,6 @@ export default (manifest) => {
       });
     }
   };
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(init, { timeout: 1000 });
-  } else {
-    init();
-  }
+
+  requestIdleCallback(init, { timeout: 1000 });
 };
