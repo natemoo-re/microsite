@@ -101,12 +101,29 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
 };
 
 export const MicrositeScript: FunctionalComponent = () => {
-  const { debug, hasGlobalScript, basePath, scripts } = useContext(
+  const { debug, hasGlobalScript, basePath, scripts, dev, devProps } = useContext(
     __InternalDocContext
   );
 
   return (
     <Fragment>
+      { dev && (
+        <Fragment>
+          <script data-csr="true" dangerouslySetInnerHTML={{__html: `window.HMR_WEBSOCKET_URL = 'ws://localhost:3333';` }} />
+          <script type="module" src="/_snowpack/hmr-client.js" />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `import { h, render } from '/_snowpack/pkg/preact.js';
+  import Page from '${dev}';
+  let Component = Page;
+  if (Page.Component) Component = Page.Component;
+  render(h(Component, ${JSON.stringify(devProps)}, null), document.getElementById('__microsite'));
+  `,
+            }}
+          />
+        </Fragment>
+      )}
       {debug && (
         <script
           dangerouslySetInnerHTML={{
