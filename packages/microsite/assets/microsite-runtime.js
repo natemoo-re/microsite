@@ -18,6 +18,24 @@ if (!("requestIdleCallback" in window)) {
   };
 }
 
+if (!("requestIdleCallback" in window)) {
+  window.requestIdleCallback = function (cb) {
+      return setTimeout(function () {
+        var start = Date.now();
+        cb({
+          didTimeout: false,
+          timeRemaining: function () {
+            return Math.max(0, 50 - (Date.now() - start));
+          },
+        });
+      }, 1);
+    };
+
+  window.cancelIdleCallback = function (id) {
+    clearTimeout(id);
+  };
+}
+
 const createObserver = (hydrate) => {
   if (!("IntersectionObserver" in window)) return null;
 
