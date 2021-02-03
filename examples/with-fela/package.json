@@ -1,0 +1,18 @@
+{
+  "name": "@example/with-fela",
+  "homepage": "/with-fela",
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "microsite",
+    "build": "microsite build",
+    "serve": "microsite build --serve"
+  },
+  "devDependencies": {
+    "fela": "11.5.2",
+    "fela-dom": "11.5.2",
+    "fela-preset-web": "11.5.2",
+    "microsite": "file:../../packages/microsite/microsite-1.1.0-next.6.tgz",
+    "preact-fela": "11.5.2"
+  }
+}
