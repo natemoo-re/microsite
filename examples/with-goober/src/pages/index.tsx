@@ -2,8 +2,8 @@ import { FunctionalComponent } from 'preact';
 import { definePage } from 'microsite/page';
 import { Head, seo } from 'microsite/head';
 
-import Box from '../components/Box';
 import GlobalStyle from '../components/GlobalStyle';
+import Logo from '../components/Logo';
 
 interface IndexProps {}
 
@@ -17,9 +17,10 @@ const Index: FunctionalComponent<IndexProps> = () => {
       <GlobalStyle/>
 
       <main>
-        <h1>Welcome to Microsite + Goober!</h1>
+        <h1>Microsite ✕ Goober</h1>
+        <p>Name a more iconic duo</p>
 
-        <Box />
+        <Logo />
       </main>
     </>
   );
