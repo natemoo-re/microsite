@@ -57,5 +57,3 @@ As a developer, you know exactly how your site is structured, so Microsite allow
 - `idle` (default) hydrates the component as soon as possible, when the browser executes [`requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) code.
 
 - `visible` hydrates the component as soon as it enters the viewport, via [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
-
-- `interaction` hydrates the component as soon as the user interacts with it (via `focus` or `pointerenter` events.)
