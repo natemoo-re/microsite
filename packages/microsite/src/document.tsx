@@ -120,7 +120,6 @@ export const MicrositeScript: FunctionalComponent = () => {
       {scripts && (
         <script
           type="module"
-          defer
           async
           dangerouslySetInnerHTML={{
             __html: generateHydrateScript(scripts, { basePath }),
