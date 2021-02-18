@@ -91,7 +91,6 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
         <link rel="modulepreload" href={href} />
       ))}
       {styles && styles.map((href) => (
-        console.log('href', href, 'wat', `${prefix}${href}`),
         <link rel="preload" href={`${prefix}${href}`} as="style" />
       ))}
       {styles && styles.map((href) => <link rel="stylesheet" href={`${prefix}${href}`} />)}
