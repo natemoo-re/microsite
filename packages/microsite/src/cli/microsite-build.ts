@@ -411,7 +411,7 @@ async function bundlePagesForSSR(paths: string[]) {
           )) {
             if (
               file.startsWith("_hydrate/") &&
-              !(file.endsWith("_vendor.js") || file.endsWith("_static_shared.js"))
+              !(file.endsWith("_vendor/index.js") || file.endsWith("_static_shared.js"))
             ) {
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
