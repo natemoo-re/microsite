@@ -64,6 +64,11 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
   const { preconnect = [], basePath = '/', hasGlobalScript = false, preload = [], styles = [] } = useContext(
     __InternalDocContext
   );
+  const shouldIncludeBasePath = basePath !== '/';
+  const prefix = shouldIncludeBasePath
+    ? './'
+    : '/';
+
   return (
     <head {...props}>
       <meta {...({ charset: "utf-8" } as any)} />
@@ -72,7 +77,7 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
         content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
       />
 
-      <base href={basePath} />
+      { shouldIncludeBasePath && <base href={basePath} /> }
 
       <Fragment>{head.current}</Fragment>
 
@@ -80,15 +85,15 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
         <link rel="preconnect" href={href} />
       ))}
       {hasGlobalScript && (
-        <link rel="modulepreload" href={`./_hydrate/chunks/_global.js`} />
+        <link rel="modulepreload" href={`${prefix}_hydrate/chunks/_global.js`} />
       )}
       {preload.map((href) => (
         <link rel="modulepreload" href={href} />
       ))}
       {styles && styles.map((href) => (
-        <link rel="preload" href={`./${href}`} as="style" />
+        <link rel="preload" href={`${prefix}${href}`} as="style" />
       ))}
-      {styles && styles.map((href) => <link rel="stylesheet" href={`./${href}`} />)}
+      {styles && styles.map((href) => <link rel="stylesheet" href={`${prefix}${href}`} />)}
 
       {children}
     </head>
