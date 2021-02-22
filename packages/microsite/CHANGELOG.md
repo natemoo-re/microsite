@@ -1,5 +1,12 @@
 # microsite
 
+## 1.1.0-next.7
+
+### Patch Changes
+
+- fix(#119): remove `defer` from inline script`
+- fix(#115): do not include vendor chunk in hydrateBindings
+
 ## 1.1.0-next.6
 
 ### Patch Changes
