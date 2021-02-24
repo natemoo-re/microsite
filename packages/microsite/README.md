@@ -9,6 +9,8 @@
     <a href="https://github.com/natemoo-re/microsite/tree/main/docs">Read the docs</a>
     <span> | </span>
     <a href="https://examples.microsite.page">See the live examples</a>
+    <span> | </span>
+    <a href="https://discord.gg/QMc6R8svPY">Join our Discord</a>
 </h4>
 
 <br />
