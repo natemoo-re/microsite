@@ -1,5 +1,11 @@
 # create-microsite
 
+## 0.2.0-next.0
+
+### Minor Changes
+
+- cc7a455: Prompt for username, confirm for --force, and point templates to monorepo
+
 ## 0.1.4
 
 ### Patch Changes
