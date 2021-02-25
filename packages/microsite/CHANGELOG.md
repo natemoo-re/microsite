@@ -1,5 +1,12 @@
 # microsite
 
+## 1.1.0-next.8
+
+### Patch Changes
+
+- 3d8b6e0: Prefer pinned Skypack URLs to lookup URLs. Improves load waterfall significantly. Fixes #106.
+- 81b1f9a: Update snowpack to snowpack@3.0.13
+
 ## 1.1.0-next.7
 
 ### Patch Changes
