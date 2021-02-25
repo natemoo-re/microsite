@@ -149,11 +149,7 @@ async function copyHydrateAssets(
   let tasks: any = [];
   const transform = async (source: string) => {
     source = stripWithHydrate(source);
-    let prevSource = source;
     source = await preactToCDN(source);
-    if (prevSource === source) {
-      console.log(source);
-    }
     const result = await service.transform(source, {
       minify: true,
       minifyIdentifiers: false,
