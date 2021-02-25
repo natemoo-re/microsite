@@ -10,6 +10,7 @@ import { Document as InternalDocument, __HeadContext, __InternalDocContext } fro
 import { FunctionalComponent, h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import { generateStaticPropsContext } from "./router.js";
+import fetch from 'node-fetch';
 // import { createPrefetch, getCacheEntry, getPreviousKey } from "./prefetch.js";
 
 export const CACHE_DIR = ".microsite/cache";
@@ -62,16 +63,40 @@ export const preactImportTransformer = {
     }),
 };
 
-const FULL_PREACT_IMPORT_REGEX = /import.*['"]preact([\/\w]+)?['"]/gm;
 const PREACT_VERSION = require("preact/package.json").version;
 
-const PREACT_CDN_SOURCES = {
+const PREACT_CDN_LOOKUP = {
   preact: `https://cdn.skypack.dev/preact@${PREACT_VERSION}`,
   "preact/hooks": `https://cdn.skypack.dev/preact@${PREACT_VERSION}/hooks`,
 };
-export const preactToCDN = (code: string) => {
-  if (!FULL_PREACT_IMPORT_REGEX.test(code)) return code;
-  return code.replace(FULL_PREACT_IMPORT_REGEX, (fullMatch, subpath) => {
+let PREACT_CDN_SOURCES = null;
+
+const resolvePreactCdnSources = async () => {
+  if (PREACT_CDN_SOURCES) return;
+
+  const mdls = Object.keys(PREACT_CDN_LOOKUP);
+  const pinnedUrls = await Promise.all(mdls.map(mdl => {
+    const lookupUrl = PREACT_CDN_LOOKUP[mdl];
+    return fetch(lookupUrl).then(res => `https://cdn.skypack.dev${res.headers.get('x-pinned-url')}`);
+  }));
+
+  PREACT_CDN_SOURCES = mdls.reduce((acc, curr, i) => {
+    return { ...acc, [curr]: pinnedUrls[i] };
+  }, {});
+  
+  return;
+}
+
+const PREACT_REGEX = /['"]preact([\/\w]+)?['"]/gm;
+
+export const preactToCDN = async (code: string) => {
+  if (!/preact/gm.test(code)) {
+    return code;
+  }
+  
+  await resolvePreactCdnSources();
+
+  return code.replace(PREACT_REGEX, (fullMatch, subpath) => {
     if (subpath === "/hooks") {
       return fullMatch.replace(
         "preact/hooks",
@@ -155,8 +180,7 @@ export const renderPage = async (
   manifest: ManifestEntry,
   { basePath = '/', debug = false, hasGlobalScript = false } = {}
 ): Promise<{ name: string; contents: string }> => {
-  const Document = await getDocument();
-  let Page = await importPage(manifest.name);
+  let [Document, Page] = await Promise.all([getDocument(), importPage(manifest.name), resolvePreactCdnSources()]);
   Page = unwrapPage(Page);
   const pageProps = data.props;
 
@@ -179,7 +203,6 @@ export const renderPage = async (
       __renderPageResult: renderToString(<HeadProvider><Page {...pageProps} /></HeadProvider>)
     })
   });
-
 
   const docContext = {
     manifest,
