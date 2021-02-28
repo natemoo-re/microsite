@@ -68,16 +68,20 @@ export async function loadConfiguration(mode: "dev" | "build") {
           ..._config.buildOptions,
           ssr: true
         },
+        packageOptions: {
+          ...userConfig.packageOptions,
+          ..._config.packageOptions,
+          external: [
+            ...(userConfig.packageOptions?.external ?? []),
+            ..._config.packageOptions.external,
+          ].filter((v) => !v.startsWith('microsite'))
+        },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
           ...(userConfig.aliases ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
-        },
-        packageOptions: {
-          ..._config.packageOptions,
-          external: ["/_snowpack/pkg/microsite/_error.js"],
         },
       });
     case "build":

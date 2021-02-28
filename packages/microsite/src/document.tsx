@@ -13,7 +13,7 @@ export const __InternalDocContext = createContext<any>({});
 const _Document = () => {
   return (
     <Html>
-      <Head />
+      <Head/>
       <body>
         <Main />
         <MicrositeScript />
@@ -60,8 +60,7 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
   children,
   ...props
 }) => {
-  const { head } = useContext(__HeadContext);
-  const { preconnect = [], basePath = '/', hasGlobalScript = false, preload = [], styles = [] } = useContext(
+  const { dev = false, preconnect = [], basePath = '/', hasGlobalScript = false, preload = [], styles = [], __renderPageHead } = useContext(
     __InternalDocContext
   );
   const shouldIncludeBasePath = basePath !== '/';
@@ -79,8 +78,6 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
 
       { shouldIncludeBasePath && <base href={basePath} /> }
 
-      <Fragment>{head.current}</Fragment>
-
       {preconnect.map((href) => (
         <link rel="preconnect" href={href} />
       ))}
@@ -96,17 +93,47 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
       {styles && styles.map((href) => <link rel="stylesheet" href={`${prefix}${href}`} />)}
 
       {children}
+
+      {dev && <meta name="microsite:start" />}
+      <Fragment>{__renderPageHead}</Fragment>
+      {dev && <meta name="microsite:end" />}
     </head>
   );
 };
 
 export const MicrositeScript: FunctionalComponent = () => {
-  const { debug, hasGlobalScript, basePath, scripts } = useContext(
+  const { debug, hasGlobalScript, basePath, scripts, dev, devProps } = useContext(
     __InternalDocContext
   );
 
   return (
     <Fragment>
+      { dev && (
+        <Fragment>
+          <script data-csr="true" dangerouslySetInnerHTML={{__html: `window.HMR_WEBSOCKET_URL = 'ws://localhost:3333';` }} />
+          <script type="module" src="/_snowpack/hmr-client.js" />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `import csr from '/_snowpack/pkg/microsite/client/csr.js';
+import Page from '${dev}';
+csr(Page, ${JSON.stringify(devProps)});`
+            }}
+          />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `(async () => {
+\ttry { await import('/src/global/index.css.proxy.js'); } catch (e) {}
+\ttry {
+\t\tconst global = await import('/src/global/index.js').then(mod => mod.default);
+\t\tif (global) global();
+\t} catch (e) {}
+})()`,
+            }}
+          />
+        </Fragment>
+      )}
       {debug && (
         <script
           dangerouslySetInnerHTML={{
