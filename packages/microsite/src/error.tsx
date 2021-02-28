@@ -1,5 +1,5 @@
 import { FunctionalComponent, JSX, h } from "preact";
-import { Head } from './head';
+import { Head } from './head.js';
 
 export interface ErrorProps {
   statusCode?: number;
