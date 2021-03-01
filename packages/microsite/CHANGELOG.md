@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.9
+
+### Patch Changes
+
+- 64ca86e: Fix missed edge case with CSS module assets shared between pages (#126)
+
 ## 1.1.0-next.8
 
 ### Patch Changes
