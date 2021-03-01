@@ -1,5 +1,12 @@
 # site
 
+## 0.0.14-next.9
+
+### Patch Changes
+
+- Updated dependencies [64ca86e]
+  - microsite@1.1.0-next.9
+
 ## 0.0.14-next.8
 
 ### Patch Changes
