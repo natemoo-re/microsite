@@ -7,8 +7,10 @@ import size from 'glob-size';
 
 const { remove } = fse;
 const SAMPLED_RUNS = 15;
-const BENCHMARKS = ['microsite-simple', 'next-simple'];
-const BENCHMARK_NAMES = ['Microsite "hello-world"', 'NextJS "hello-world"'];
+const BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
+const BENCHMARK_NAMES = ['Microsite "hello-world"', 'NextJS "hello-world"', 'Gatsby "hello-world"'];
+const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
+const BENCHMARK_OUTDIR = ['dist', 'out', 'public'];
 
 async function runCmd(cmd, dir = '.') {
     return new Promise((resolve, reject) => {
@@ -22,11 +24,12 @@ async function runCmd(cmd, dir = '.') {
 }
 
 async function benchmark(name) {
+    const index = BENCHMARKS.indexOf(name);
     const samples = [];
     const build = 'npm run build';
     const dir = `./benchmark/${name}`;
-    const cacheDir = join(dir, /next/gmi.test(name) ? '.next' : '.microsite');
-    const outDir = join(dir, /next/gmi.test(name) ? 'out' : 'dist');
+    const cacheDir = join(dir, BENCHMARK_CACHEDIR[index]);
+    const outDir = join(dir, BENCHMARK_OUTDIR[index]);
 
     for (const i of Array.from({ length: SAMPLED_RUNS }, (_, i) => i)) {
         const { duration } = await runCmd(build, dir);
