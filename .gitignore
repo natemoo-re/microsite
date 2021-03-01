@@ -4,6 +4,10 @@ dist/
 .microsite
 *.tgz
 demo/
+.cache
+.next
+
+benchmark/gatsby-simple/public
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts

@@ -19,7 +19,7 @@
 `microsite` is a fast, opinionated static-site generator (SSG) built on top of [Snowpack](https://snowpack.dev). It outputs extremely minimal clientside code using [**automatic partial hydration**](https://github.com/natemoo-re/microsite/blob/main/docs/basic/bundled-javascript.md#automatic-partial-hydration).
 
 ```bash
-npm init microsite <project>
+npm init microsite
 ```
 
 > Microsite is an **ESM node package**, so it needs to run in a Node environment which supports ESM. We support the latest version of [`node` v12.x LTS (Erbium)](https://nodejs.org/download/release/latest-v12.x/) — see [Engines](https://github.com/natemoo-re/microsite/blob/main/docs/engines.md) for more details.
