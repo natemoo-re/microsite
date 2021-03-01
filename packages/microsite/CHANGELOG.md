@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.10
+
+### Patch Changes
+
+- 7fcba84: Fix error with previous shared CSS module logic, adds \_static output directory
+
 ## 1.1.0-next.9
 
 ### Patch Changes
@@ -332,7 +338,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0
+    count: 0,
   });
 
   // components/Counter.tsx
