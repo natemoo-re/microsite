@@ -8,16 +8,19 @@ export function generateHydrateScript(
   hydrateBindings: ManifestEntry["hydrateBindings"],
   opts: { basePath?: string } = {}
 ) {
-  const { basePath = '/' } = opts;
+  const { basePath = "/" } = opts;
   const entries = Object.fromEntries(
     Object.entries(hydrateBindings)
       .map(([file, exports]) =>
-        exports.map((cmp) => [cleanComponentName(cmp), [cmp, `${basePath}${file}`]])
+        exports.map((cmp) => [
+          cleanComponentName(cmp),
+          [cmp, `${basePath}${file}`],
+        ])
       )
       .flat(1)
   );
 
-  return `import init from "${basePath}_hydrate/microsite-runtime.js";\ninit(${JSON.stringify(
+  return `import init from "${basePath}_static/vendor/microsite.js";\ninit(${JSON.stringify(
     entries
   )})`;
 }

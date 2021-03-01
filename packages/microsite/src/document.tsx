@@ -1,4 +1,12 @@
-import { h, createContext, Fragment, FunctionalComponent, JSX, ComponentType, ComponentProps } from "preact";
+import {
+  h,
+  createContext,
+  Fragment,
+  FunctionalComponent,
+  JSX,
+  ComponentType,
+  ComponentProps,
+} from "preact";
 import { useContext } from "preact/hooks";
 import { generateHydrateScript } from "./utils/hydration.js";
 
@@ -9,11 +17,10 @@ export const __HeadContext = createContext({
 /** @internal */
 export const __InternalDocContext = createContext<any>({});
 
-
 const _Document = () => {
   return (
     <Html>
-      <Head/>
+      <Head />
       <body>
         <Main />
         <MicrositeScript />
@@ -27,18 +34,23 @@ interface RenderPageResult {
   [key: string]: any;
 }
 
-export const defineDocument = <T extends ComponentType<any>>(Document: T, ctx: {
-  prepare: (ctx: { renderPage: () => Promise<RenderPageResult> }) => Promise<Omit<ComponentProps<T>, 'children'> & RenderPageResult>;
-}) => {
+export const defineDocument = <T extends ComponentType<any>>(
+  Document: T,
+  ctx: {
+    prepare: (ctx: {
+      renderPage: () => Promise<RenderPageResult>;
+    }) => Promise<Omit<ComponentProps<T>, "children"> & RenderPageResult>;
+  }
+) => {
   return Object.assign(Document, ctx);
-}
+};
 
 export const Document = defineDocument(_Document, {
   async prepare({ renderPage }) {
     const page = await renderPage();
     return { ...page };
-  }
-})
+  },
+});
 
 export const Html: FunctionalComponent<JSX.HTMLAttributes<HTMLHtmlElement>> = ({
   lang = "en",
@@ -46,27 +58,35 @@ export const Html: FunctionalComponent<JSX.HTMLAttributes<HTMLHtmlElement>> = ({
   ...props
 }) => <html lang={lang} dir={dir} {...props} />;
 
-export const Main: FunctionalComponent<
-  Omit<
-    JSX.HTMLAttributes<HTMLDivElement>,
-    "id" | "dangerouslySetInnerHTML" | "children"
-  >
-> = (props) => {
+export const Main: FunctionalComponent<Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  "id" | "dangerouslySetInnerHTML" | "children"
+>> = (props) => {
   const { __renderPageResult } = useContext(__InternalDocContext);
-  return <div {...props} id="__microsite" dangerouslySetInnerHTML={{ __html: __renderPageResult }} />;
-}
+  return (
+    <div
+      {...props}
+      id="__microsite"
+      dangerouslySetInnerHTML={{ __html: __renderPageResult }}
+    />
+  );
+};
 
 export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
   children,
   ...props
 }) => {
-  const { dev = false, preconnect = [], basePath = '/', hasGlobalScript = false, preload = [], styles = [], __renderPageHead } = useContext(
-    __InternalDocContext
-  );
-  const shouldIncludeBasePath = basePath !== '/';
-  const prefix = shouldIncludeBasePath
-    ? './'
-    : '/';
+  const {
+    dev = false,
+    preconnect = [],
+    basePath = "/",
+    hasGlobalScript = false,
+    preload = [],
+    styles = [],
+    __renderPageHead,
+  } = useContext(__InternalDocContext);
+  const shouldIncludeBasePath = basePath !== "/";
+  const prefix = shouldIncludeBasePath ? "./" : "/";
 
   return (
     <head {...props}>
@@ -76,21 +96,25 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
         content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
       />
 
-      { shouldIncludeBasePath && <base href={basePath} /> }
+      {shouldIncludeBasePath && <base href={basePath} />}
 
       {preconnect.map((href) => (
         <link rel="preconnect" href={href} />
       ))}
       {hasGlobalScript && (
-        <link rel="modulepreload" href={`${prefix}_hydrate/chunks/_global.js`} />
+        <link rel="modulepreload" href={`${prefix}_static/chunks/_global.js`} />
       )}
       {preload.map((href) => (
         <link rel="modulepreload" href={href} />
       ))}
-      {styles && styles.map((href) => (
-        <link rel="preload" href={`${prefix}${href}`} as="style" />
-      ))}
-      {styles && styles.map((href) => <link rel="stylesheet" href={`${prefix}${href}`} />)}
+      {styles &&
+        styles.map((href) => (
+          <link rel="preload" href={`${prefix}${href}`} as="style" />
+        ))}
+      {styles &&
+        styles.map((href) => (
+          <link rel="stylesheet" href={`${prefix}${href}`} />
+        ))}
 
       {children}
 
@@ -102,22 +126,32 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
 };
 
 export const MicrositeScript: FunctionalComponent = () => {
-  const { debug, hasGlobalScript, basePath, scripts, dev, devProps } = useContext(
-    __InternalDocContext
-  );
+  const {
+    debug,
+    hasGlobalScript,
+    basePath,
+    scripts,
+    dev,
+    devProps,
+  } = useContext(__InternalDocContext);
 
   return (
     <Fragment>
-      { dev && (
+      {dev && (
         <Fragment>
-          <script data-csr="true" dangerouslySetInnerHTML={{__html: `window.HMR_WEBSOCKET_URL = 'ws://localhost:3333';` }} />
+          <script
+            data-csr="true"
+            dangerouslySetInnerHTML={{
+              __html: `window.HMR_WEBSOCKET_URL = 'ws://localhost:3333';`,
+            }}
+          />
           <script type="module" src="/_snowpack/hmr-client.js" />
           <script
             type="module"
             dangerouslySetInnerHTML={{
               __html: `import csr from '/_snowpack/pkg/microsite/client/csr.js';
 import Page from '${dev}';
-csr(Page, ${JSON.stringify(devProps)});`
+csr(Page, ${JSON.stringify(devProps)});`,
             }}
           />
           <script
