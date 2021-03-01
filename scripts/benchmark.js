@@ -6,7 +6,7 @@ import formatBytes from 'nice-bytes';
 import size from 'glob-size';
 
 const { remove } = fse;
-const SAMPLED_RUNS = 3;
+const SAMPLED_RUNS = 15;
 const BENCHMARKS = ['microsite-simple', 'next-simple'];
 const BENCHMARK_NAMES = ['Microsite "hello-world"', 'NextJS "hello-world"'];
 
