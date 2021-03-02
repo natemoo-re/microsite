@@ -1,4 +1,4 @@
-import { h, FunctionComponent, createContext } from "preact";
+import { h, FunctionComponent, createContext, VNode } from "preact";
 import { useContext } from "preact/hooks";
 
 const isServer = typeof window === "undefined";
@@ -6,6 +6,7 @@ export const HydrateContext = createContext<string | false>(false);
 
 export interface HydrationProps {
   method?: "idle" | "visible";
+  fallback?: VNode<any> | null;
 }
 
 export function withHydrate<T extends FunctionComponent<any>>(
@@ -13,7 +14,7 @@ export function withHydrate<T extends FunctionComponent<any>>(
   hydrationProps: HydrationProps = {}
 ): T {
   const name = Component.displayName || Component.name;
-  const { method } = hydrationProps;
+  const { method, fallback: Fallback } = hydrationProps;
 
   const Wrapped: FunctionComponent<any> = (props, ref) => {
     const hydrateParent = useContext(HydrateContext);
@@ -29,12 +30,14 @@ export function withHydrate<T extends FunctionComponent<any>>(
 
     const p = isServer ? `p=${JSON.stringify(props)}` : '';
     const m = isServer && method ? `m=${method}` : '';
+    const f = isServer && typeof Fallback !== 'undefined' ? 'f=1' : '';
     const Marker = 'hydrate-marker' as any;
+    const Placeholder = 'hydrate-placeholder' as 'div';
     return (
       <HydrateContext.Provider value={name}>
         {isServer && (<Marker dangerouslySetInnerHTML={{ __html: `?h c=${name} ?` }} />)}
-        <Component {...{ ...props, ref }} />
-        {isServer && (<Marker dangerouslySetInnerHTML={{ __html: `?h ${[p, m].filter(v => v).join(' ')} ?` }} />)}
+        {typeof Fallback !== 'undefined' ? (Fallback || <Placeholder />) : <Component {...{ ...props, ref }} />}
+        {isServer && (<Marker dangerouslySetInnerHTML={{ __html: `?h ${[p, m, f].filter(v => v).join(' ')} ?` }} />)}
       </HydrateContext.Provider>
     );
   };
