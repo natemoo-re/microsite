@@ -6,9 +6,9 @@ import formatBytes from 'nice-bytes';
 import size from 'glob-size';
 
 const { remove } = fse;
-const SAMPLED_RUNS = 10;
+const SAMPLED_RUNS = 24;
 const BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
-const BENCHMARK_NAMES = ['Microsite "hello-world"', 'NextJS "hello-world"', 'Gatsby "hello-world"'];
+const BENCHMARK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
 const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
 const BENCHMARK_OUTDIR = ['dist', 'out', 'public'];
 
@@ -32,6 +32,13 @@ async function benchmark(name) {
     const outDir = join(dir, BENCHMARK_OUTDIR[index]);
 
     for (const i of Array.from({ length: SAMPLED_RUNS }, (_, i) => i)) {
+        const BAR_SIZE = 20;
+        const progress = Math.round(((i + 1) / SAMPLED_RUNS) * BAR_SIZE);
+        const dots = "•".repeat(progress).padEnd(BAR_SIZE, ' ');
+        
+        process.stdout.write(`\r${name.padEnd(35, ' ')} [${dots}] ${`${i + 1}`.padStart(3, ' ')}/${SAMPLED_RUNS}\r`);
+        if (i === SAMPLED_RUNS - 1) console.log(`${name.padEnd(35, ' ')} [${dots}] ${`${i + 1}`.padStart(3, ' ')}/${SAMPLED_RUNS}\r`);
+
         const { duration } = await runCmd(build, dir);
         const { total, count: jsFiles } = await size('**/*.js', { cwd: outDir });
         
@@ -50,15 +57,18 @@ async function benchmark(name) {
 
 async function run() {
     const frameworks = {};
+    
     for (const name of BENCHMARKS) {
         frameworks[name] = await benchmark(name);
     }
 
-    console.log(`Results averaged over ${SAMPLED_RUNS} runs:\n`);
-
+    let header = `${'Framework'.padEnd(20, ' ')} |   Client-side JS |   Duration`; 
+    console.log('\n' + header);
+    console.log(`—`.repeat(header.length))
     BENCHMARKS.forEach((name, i) => {
-        console.log(`${BENCHMARK_NAMES[i]} generated ${frameworks[name].size.label} of client-side JS in ${frameworks[name].duration.label}`);
+        console.log(`${BENCHMARK_NAMES[i].padEnd(20, ' ')} | ${frameworks[name].size.label.padStart(16, ' ')} | ${frameworks[name].duration.label.padStart(10, ' ')}`);
     })
+    console.log();
 }
 
 run();
