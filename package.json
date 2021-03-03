@@ -7,7 +7,8 @@
   "scripts": {
     "benchmark": "node scripts/benchmark",
     "bootstrap:ci": "npx lerna bootstrap --ci --hoist",
-    "build": "npx lerna run build --scope=microsite --scope=create-microsite --sort",
+    "bootstrap:benchmark": "npx lerna bootstrap --scope='microsite' --scope='@benchmark/microsite' --ci --hoist",
+    "build": "npx lerna run build --scope='microsite' --scope='create-microsite' --sort",
     "prebuild:examples": "node scripts/generate-examples",
     "build:examples": "npx lerna run build --scope='@example/*' --parallel",
     "postbuild:examples": "node scripts/copy-examples"
@@ -27,7 +28,7 @@
     "typescript": "^4.1.2"
   },
   "volta": {
-    "node": "15.11.0"
+    "node": "12.21.0"
   },
   "husky": {
     "hooks": {

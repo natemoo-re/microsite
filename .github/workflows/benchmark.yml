@@ -21,7 +21,7 @@ jobs:
     
     - run: npm ci
 
-    - run: npm run bootstrap:ci
+    - run: npm run bootstrap:benchmark
 
     - run: npm run benchmark
 
