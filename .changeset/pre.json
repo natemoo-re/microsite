@@ -12,7 +12,8 @@
     "@example/tailwind": "0.0.0",
     "@example/custom-document": "0.0.0",
     "@example/with-fela": "0.0.0",
-    "@example/with-goober": "0.0.0"
+    "@example/with-goober": "0.0.0",
+    "@example/custom-ssr-fallback": "0.0.0"
   },
   "changesets": [
     "beige-rockets-unite",
@@ -26,6 +27,7 @@
     "fresh-clocks-arrive",
     "funny-apes-jam",
     "fuzzy-ants-knock",
+    "great-tables-collect",
     "hip-suns-cheat",
     "itchy-rules-hear",
     "late-lions-leave",
