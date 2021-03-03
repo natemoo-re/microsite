@@ -1,6 +1,12 @@
 name: Benchmark
 
-on: pull_request
+on:
+  pull_request:
+    paths:
+    - 'benchmark/**/*'
+    - 'packages/microsite/**/*'
+    - 'scripts/benchmark.js'
+    - 'package.json'
 
 jobs:
   benchmark:
