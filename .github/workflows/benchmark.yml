@@ -24,11 +24,12 @@ jobs:
     - run: npm run bootstrap:benchmark
 
     - run: npm run benchmark:microsite
+      id: benchmark
 
     - name: comment PR
       uses: unsplash/comment-on-pr@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        msg: "Test message"
-        check_for_duplicate_msg: false
+        msg: ${{ steps.benchmark.outputs.RESULT }}
+        check_for_duplicate_msg: true

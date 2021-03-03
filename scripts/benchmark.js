@@ -126,8 +126,11 @@ async function run() {
         comment.push('\n');
     })
     
-    console.log(`::set-output name=RESULT::${comment}`);
+    console.log(`::set-output name=RESULT::${comment.join('\n')}`);
+
+    console.log('::group::Results')
     console.log(comment.join('\n'));
+    console.log('::endgroup::')
 }
 
 run();
