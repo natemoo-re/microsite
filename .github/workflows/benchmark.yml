@@ -23,7 +23,7 @@ jobs:
 
     - run: npm run bootstrap:benchmark
 
-    - run: npm run benchmark
+    - run: npm run benchmark:microsite
 
     - name: comment PR
       uses: unsplash/comment-on-pr@master
