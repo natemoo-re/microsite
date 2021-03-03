@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#__microsite {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: system-ui;
+  text-align: center;
+}
+
+main {
+  width: 100vw;
+  margin: auto 0;
+  display: grid;
+  place-items: center;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding-bottom: 4em;
+}
+
+div {
+  display: grid;
+  grid-auto-flow: column;
+  place-items: center;
+}
+
+code {
+  background: #eee;
+  border-radius: 4px;
+  font-size: 1.25em;
+  padding: 0.25em;
+}
+
+button {
+  font-size: 32px;
+  padding: 16px;
+}
+
+p {
+  max-width: 56ch;
+  line-height: 1.5;
+}
+
+h4 {
+  margin: 0 16px;
+  padding: 16px 32px;
+  width: 4ch;
+  font-size: 4rem;
+  text-align: center;
+}
