@@ -21,8 +21,8 @@ jobs:
 
     - name: comment PR
       uses: unsplash/comment-on-pr@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          msg: "Test message"
-          check_for_duplicate_msg: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        msg: "Test message"
+        check_for_duplicate_msg: false
