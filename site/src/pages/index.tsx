@@ -2,8 +2,7 @@ import { FunctionalComponent } from "preact";
 import { definePage } from "microsite/page";
 import { Head, seo } from "microsite/head";
 
-import css from './index.module.css';
-import Logo from '@/components/Logo';
+import Layout from "@/components/Layout";
 
 const Index: FunctionalComponent = () => {
   return (
@@ -16,10 +15,16 @@ const Index: FunctionalComponent = () => {
         </seo.description>
       </Head>
 
-      <main class={css.main}>
+      <Layout>
+        <header class="full-width">
+          <h1>Do more with less JavaScript.</h1>
+          <p style={{ fontSize: '1.5em' }}>Microsite is a smarter, performance-obsessed static site generator powered by Preact and Snowpack.</p>
+        </header>
+      </Layout>
+      {/* <main class={css.main}>
         <Logo />
         <h1>This site is under construction.</h1>
-      </main>
+      </main> */}
     </>
   );
 };
