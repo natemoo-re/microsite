@@ -1,0 +1,23 @@
+name: Benchmark
+
+on: pull_request
+
+jobs:
+  benchmark:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Volta
+      uses: volta-cli/action@v1
+    - run: npm ci
+    - run: npm run bootstrap:ci
+    - run: npm run benchmark
+    - name: comment PR
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Test message"
+          check_for_duplicate_msg: false
