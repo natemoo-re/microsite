@@ -179,7 +179,7 @@ csr(Page, ${JSON.stringify(devProps)});`,
         <script
           type="module"
           dangerouslySetInnerHTML={{
-            __html: `import global from '${basePath}_hydrate/chunks/_global.js';\nglobal();`,
+            __html: `import global from '${basePath}_static/chunks/_global.js';\nglobal();`,
           }}
         />
       )}
