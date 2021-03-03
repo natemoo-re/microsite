@@ -8,7 +8,8 @@ import { gzip } from 'gzip-cli';
 
 const { remove } = fse;
 let SAMPLED_RUNS = 5;
-const BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
+const ALL_BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
+let BENCHMARKS = [];
 const BENCHMARK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
 const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
 const BENCHMARK_OUTDIR = ['dist', 'out', 'public'];
@@ -82,11 +83,19 @@ async function benchmark(name) {
 async function run() {
     const args = process.argv.slice(2).reduce((acc, curr, i, arr) => {
         if (i % 2 !== 0) {
-            return { ...acc, [arr[i - 1]]: curr };
+            const key = arr[i - 1];
+            if (typeof acc[key] !== 'undefined') {
+                if (Array.isArray(acc[key])) return { ...acc, [key]: [...acc[key], curr] }
+                return { ...acc, [key]: [acc[key], curr] };
+            }
+            return { ...acc, [key]: curr };
         }
         return acc;
     }, {});
     SAMPLED_RUNS = args['--runs'] || 10;
+    let benchmarks = args['--suite'] || '*';
+    BENCHMARKS = benchmarks === '*' ? ALL_BENCHMARKS : benchmarks;
+    if (!Array.isArray(BENCHMARKS)) BENCHMARKS = [BENCHMARKS];
     
     const frameworks = {};
     
