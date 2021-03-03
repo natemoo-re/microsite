@@ -1,5 +1,11 @@
 # microsite
 
+## 1.1.0-next.11
+
+### Patch Changes
+
+- 6723b24: Adds a `fallback` option to `withHydrate` to allow customization of server-side rendering behavior.
+
 ## 1.1.0-next.10
 
 ### Patch Changes
@@ -338,7 +344,7 @@
   import { createGlobalState } from "microsite/global";
 
   export const state = createGlobalState({
-    count: 0,
+    count: 0
   });
 
   // components/Counter.tsx
