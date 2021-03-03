@@ -96,7 +96,7 @@ async function run() {
     let benchmarks = args['--suite'] || '*';
     BENCHMARKS = benchmarks === '*' ? ALL_BENCHMARKS : benchmarks;
     if (!Array.isArray(BENCHMARKS)) BENCHMARKS = [BENCHMARKS];
-    
+
     const frameworks = {};
     
     for (const name of BENCHMARKS) {
@@ -111,18 +111,23 @@ async function run() {
         gzipSize: 'JS size (gzip)',
         brotliSize: 'JS size (brotli)'
     }
+    
+    let comment = [];
     const header = Object.values(labels).join(' | ');
-    console.log('\n' + header);
-    console.log(`—`.repeat(header.length))
+    comment.push('\n' + header);
+    comment.push(`—`.repeat(header.length))
     BENCHMARKS.forEach((name) => {
         const row = Object.entries(labels).map(([key, label], i) => {
             const method = i === 0 ? 'padEnd' : 'padStart';
             const len = label.length;
             return `${frameworks[name][key].label}`[method](len);
         }).join(' | ');
-        console.log(row);
+        comment.push(row);
+        comment.push('\n');
     })
-    console.log();
+    
+    console.log(`::set-output name=RESULT::${comment}`);
+    console.log(comment.join('\n'));
 }
 
 run();
