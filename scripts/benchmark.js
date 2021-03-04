@@ -6,6 +6,7 @@ import formatBytes from 'nice-bytes';
 import size from 'glob-size';
 import { gzip } from 'gzip-cli';
 import { performance } from 'perf_hooks';
+import getVitals from './vitals.js';
 
 const { remove } = fse;
 let SAMPLED_RUNS = 15;
@@ -55,14 +56,21 @@ async function benchmark(name) {
             gzipSize = totalGzip;
             brotliSize = totalBrotli;
         }
+
+        let vitals;
+        if (i === SAMPLED_RUNS - 1) {
+            vitals = await getVitals(outDir);
+        }
         
         samples[i] = {
             duration,
             numFiles,
             size: total,
             gzipSize,
-            brotliSize
+            brotliSize,
+            vitals
         }
+
         await Promise.all([remove(cacheDir), remove(outDir)]);
     }
 
@@ -71,8 +79,9 @@ async function benchmark(name) {
     const avgGzipSize = samples.reduce((a, { gzipSize: b }) => (a + b), 0) / SAMPLED_RUNS;
     const avgBrotliSize = samples.reduce((a, { brotliSize: b }) => (a + b), 0) / SAMPLED_RUNS;
     const numFiles = samples[samples.length - 1].numFiles;
+    const vitals = samples[samples.length - 1].vitals;
 
-    return { 
+    let result = { 
         name: { value: name, label: benchmark },
         duration: { value: avgDuration, label: formatMs(avgDuration) },
         numFiles: { value: numFiles, label: numFiles },
@@ -80,6 +89,11 @@ async function benchmark(name) {
         gzipSize: { value: avgGzipSize, label: avgGzipSize > 0 ? formatBytes(avgGzipSize).text : '0B' },
         brotliSize: { value: avgBrotliSize, label: avgBrotliSize > 0 ? formatBytes(avgBrotliSize).text : '0B' }
     };
+    for (const metric of vitals) {
+        result[metric.id] = { value: metric.numericValue, label: metric.displayValue };
+    }
+
+    return result;
 }
 
 async function run() {
@@ -104,11 +118,16 @@ async function run() {
 
     const labels = {
         name: 'Benchmark'.padEnd(20, ' '),
-        duration: 'Duration',
+        duration: 'Build duration',
         numFiles: 'JS files',
-        uncompressedSize: 'JS size (raw)',
+        uncompressedSize: 'JS size (raw / gzip / brotli)',
         gzipSize: 'JS size (gzip)',
-        brotliSize: 'JS size (brotli)'
+        brotliSize: 'JS size (brotli)',
+        'first-meaningful-paint': 'First Meaningful Paint',
+        'speed-index': 'Speed Index',
+        'first-cpu-idle': 'First CPU Idle',
+        'interactive': 'Time to Interactive',
+        
     }
     
     let tables = [];

@@ -12,24 +12,24 @@ Great question! Microsite treats every byte of JavaScript as an opt-in, which me
 
 ## Microsite
 
-| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) |
-| :-------- | -------: | -------: | ------------: | -------------: | ---------------: |
-| static    |     2.1s |        0 |            0B |             0B |               0B |
-| counter   |       2s |        2 |        2.83kB |         1.54kB |           1.38kB |
+| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) | First Meaningful Paint | Speed Index | First CPU Idle | Time to Interactive |
+| :-------- | -------: | -------: | ------------: | -------------: | ---------------: | ---------------------: | ----------: | -------------: | ------------------: |
+| static    |     2.8s |        0 |            0B |             0B |               0B |                  0.9 s |       0.9 s |          0.9 s |               0.9 s |
+| counter   |     2.2s |        2 |        2.84kB |         1.55kB |           1.40kB |                  1.0 s |       1.0 s |          1.0 s |               1.0 s |
 
 ## NextJS
 
-| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) |
-| :-------- | -------: | -------: | ------------: | -------------: | ---------------: |
-| static    |     6.1s |       12 |      294.98kB |        98.71kB |          87.72kB |
-| counter   |     9.5s |       10 |      295.85kB |        99.03kB |          87.99kB |
+| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) | First Meaningful Paint | Speed Index | First CPU Idle | Time to Interactive |
+| :-------- | -------: | -------: | ------------: | -------------: | ---------------: | ---------------------: | ----------: | -------------: | ------------------: |
+| static    |    10.2s |       10 |      294.56kB |        98.42kB |          87.47kB |                  2.5 s |       2.5 s |          2.5 s |               2.5 s |
+| counter   |     9.5s |       10 |      295.85kB |        99.03kB |          87.99kB |                  2.5 s |       2.5 s |          2.5 s |               2.5 s |
 
 ## Gatsby
 
-| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) |
-| :-------- | -------: | -------: | ------------: | -------------: | ---------------: |
-| static    |    10.2s |        6 |      392.92kB |       123.66kB |          91.69kB |
-| counter   |      10s |        6 |      393.23kB |       123.75kB |          91.79kB |
+| Benchmark | Duration | JS files | JS size (raw) | JS size (gzip) | JS size (brotli) | First Meaningful Paint | Speed Index | First CPU Idle | Time to Interactive |
+| :-------- | -------: | -------: | ------------: | -------------: | ---------------: | ---------------------: | ----------: | -------------: | ------------------: |
+| static    |    10.9s |        6 |      392.92kB |       123.66kB |          91.69kB |                  2.8 s |       2.8 s |          2.8 s |               2.8 s |
+| counter   |      10s |        6 |      393.23kB |       123.75kB |          91.79kB |                  2.8 s |       2.8 s |          2.8 s |               2.8 s |
 
 <!-- ENDTABLE -->
 
