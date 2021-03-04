@@ -1,5 +1,5 @@
 {
-  "name": "@benchmark/gatsby",
+  "name": "@benchmark/gatsby-static",
   "version": "1.0.0",
   "private": true,
   "scripts": {

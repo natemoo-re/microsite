@@ -9,8 +9,10 @@ import { performance } from 'perf_hooks';
 
 const { remove } = fse;
 let SAMPLED_RUNS = 15;
-const BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
-const BENCHMARK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
+const FRAMEWORKS = ['microsite', 'next', 'gatsby'];
+const TYPES = ['static'];
+const BENCHMARKS = [].concat(...FRAMEWORKS.map(f => TYPES.map(t => `${f}/${t}`)));
+const FRAMEWORK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
 const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
 const BENCHMARK_OUTDIR = ['dist', 'out', 'public'];
 
@@ -27,7 +29,7 @@ async function runCmd(cmd, dir = '.') {
 
 async function benchmark(name) {
     const index = BENCHMARKS.indexOf(name);
-    const label = BENCHMARK_NAMES[index];
+    const label = FRAMEWORK_NAMES[index];
     const samples = [];
     const build = 'npm run build';
     const dir = `./benchmark/${name}`;
@@ -71,7 +73,7 @@ async function benchmark(name) {
     const numFiles = samples[samples.length - 1].numFiles;
 
     return { 
-        name: { value: name, label },
+        name: { value: name, label: name.split('/').pop() },
         duration: { value: avgDuration, label: formatMs(avgDuration) },
         numFiles: { value: numFiles, label: numFiles },
         uncompressedSize: { value: avgSize, label: avgSize > 0 ? formatBytes(avgSize).text : '0B' },
@@ -101,7 +103,7 @@ async function run() {
     }
 
     const labels = {
-        name: 'Framework'.padEnd(20, ' '),
+        name: 'Benchmark'.padEnd(20, ' '),
         duration: 'Duration',
         numFiles: 'JS files',
         uncompressedSize: 'JS size (raw)',
@@ -109,25 +111,31 @@ async function run() {
         brotliSize: 'JS size (brotli)'
     }
     
-    let table = [];
+    let tables = [];
     const header = Object.values(labels).join(' | ');
-    table.push('\n' + `| ${header} |`);
-    table.push(`| ${Object.values(labels).map((label, i) => `${i === 0 ? ':' : ''}${'-'.repeat(label.length - 1)}${i !== 0 ? ':' : ''}`).join(' | ')} |`)
-    BENCHMARKS.forEach((name) => {
-        const row = Object.entries(labels).map(([key, label], i) => {
-            const method = i === 0 ? 'padEnd' : 'padStart';
-            const len = label.length;
-            return `${frameworks[name][key].label}`[method](len);
-        }).join(' | ');
-        table.push(`| ${row} |`);
+    FRAMEWORKS.forEach((name) => {
+        let table = [];
+        table.push('\n' + `| ${header} |`);
+        table.push(`| ${Object.values(labels).map((label, i) => `${i === 0 ? ':' : ''}${'-'.repeat(label.length - 1)}${i !== 0 ? ':' : ''}`).join(' | ')} |`)
+        
+        TYPES.forEach((type) => {
+            const row = Object.entries(labels).map(([key, label], i) => {
+                const method = i === 0 ? 'padEnd' : 'padStart';
+                const len = label.length;
+                return `${frameworks[`${name}/${type}`][key].label}`[method](len);
+            }).join(' | ');
+            table.push(`| ${row} |`);
+        })
+        
+        tables.push(table);
     })
 
     const README = `./benchmark/README.md`;
     const text = await fse.readFile(README).then(res => res.toString());
-    const newText = text.replace(/(?<=\<!--\s*TABLE\s*-->\n)(.*)(?=<!--\s*ENDTABLE\s*-->)/gms, table.join('\n') + '\n\n');
+    const newText = text.replace(/(?<=\<!--\s*TABLE\s*-->\n)(.*)(?=<!--\s*ENDTABLE\s*-->)/gms, tables.map((table, i) => `## ${FRAMEWORK_NAMES[i]}\n${table.join('\n')}\n`).join('\n') + '\n');
     await fse.writeFile(README, newText);
 
-    console.log(table.join('\n'))
+    console.log(tables[0].join('\n'))
 }
 
 run();

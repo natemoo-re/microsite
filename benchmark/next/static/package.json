@@ -1,5 +1,5 @@
 {
-  "name": "@benchmark/next",
+  "name": "@benchmark/next-static",
   "version": "0.1.0",
   "private": true,
   "scripts": {
