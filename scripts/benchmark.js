@@ -8,8 +8,7 @@ import { gzip } from 'gzip-cli';
 
 const { remove } = fse;
 let SAMPLED_RUNS = 15;
-const ALL_BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
-let BENCHMARKS = [];
+const BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
 const BENCHMARK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
 const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
 const BENCHMARK_OUTDIR = ['dist', 'out', 'public'];
@@ -93,9 +92,6 @@ async function run() {
         return acc;
     }, {});
     SAMPLED_RUNS = args['--runs'] || 10;
-    let benchmarks = args['--suite'] || '*';
-    BENCHMARKS = benchmarks === '*' ? ALL_BENCHMARKS : benchmarks;
-    if (!Array.isArray(BENCHMARKS)) BENCHMARKS = [BENCHMARKS];
 
     const frameworks = {};
     
@@ -112,25 +108,25 @@ async function run() {
         brotliSize: 'JS size (brotli)'
     }
     
-    let comment = [];
+    let table = [];
     const header = Object.values(labels).join(' | ');
-    comment.push('\n' + header);
-    comment.push(`—`.repeat(header.length))
+    table.push('\n' + header);
+    table.push(Object.values(labels).map((label, i) => `${i === 0 ? ':' : ''}${'-'.repeat(label.length - 1)}${i !== 0 ? ':' : ''}`).join(' | '))
     BENCHMARKS.forEach((name) => {
         const row = Object.entries(labels).map(([key, label], i) => {
             const method = i === 0 ? 'padEnd' : 'padStart';
             const len = label.length;
             return `${frameworks[name][key].label}`[method](len);
         }).join(' | ');
-        comment.push(row);
-        comment.push('\n');
+        table.push(row);
+        table.push('\n');
     })
-    
-    console.log(`::set-output name=RESULT::${frameworks[BENCHMARKS[0]].duration.label}`)
 
-    console.log('::group::Results')
-    console.log(comment.join('\n'))
-    console.log('::endgroup::')
+    const README = `./benchmark/README.md`;
+    const text = await fse.readFile(README).then(res => res.toString());
+    await fse.writeFile(README, text.replace(/(?<=\<!--\s*TABLE\s*-->\n).*(?=\n<!--\s*ENDTABLE\s*-->)/gms, table.join('\n')));
+
+    console.log(table.join('\n'))
 }
 
 run();

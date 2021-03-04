@@ -1,12 +1,6 @@
 name: Benchmark
 
-on:
-  pull_request:
-    paths:
-    - 'benchmark/**/*'
-    - 'packages/microsite/**/*'
-    - 'scripts/benchmark.js'
-    - 'package.json'
+on: workflow_dispatch
 
 jobs:
   benchmark:
@@ -23,16 +17,4 @@ jobs:
 
     - run: npm run bootstrap:benchmark
 
-    - run: npm run benchmark:microsite
-      id: benchmark
-
-    - name: test benchmark
-      run: echo "${{ steps.benchmark.outputs.RESULT }}"
-
-    - name: comment PR
-      uses: unsplash/comment-on-pr@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        msg: "Base Microsite build ran in ${{ steps.benchmark.outputs.RESULT }}"
-        check_for_duplicate_msg: true
+    - run: npm run benchmark
