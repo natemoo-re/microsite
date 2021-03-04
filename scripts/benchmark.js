@@ -7,7 +7,7 @@ import size from 'glob-size';
 import { gzip } from 'gzip-cli';
 
 const { remove } = fse;
-let SAMPLED_RUNS = 5;
+let SAMPLED_RUNS = 15;
 const ALL_BENCHMARKS = ['microsite-simple', 'next-simple', 'gatsby-simple'];
 let BENCHMARKS = [];
 const BENCHMARK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
