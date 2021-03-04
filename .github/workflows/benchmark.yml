@@ -34,5 +34,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        msg: "${{ steps.benchmark.outputs.RESULT }}"
+        msg: "Base Microsite build ran in ${{ steps.benchmark.outputs.RESULT }}"
         check_for_duplicate_msg: true
