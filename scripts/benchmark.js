@@ -10,7 +10,7 @@ import { performance } from 'perf_hooks';
 const { remove } = fse;
 let SAMPLED_RUNS = 15;
 const FRAMEWORKS = ['microsite', 'next', 'gatsby'];
-const TYPES = ['static'];
+const TYPES = ['static', 'counter'];
 const BENCHMARKS = [].concat(...FRAMEWORKS.map(f => TYPES.map(t => `${f}/${t}`)));
 const FRAMEWORK_NAMES = ['Microsite', 'NextJS', 'Gatsby'];
 const BENCHMARK_CACHEDIR = ['.microsite', '.next', '.cache'];
@@ -28,8 +28,8 @@ async function runCmd(cmd, dir = '.') {
 }
 
 async function benchmark(name) {
-    const index = BENCHMARKS.indexOf(name);
-    const label = FRAMEWORK_NAMES[index];
+    const [framework, benchmark] = name.split('/')
+    const index = FRAMEWORKS.indexOf(framework);
     const samples = [];
     const build = 'npm run build';
     const dir = `./benchmark/${name}`;
@@ -73,7 +73,7 @@ async function benchmark(name) {
     const numFiles = samples[samples.length - 1].numFiles;
 
     return { 
-        name: { value: name, label: name.split('/').pop() },
+        name: { value: name, label: benchmark },
         duration: { value: avgDuration, label: formatMs(avgDuration) },
         numFiles: { value: numFiles, label: numFiles },
         uncompressedSize: { value: avgSize, label: avgSize > 0 ? formatBytes(avgSize).text : '0B' },
