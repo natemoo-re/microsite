@@ -126,7 +126,7 @@ async function run() {
         comment.push('\n');
     })
     
-    console.log(`::set-output name=RESULT::${frameworks[BENCHMARKS[0]].duration}`)
+    console.log(`::set-output name=RESULT::${frameworks[BENCHMARKS[0]].duration.label}`)
 
     console.log('::group::Results')
     console.log(comment.join('\n'))
