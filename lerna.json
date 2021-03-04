@@ -1,4 +1,4 @@
 {
-  "packages": ["packages/*", "examples/*", "benchmark/*", "site"],
+  "packages": ["packages/*", "examples/*", "benchmark/**", "site"],
   "version": "independent"
 }
