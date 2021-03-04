@@ -120,7 +120,7 @@ async function run() {
         name: 'Benchmark'.padEnd(20, ' '),
         duration: 'Build duration',
         numFiles: 'JS files',
-        uncompressedSize: 'JS size (raw / gzip / brotli)',
+        uncompressedSize: 'JS size (raw)',
         gzipSize: 'JS size (gzip)',
         brotliSize: 'JS size (brotli)',
         'first-meaningful-paint': 'First Meaningful Paint',
