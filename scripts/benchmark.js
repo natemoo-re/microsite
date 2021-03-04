@@ -124,7 +124,7 @@ async function run() {
 
     const README = `./benchmark/README.md`;
     const text = await fse.readFile(README).then(res => res.toString());
-    const newText = text.replace(/(?<=\<!--\s*TABLE\s*-->\n)(.*)(?=<!--\s*ENDTABLE\s*-->)/gms, table.join('\n'));
+    const newText = text.replace(/(?<=\<!--\s*TABLE\s*-->\n)(.*)(?=<!--\s*ENDTABLE\s*-->)/gms, table.join('\n') + '\n\n');
     await fse.writeFile(README, newText);
 
     console.log(table.join('\n'))
