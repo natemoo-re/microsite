@@ -126,10 +126,10 @@ async function run() {
         comment.push('\n');
     })
     
-    console.log(`::set-output name=RESULT::${comment.join('\n')}`);
+    console.log(`::set-output name=RESULT::${frameworks[BENCHMARKS[0]].duration}`)
 
     console.log('::group::Results')
-    console.log(comment.join('\n'));
+    console.log(comment.join('\n'))
     console.log('::endgroup::')
 }
 

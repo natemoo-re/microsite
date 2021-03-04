@@ -27,7 +27,7 @@ jobs:
       id: benchmark
 
     - name: test benchmark
-      run: echo ${{ steps.benchmark.outputs.RESULT }}
+      run: echo "${{ steps.benchmark.outputs.RESULT }}"
 
     - name: comment PR
       uses: unsplash/comment-on-pr@master
