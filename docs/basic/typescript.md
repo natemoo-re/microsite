@@ -41,7 +41,7 @@ To imporve the type inference for `getStaticPaths` and `getStaticProps`, you may
 ```tsx
 import { definePage } from 'microsite/page';
 
-const MyPage = () => {};
+const Post = () => {};
 
 export default definePage(Post, {
     path: '/posts/[slug]',
