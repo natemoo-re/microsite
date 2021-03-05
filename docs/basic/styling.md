@@ -42,7 +42,7 @@ Microsite automatically detects if you have a PostCSS configuration file and wil
 
 ## CSS-in-JS
 
-Microsite currently support some CSS-in-JS solutions.
+Support for CSS-in-JS solutions is coming in `v1.1.0`. There are currently some examples on the `v1.1.0` branch, but more will be added soon.
 
-- [Fela](../../examples/with-fela)
-- [Goober](../../examples/with-goober)
+- [Fela](https://github.com/natemoo-re/microsite/tree/v1.1.0/examples/with-fela)
+- [Goober](https://github.com/natemoo-re/microsite/tree/v1.1.0/examples/with-goober)
