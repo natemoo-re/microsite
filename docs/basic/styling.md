@@ -44,5 +44,5 @@ Microsite automatically detects if you have a PostCSS configuration file and wil
 
 Microsite currently support some CSS-in-JS solutions.
 
-- [Fela](../../examples/with-fela.md)
-- [Goober](../../examples/with-goober.md)
+- [Fela](../../examples/with-fela)
+- [Goober](../../examples/with-goober)
