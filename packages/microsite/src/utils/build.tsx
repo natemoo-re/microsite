@@ -54,7 +54,7 @@ export const proxyImportTransformer = {
     }),
 };
 
-const PREACT_IMPORT_REGEX = /^.*_snowpack/pkg/preact([\/\w]+)?\.js$/gm;
+const PREACT_IMPORT_REGEX = /^.*_snowpack\/pkg\/preact([\/\w]+)?\.js$/gm;
 export const preactImportTransformer = {
   filter: (source: string) => PREACT_IMPORT_REGEX.test(source),
   transform: (source: string) =>
