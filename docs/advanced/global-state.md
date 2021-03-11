@@ -12,7 +12,7 @@ Microsite's partial hydration method manages each component as a seperate Preact
 Components can consume this global state object via **`useGlobalState(state)`**.
 
 ```tsx
-// utils/state.tsx
+// utils/state.ts
 import { createGlobalState } from "microsite/global";
 
 export const state = createGlobalState({
