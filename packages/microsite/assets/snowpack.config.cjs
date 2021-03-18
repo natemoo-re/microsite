@@ -10,8 +10,10 @@ module.exports = {
   ],
   packageOptions: {
     source: 'local',
+    polyfillNode: true,
     external: [
       ...builtins,
+      "@micrositejs/markdown",
       "microsite/server/fetch",
       "microsite/document",
       "microsite/error",

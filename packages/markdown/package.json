@@ -1,0 +1,52 @@
+{
+  "name": "@micrositejs/markdown",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": {
+    "name": "Nate Moore",
+    "email": "nate@natemoo.re",
+    "url": "https://natemoo.re"
+  },
+  "license": "MIT",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc -p tsconfig.json --skipLibCheck"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@mdx-js/preact": "^1.6.22",
+    "esbuild": "^0.8.56",
+    "preact": "^10.5.12",
+    "preact-render-to-string": "5.1.11",
+    "remark-frontmatter": "^3.0.0",
+    "remark-mdx-frontmatter": "^1.0.1",
+    "xdm": "^1.5.1"
+  },
+  "devDependencies": {
+    "@hashicorp/remark-plugins": "^3.1.1",
+    "@types/node": "12.19.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/natemoo-re/microsite.git",
+    "directory": "packages/microsite-mdx"
+  },
+  "bugs": {
+    "url": "https://github.com/natemoo-re/microsite/issues"
+  },
+  "homepage": "https://github.com/natemoo-re/microsite#readme",
+  "volta": {
+    "node": "12.20.1"
+  },
+  "engines": {
+    "node": ">=12.20.1"
+  }
+}

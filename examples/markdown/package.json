@@ -1,0 +1,15 @@
+{
+  "name": "@example/markdown",
+  "homepage": "/markdown",
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "microsite",
+    "build": "microsite build",
+    "serve": "microsite build --serve"
+  },
+  "devDependencies": {
+    "@micrositejs/markdown": "file:../../packages/markdown/micrositejs-markdown-0.0.1.tgz",
+    "microsite": "file:../../packages/microsite/microsite-1.1.0-next.12.tgz"
+  }
+}
