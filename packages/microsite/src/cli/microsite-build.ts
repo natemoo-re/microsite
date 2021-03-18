@@ -2,7 +2,7 @@ import { build as buildProject } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
-import { rollup } from "rollup";
+import { GetModuleInfo, rollup } from "rollup";
 import { performance } from "perf_hooks";
 import { green, dim } from "kleur/colors";
 import styles from "rollup-plugin-styles";
@@ -222,6 +222,8 @@ async function fetchRouteData(paths: string[]) {
   return routeData;
 }
 
+type ModuleInfo = ReturnType<GetModuleInfo>;
+
 /**
  * This function runs rollup on Snowpack's output to
  * extract the hydrated chunks and prepare the pages to be
@@ -272,6 +274,8 @@ async function bundlePagesForSSR(paths: string[]) {
     },
   });
 
+  let entries = new Set<string>();
+  let entryHydrations: Record<string, Set<string>> = {};
   let sharedModuleCssProxyEntries = new Set<string>();
 
   const { output } = await bundle.generate({
@@ -312,10 +316,20 @@ async function bundlePagesForSSR(paths: string[]) {
         ...info.dynamicImporters,
       ]);
 
+      let moduleInfoById: Record<string, ModuleInfo> = {};
+
       for (const moduleId of idsToHandle) {
-        const { isEntry, dynamicImporters, importers } = getModuleInfo(
-          moduleId
-        );
+          const moduleInfo = getModuleInfo(moduleId);
+
+          moduleInfoById[moduleId] = moduleInfo;
+
+          for (const importerId of moduleInfo.importers)
+              idsToHandle.add(importerId);
+      }
+
+      for (const moduleId of idsToHandle) {
+        const moduleInfo = moduleInfoById[moduleId];
+        const { isEntry, dynamicImporters, importers } = moduleInfo;
 
         // TODO: naive check to see if module is a "facade" to only export sub-modules (something like `/components/index.ts`)
         // const isFacade = (basename(moduleId, extname(moduleId)) === 'index') && !isEntry && importedIds.every(m => dirname(m).startsWith(dirname(moduleId)));
@@ -323,13 +337,17 @@ async function bundlePagesForSSR(paths: string[]) {
         if (isEntry || [...importers, ...dynamicImporters].length > 0)
           target.push(moduleId);
 
-        for (const importerId of importers) idsToHandle.add(importerId);
+        if (isEntry) {
+          entries.add(moduleId);
+        }
       }
+
+      let manualChunkId: string;
 
       if (dependentHydrateEntryPoints.length > 1) {
         // All shared components should go in the same chunk (for now)
         // Eventually this could be optimized to split into a few chunks based on how many entry points rely on them
-        return `_hydrate/chunks/_shared`;
+        manualChunkId = `_hydrate/chunks/_shared`;
       }
 
       if (dependentStaticEntryPoints.length > 1) {
@@ -339,9 +357,9 @@ async function bundlePagesForSSR(paths: string[]) {
               entry.replace(/^.*\/pages\//gim, "pages/")
             )
           );
-          return `_static/chunks/_classnames`;
+          manualChunkId = `_static/chunks/_classnames`;
         }
-        return "_static/chunks/_shared";
+        manualChunkId = "_static/chunks/_shared";
       }
 
       if (dependentHydrateEntryPoints.length === 1) {
@@ -351,10 +369,34 @@ async function bundlePagesForSSR(paths: string[]) {
           dependentHydrateEntryPoints[0]
         ).replace(/^pages\//, "")}-${hash}`;
 
-        return `_hydrate/chunks/${filename}`;
+        manualChunkId = `_hydrate/chunks/${filename}`;
       }
+
+      for (const moduleId of dependentHydrateEntryPoints) {
+        if (entries.has(moduleId)) {
+          if (!(moduleId in entryHydrations)) {
+            entryHydrations[moduleId] = new Set();
+          }
+
+          entryHydrations[moduleId].add(manualChunkId);
+        }
+      }
+
+      return manualChunkId;
     },
   });
+
+  const hydrationExports = output.reduce((acc, chunkOrAsset) => {
+    if (
+      chunkOrAsset.type !== 'asset' &&
+      chunkOrAsset.name.startsWith("_hydrate/")
+    ) {
+      return {
+        ...acc,
+        [chunkOrAsset.name]: chunkOrAsset.exports,
+      };
+    }
+  }, {});
 
   const manifest: ManifestEntry[] = [];
 
@@ -459,6 +501,19 @@ async function bundlePagesForSSR(paths: string[]) {
             chunkOrAsset.importedBindings
           )) {
             if (file.startsWith("_hydrate/")) {
+              hydrateBindings = Object.assign(hydrateBindings, {
+                [file]: exports,
+              });
+            }
+          }
+
+          const id = chunkOrAsset.facadeModuleId;
+
+          if (id in entryHydrations) {
+            for (const hydration of entryHydrations[id]) {
+              const exports = hydrationExports[hydration] ?? [];
+              const file = `${hydration}.js`;
+
               hydrateBindings = Object.assign(hydrateBindings, {
                 [file]: exports,
               });
