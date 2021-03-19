@@ -78,7 +78,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
         },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
-          ...(userConfig.aliases ?? {}),
+          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
@@ -95,7 +95,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
         },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
-          ...(userConfig.aliases ?? {}),
+          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
         },
