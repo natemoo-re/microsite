@@ -1,8 +1,8 @@
 import { h, createContext, Fragment, FunctionalComponent } from "preact";
 import { useRef, useContext, Ref } from "preact/hooks";
-import { __HeadContext } from "./document.js";
+import { __HeadContext, __InternalDocContext } from "./document.js";
 
-import render, { renderToString } from "preact-render-to-string";
+import render from "preact-render-to-string";
 
 export let warned = false;
 interface OpenGraphBase {
@@ -73,8 +73,6 @@ export const __SeoContext = createContext<{ seo: Ref<SEO> }>({
   seo: { current: {} },
 });
 
-const isComment = (node: Node): node is Comment =>
-  node.nodeType === node.COMMENT_NODE;
 const isElement = (node: Node): node is Element =>
   node.nodeType === node.ELEMENT_NODE;
 
@@ -321,45 +319,35 @@ export const Head: FunctionalComponent<any> = ({ children }) => {
   );
 
   if (typeof window !== "undefined") {
-    if (!prevHead.current)
-      document.head.prepend(document.createComment("microsite:end"));
-
-    let html = renderToString(
+    let html = render(
       <Fragment>{head.current}</Fragment>,
       {},
       { pretty: true }
     );
+
     if (prevHead.current !== html) {
-      // TODO: this side-effect doesn't run with Snowpack HMR with cached response
-      if (prevHead.current) {
-        let managed = false;
-        for (const node of Array.from(document.head.childNodes)) {
-          if (isComment(node)) {
-            if (node.nodeValue === "microsite:start") {
-              managed = true;
-              continue;
-            }
-            if (node.nodeValue === "microsite:end") return;
-          }
-          if (managed) {
-            if (
-              isElement(node) &&
-              node.nextSibling &&
-              isComment(node.nextSibling) &&
-              node.nextSibling.nodeValue === "microsite:end"
-            ) {
-              node.insertAdjacentHTML("afterend", html);
-            }
-            node.remove();
+      let marker: Element = null;
+      let managed = false;
+      for (const node of Array.from(document.head.childNodes)) {
+        if (
+          isElement(node) &&
+          node.tagName.toLowerCase() === "meta" &&
+          node.getAttribute("name")?.startsWith("microsite")
+        ) {
+          if (node.getAttribute("name").endsWith("start")) {
+            managed = true;
+            marker = node;
+            continue;
+          } else {
+            break;
           }
         }
+        if (managed) {
+          node.remove();
+        }
       }
-    }
-    if (!prevHead.current) {
-      const template = document.createElement("template");
-      template.innerHTML = html;
-      document.head.prepend(template.content.cloneNode(true));
-      document.head.prepend(document.createComment("microsite:start"));
+
+      marker!.insertAdjacentHTML("afterend", html);
     }
 
     prevHead.current = html;

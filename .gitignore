@@ -1,6 +1,7 @@
 node_modules
 .DS_Store
 dist/
+out/
 .microsite
 *.tgz
 demo/
@@ -8,6 +9,7 @@ demo/
 .next
 
 benchmark/gatsby-simple/public
+*.log
 
 packages/microsite/**/*.js
 packages/microsite/**/*.d.ts

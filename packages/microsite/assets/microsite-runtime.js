@@ -1,4 +1,22 @@
-import { h, hydrate as mount } from "preact";
+import { h, hydrate as rehydrate, render } from "preact";
+
+if (!("requestIdleCallback" in window)) {
+  window.requestIdleCallback = function (cb) {
+      return setTimeout(function () {
+        var start = Date.now();
+        cb({
+          didTimeout: false,
+          timeRemaining: function () {
+            return Math.max(0, 50 - (Date.now() - start));
+          },
+        });
+      }, 1);
+    };
+
+  window.cancelIdleCallback = function (id) {
+    clearTimeout(id);
+  };
+}
 
 const createObserver = (hydrate) => {
   if (!("IntersectionObserver" in window)) return null;
@@ -16,20 +34,25 @@ const createObserver = (hydrate) => {
   return io;
 };
 
-function attach(fragment, data, { key, name, source }) {
-  const { p: { children = null, ...props } = {}, m: method = "idle" } = data;
+function attach(fragment, data, { key, name, source }, cb) {
+  const { p: { children = null, ...props } = {}, m: method = "idle", f: flush } = data;
 
   const hydrate = async () => {
     if (window.__MICROSITE_DEBUG)
       console.log(`[Hydrate] <${key} /> hydrated via "${method}"`);
     const { [name]: Component } = await import(source);
-    mount(h(Component, props, children), fragment);
+    
+    if (flush) {
+      render(h(Component, props, children), fragment);
+    } else {
+      rehydrate(h(Component, props, children), fragment);
+    }
+    if (cb) cb();
   };
 
   switch (method) {
     case "idle": {
       if (
-        !("requestIdleCallback" in window) ||
         !("requestAnimationFrame" in window)
       )
         return setTimeout(hydrate, 0);
@@ -66,6 +89,7 @@ function createPersistentFragment(parentNode, childNodes) {
   }
   return {
     parentNode,
+    firstChild: childNodes[0],
     childNodes,
     appendChild: insert,
     insertBefore: insert,
@@ -145,17 +169,13 @@ export default (manifest) => {
       const { c: Component } = data;
       const [name, source] = manifest[Component];
       if (name && source) {
-        attach(fragment, data, { key: Component, name, source });
+        attach(fragment, data, { key: Component, name, source }, () => {
+          fragment.childNodes.forEach(child => child.tagName === 'HYDRATE-PLACEHOLDER' ? child.remove() : null);
+          markers.forEach((marker) => marker.remove())
+        });
       }
-
-      requestIdleCallback(() => {
-        markers.forEach((marker) => marker.remove());
-      });
     }
   };
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(init, { timeout: 1000 });
-  } else {
-    init();
-  }
+
+  requestIdleCallback(init, { timeout: 1000 });
 };

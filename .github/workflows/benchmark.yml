@@ -1,0 +1,24 @@
+name: Benchmark
+
+on: [workflow_dispatch]
+
+jobs:
+  benchmark:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Volta
+      uses: volta-cli/action@v1
+    
+    - run: npm ci
+
+    - run: npm run bootstrap:benchmark
+
+    - run: npm run benchmark
+
+    - uses: EndBug/add-and-commit@v7
+      with:
+        add: 'benchmark/README.md'

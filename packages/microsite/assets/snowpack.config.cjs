@@ -8,9 +8,9 @@ module.exports = {
     '@prefresh/snowpack',
     'microsite/assets/snowpack-plugin.cjs'
   ],
-  installOptions: {
-    installTypes: true,
-    externalPackage: [
+  packageOptions: {
+    source: 'local',
+    external: [
       ...builtins,
       "microsite/server/fetch",
       "microsite/document",
@@ -31,6 +31,7 @@ module.exports = {
     out: '.microsite/staging',
     jsxFactory: 'h',
     jsxFragment: 'Fragment',
+    jsxInject: 'import { h, Fragment } from "preact";',
     sourceMaps: false
   },
   mount: {

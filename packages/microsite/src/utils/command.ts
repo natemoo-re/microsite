@@ -6,6 +6,7 @@ const require = createRequire(import.meta.url);
 import { fileExists } from "./fs.js";
 import { createConfiguration } from "snowpack";
 import cc from "cosmiconfig";
+import { yellow } from "kleur/colors";
 const { cosmiconfig } = cc;
 const _config = require("microsite/assets/snowpack.config.cjs");
 
@@ -39,7 +40,22 @@ export async function loadConfiguration(mode: "dev" | "build") {
     ? resolveTsconfigPathsToAlias({ tsconfigPath })
     : {};
   const userConfig = snowpackconfigPath ? require(snowpackconfigPath) : {};
-
+  
+  if (usesPostCSS) {
+    const missing = [];
+    const deps = ['@snowpack/plugin-postcss', 'postcss', 'postcss-cli'];
+    deps.forEach(dependency => {
+      try {
+        require.resolve(dependency);
+      } catch (e) {
+        missing.push(dependency);
+      }
+    });
+    if (missing.length > 0) {
+      console.error(yellow(`It looks like you're trying to use PostCSS!\nMicrosite will automatically use your configuration, but requires some 'devDependencies' to do so.\n\nPlease run 'npm install --save-dev ${missing.join(' ')}'\n`));
+      process.exit(1);
+    }
+  }
   const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
@@ -47,32 +63,48 @@ export async function loadConfiguration(mode: "dev" | "build") {
       return createConfiguration({
         ...userConfig,
         ..._config,
+        buildOptions: {
+          ...userConfig.buildOptions,
+          ..._config.buildOptions,
+          ssr: true
+        },
+        packageOptions: {
+          ...userConfig.packageOptions,
+          ..._config.packageOptions,
+          external: [
+            ...(userConfig.packageOptions?.external ?? []),
+            ..._config.packageOptions.external,
+          ].filter((v) => !v.startsWith('microsite'))
+        },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
-          ...(userConfig.aliases ?? {}),
+          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
-        },
-        installOptions: {
-          ...(userConfig.installOptions ?? {}),
-          ..._config.installOptions,
-          externalPackage: ["/web_modules/microsite/_error.js"],
         },
       });
     case "build":
       return createConfiguration({
         ...userConfig,
         ..._config,
+        buildOptions: {
+          ...userConfig.buildOptions,
+          ..._config.buildOptions,
+          ssr: true
+        },
         plugins: [...additionalPlugins, ..._config.plugins, ...(userConfig.plugins ?? [])],
         alias: {
-          ...(userConfig.aliases ?? {}),
+          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
         },
-        installOptions: {
-          ...(userConfig.installOptions ?? {}),
-          ..._config.installOptions,
+        packageOptions: {
+          ..._config.packageOptions,
+          external: [
+            ...(userConfig.packageOptions?.external ?? []),
+            ..._config.packageOptions.external,
+          ].filter((v) => v !== "preact"),
           rollup: {
             ...(userConfig.installOptions?.rollup ?? {}),
             ...(_config.installOptions?.rollup ?? {}),
@@ -85,11 +117,7 @@ export async function loadConfiguration(mode: "dev" | "build") {
                 }
               }
             ],
-          },
-          externalPackage: [
-            ...(userConfig.installOptions?.externalPackage ?? []),
-            ..._config.installOptions.externalPackage,
-          ].filter((v) => v !== "preact"),
+          }
         },
       });
   }

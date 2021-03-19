@@ -1,5 +1,58 @@
 # microsite
 
+## 1.1.0-next.11
+
+### Patch Changes
+
+- 6723b24: Adds a `fallback` option to `withHydrate` to allow customization of server-side rendering behavior.
+
+## 1.1.0-next.10
+
+### Patch Changes
+
+- 7fcba84: Fix error with previous shared CSS module logic, adds \_static output directory
+
+## 1.1.0-next.9
+
+### Patch Changes
+
+- 64ca86e: Fix missed edge case with CSS module assets shared between pages (#126)
+
+## 1.1.0-next.8
+
+### Patch Changes
+
+- 3d8b6e0: Prefer pinned Skypack URLs to lookup URLs. Improves load waterfall significantly. Fixes #106.
+- 81b1f9a: Update snowpack to snowpack@3.0.13
+
+## 1.1.0-next.7
+
+### Patch Changes
+
+- fix(#119): remove `defer` from inline script`
+- fix(#115): do not include vendor chunk in hydrateBindings
+
+## 1.1.0-next.6
+
+### Patch Changes
+
+- ddd48ea: Include shim for `requestIdleCallback` for Safari
+- d486147: Update hydration method to be compatible with `preact@10.5.11+`. Allows `preact@^10.5.12`.
+
+## 1.1.0-next.5
+
+### Patch Changes
+
+- Pin `preact@10.5.10` and `snowpack@~3.0.11`
+
+## 1.1.0-next.4
+
+### Patch Changes
+
+- 4c63780: Fix <Head> component bug
+- 669eab2: Remove prettier from core dependencies
+- 1eb8733: Remove PostCSS logic from core dependencies. Microsite will prompt users to install PostCSS locally if detected.
+
 ## 1.1.0-next.3
 
 ### Patch Changes
