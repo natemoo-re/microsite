@@ -5,6 +5,7 @@ const isServer = typeof window === "undefined";
 export const HydrateContext = createContext<string | false>(false);
 
 export interface HydrationProps {
+  displayName?: string;
   method?: "idle" | "visible";
   fallback?: VNode<any> | null;
 }
@@ -13,7 +14,7 @@ export function withHydrate<T extends FunctionComponent<any>>(
   Component: T,
   hydrationProps: HydrationProps = {}
 ): T {
-  const name = Component.displayName || Component.name;
+  const name = hydrationProps.displayName || Component.displayName || Component.name;
   const { method, fallback: Fallback } = hydrationProps;
 
   const Wrapped: FunctionComponent<any> = (props, ref) => {
