@@ -31,6 +31,7 @@ module.exports = {
     out: '.microsite/staging',
     jsxFactory: 'h',
     jsxFragment: 'Fragment',
+    jsxInject: 'import { h, Fragment } from "preact";',
     sourceMaps: false
   },
   mount: {

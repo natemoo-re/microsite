@@ -142,12 +142,11 @@ async function copyHydrateAssets(
   manifest: ManifestEntry[],
   globalStyle?: string | null
 ) {
-  const service = await esbuild.startService();
   let tasks: any = [];
   const transform = async (source: string) => {
     source = stripWithHydrate(source);
     source = await preactToCDN(source);
-    const result = await service.transform(source, {
+    const result = await esbuild.transform(source, {
       minify: true,
       minifyIdentifiers: false,
     });
@@ -168,7 +167,7 @@ async function copyHydrateAssets(
   ) {
     const transformInit = async (source: string) => {
       source = await preactToCDN(source);
-      const result = await service.transform(source, {
+      const result = await esbuild.transform(source, {
         minify: true,
       });
       return result.code;
@@ -196,7 +195,6 @@ async function copyHydrateAssets(
     ...jsAssets.map((asset) => copyAssetToFinal(asset, transform)),
     ...hydrateStyleAssets.map((asset) => copyAssetToFinal(asset)),
   ]);
-  service.stop();
   return;
 }
 
@@ -396,6 +394,7 @@ async function bundlePagesForSSR(paths: string[]) {
         [chunkOrAsset.name]: chunkOrAsset.exports,
       };
     }
+    return acc;
   }, {});
 
   const manifest: ManifestEntry[] = [];

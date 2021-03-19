@@ -43,12 +43,12 @@
     "**/*.d.ts"
   ],
   "dependencies": {
-    "@prefresh/snowpack": "^3.0.2",
+    "@prefresh/snowpack": "^3.1.1",
     "@snowpack/plugin-dotenv": "^2.0.5",
     "arg": "^5.0.0",
     "cacache": "^15.0.5",
     "cosmiconfig": "^7.0.0",
-    "esbuild": "^0.8.16",
+    "esbuild": "^0.9.5",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "http-cache-semantics": "^4.1.0",
@@ -57,12 +57,12 @@
     "open": "^7.3.0",
     "path-browserify": "^1.0.1",
     "polka": "^0.5.2",
-    "preact": "^10.5.12",
-    "preact-render-to-string": "5.1.11",
+    "preact": "^10.5.13",
+    "preact-render-to-string": "^5.1.16",
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
     "sirv": "^1.0.10",
-    "snowpack": "~3.0.13"
+    "snowpack": "^3.1.1"
   },
   "devDependencies": {
     "@types/node": "^12.19.0",

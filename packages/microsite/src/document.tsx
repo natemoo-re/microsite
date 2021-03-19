@@ -127,6 +127,7 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
 
 export const MicrositeScript: FunctionalComponent = () => {
   const {
+    __csrUrl,
     debug,
     hasGlobalScript,
     basePath,
@@ -149,7 +150,7 @@ export const MicrositeScript: FunctionalComponent = () => {
           <script
             type="module"
             dangerouslySetInnerHTML={{
-              __html: `import csr from '/_snowpack/pkg/microsite/client/csr.js';
+              __html: `import csr from '${__csrUrl}';
 import Page from '${dev}';
 csr(Page, ${JSON.stringify(devProps)});`,
             }}

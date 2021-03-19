@@ -1,4 +1,4 @@
-import { ServerRuntime, startServer } from "snowpack";
+import { ServerRuntime, SnowpackDevServer, startServer } from "snowpack";
 import arg from "arg";
 import { join, resolve, extname } from "path";
 import type { IncomingMessage, ServerResponse } from "http";
@@ -14,8 +14,10 @@ import { generateStaticPropsContext } from "../utils/router.js";
 
 const noop = () => Promise.resolve();
 
+let devServer: SnowpackDevServer;
 let runtime: ServerRuntime;
 let renderToString: any;
+let csrSrc: string;
 let Document: any;
 let __HeadContext: any;
 let __InternalDocContext: any;
@@ -31,11 +33,11 @@ const loadErrorPage = async () => {
       ErrorPage = UserErrorPage;
       errorSrc = "/src/pages/_error.js";
     } catch (e) {
+      errorSrc = await devServer.getUrlForPackage('microsite/error');
       const {
         exports: { default: InternalErrorPage },
-      } = await runtime.importModule("/_snowpack/pkg/microsite/error.js");
+      } = await runtime.importModule(errorSrc);
       ErrorPage = InternalErrorPage;
-      errorSrc = "/_snowpack/pkg/microsite/error.js";
     }
   }
   return [ErrorPage, errorSrc];
@@ -43,14 +45,17 @@ const loadErrorPage = async () => {
 
 const renderPage = async (page: string, initialProps?: any) => {
   if (!renderToString) {
+    const preactRenderToStringSrc = await devServer.getUrlForPackage('preact-render-to-string');
     renderToString = await runtime
-      .importModule("/_snowpack/pkg/preact-render-to-string.js")
+      .importModule(preactRenderToStringSrc)
       .then(({ exports: { default: mod } }) => mod);
   }
   if (!Document) {
+    const [documentSrc, csrUrl] = await Promise.all([devServer.getUrlForPackage('microsite/document'), devServer.getUrlForPackage('microsite/client/csr')]);
+    csrSrc = csrUrl;
     const {
         exports: { Document: InternalDocument, __HeadContext: __Head, __InternalDocContext: __Doc },
-      } = await runtime.importModule("/_snowpack/pkg/microsite/document.js");
+      } = await runtime.importModule(documentSrc);
       __HeadContext = __Head;
       __InternalDocContext = __Doc;
     try {
@@ -144,6 +149,7 @@ const renderPage = async (page: string, initialProps?: any) => {
     const docContext = {
       dev: page,
       devProps: pageProps ?? {},
+      __csrUrl: csrSrc,
       __renderPageHead: headContext.head.current,
       __renderPageResult,
     };
@@ -191,6 +197,7 @@ export default async function dev(
     config,
     lockfile: null,
   });
+  devServer = snowpack;
   runtime = snowpack.getServerRuntime();
   
   snowpack.onFileChange(({ filePath }) => {
