@@ -1,5 +1,6 @@
 {
   "name": "@benchmark/microsite-counter",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start": "microsite",
@@ -9,7 +10,7 @@
   "devDependencies": {
     "husky": "^4.3.0",
     "lint-staged": "^10.4.2",
-    "microsite": "^1.1.0-next.7",
+    "microsite": "^1.1.0",
     "prettier": "^2.1.2"
   },
   "husky": {

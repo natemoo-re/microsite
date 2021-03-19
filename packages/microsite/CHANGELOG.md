@@ -1,5 +1,39 @@
 # microsite
 
+## 1.1.0
+
+### Minor Changes
+
+- 889da9a: Implements fragment-based hydration. This is a **breaking change**&mdash;the previous behavior was to wrap any hydrated components in a `div` with `display: contents` but this new behavior has the benefit of not modifying the document flow at all.
+
+  **Breaking change**: The `interaction` hydration strategy has been removed. In practice it tended to actually _cause_ interaction delays because hydration work would occur in an input-blocking fashion. Use `idle` or `visible`.
+
+### Patch Changes
+
+- 53ea544: Fixed a bug when using any --flag with "microsite" CLI
+- 889da9a: Add support for deployment to a relative subdirectory. To enable this behavior, either set `"homepage": "/subdir"` in `package.json` or pass `--base-path=/subdir` to `microsite build`.
+- c3e1ec5: Always output hashed files with an 8 character hash
+- 0c9d426: Include shim for `requestIdleCallback` for Safari
+- 0c9d426: Fix error with previous shared CSS module logic, adds \_static output directory
+- 0c9d426: Fix <Head> component bug
+- 0c9d426: Update hydration method to be compatible with `preact@10.5.11+`. Allows `preact@^10.5.12`.
+- 0c9d426: Remove prettier from core dependencies
+- 2468a3a: Dev server now uses `etag` for caching and chunk behavior for `global/index.ts` files has been fixed
+- 06f439b: Add `--no-open` flag to `microsite dev` and `microsite build --serve`. This flag allows you to skip the default behavior of automatically opening your browser.
+- 0c9d426: Prefer pinned Skypack URLs to lookup URLs. Improves load waterfall significantly. Fixes #106.
+- 0c9d426: Adds a `fallback` option to `withHydrate` to allow customization of server-side rendering behavior.
+- 0c9d426: Pin `preact@10.5.10` and `snowpack@~3.0.11`
+- 0c9d426: Remove PostCSS logic from core dependencies. Microsite will prompt users to install PostCSS locally if detected.
+- efdc433: Add support for custom "pages/\_document.tsx" file
+- 355eb2b: Fixed a bug with custom document rendering
+- 0c9d426: Fix missed edge case with CSS module assets shared between pages (#126)
+- 0c9d426: Update snowpack to snowpack@3.0.13
+- 0c9d426: fix(#119): remove `defer` from inline script`
+
+  fix(#115): do not include vendor chunk in hydrateBindings
+
+- db45d3b: Add support for custom "snowpack.config.cjs" files
+
 ## 1.1.0-next.11
 
 ### Patch Changes
