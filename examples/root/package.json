@@ -8,7 +8,7 @@
     "serve": "microsite build --serve"
   },
   "devDependencies": {
-    "microsite": "^1.1.0"
+    "microsite": "file:../../packages/microsite"
   },
   "dependencies": {
     "title": "^3.4.2"
