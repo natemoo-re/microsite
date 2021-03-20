@@ -13,11 +13,11 @@ jobs:
     - name: Setup Volta
       uses: volta-cli/action@v1
     
-    - run: npm ci
+    - run: yarn
 
-    - run: npm run bootstrap:benchmark
+    - run: yarn bootstrap:benchmark
 
-    - run: npm run benchmark
+    - run: yarn benchmark
 
     - uses: EndBug/add-and-commit@v7
       with:
