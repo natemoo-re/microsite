@@ -13,7 +13,7 @@
     "microsite": "./dist/bin/microsite.js"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "prebuild": "node ./scripts/clean.js",
     "build": "tsc -p tsconfig.json --skipLibCheck"
   },

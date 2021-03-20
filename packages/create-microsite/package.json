@@ -13,7 +13,7 @@
     "create-microsite": "./index.js"
   },
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "build": "tsc -p tsconfig.json"
   },
   "files": [
