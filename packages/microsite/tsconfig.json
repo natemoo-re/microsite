@@ -5,10 +5,9 @@
     "skipDefaultLibCheck": true,
     "declaration": true,
     "declarationDir": "./",
-    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
     "experimentalDecorators": true,
     "lib": ["dom", "ES2019"],
-    "outDir": "./dist",
     "moduleResolution": "Node",
     "module": "ESNext",
     "target": "ES2017",
@@ -18,6 +17,7 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./src",
+    "outDir": "./dist"
   },
   "include": ["src", "./internal.d.ts"],
   "exclude": ["node_modules"]

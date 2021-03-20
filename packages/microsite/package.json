@@ -14,27 +14,26 @@
   },
   "scripts": {
     "prepare": "yarn build",
-    "prebuild": "node ./scripts/clean.js",
-    "build": "tsc -p tsconfig.json --skipLibCheck"
+    "types": "tsc -p . --skipLibCheck --emitDeclarationOnly",
+    "clean": "node ./scripts/clean.js",
+    "prebuild": "yarn clean && yarn types",
+    "build": "node ./scripts/build.js"
   },
   "exports": {
-    "./base": "./base.json",
-    "./base.json": "./base.json",
-    "./client/csr": "./dist/client/csr.js",
-    "./client/hooks": "./dist/client/hooks.js",
-    "./client/hydrate": "./dist/client/hydrate.js",
-    "./server/fetch": "./dist/server/fetch.js",
     "./document": "./dist/document.js",
     "./error": "./dist/error.js",
     "./global": "./dist/global.js",
     "./head": "./dist/head.js",
     "./hydrate": "./dist/hydrate.js",
     "./page": "./dist/page.js",
-    "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
-    "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
+    "./client/*": "./dist/client/*.js",
+    "./server/*": "./dist/server/*.js",
+    "./assets/*.cjs": "./assets/*.cjs",
+    "./assets/*.js": "./assets/*.js",
     "./assets/types/*": "./assets/types/*.d.ts",
-    "./assets/microsite-runtime.js": "./assets/microsite-runtime.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./base": "./base.json",
+    "./base.json": "./base.json"
   },
   "files": [
     "assets",
@@ -45,8 +44,15 @@
   "dependencies": {
     "@prefresh/snowpack": "^3.1.1",
     "@snowpack/plugin-dotenv": "^2.0.5",
+    "preact": "^10.5.13",
+    "preact-render-to-string": "^5.1.16",
+    "rollup": "^2.32.1",
+    "rollup-plugin-styles": "^3.11.0",
+    "snowpack": "^3.1.1",
+    "esbuild": "^0.9.5"
+  },
+  "devDependencies": {
     "arg": "^5.0.0",
-    "esbuild": "^0.9.5",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "kleur": "^4.1.3",
@@ -54,14 +60,7 @@
     "open": "^7.3.0",
     "path-browserify": "^1.0.1",
     "polka": "^0.5.2",
-    "preact": "^10.5.13",
-    "preact-render-to-string": "^5.1.16",
-    "rollup": "^2.32.1",
-    "rollup-plugin-styles": "^3.11.0",
     "sirv": "^1.0.10",
-    "snowpack": "^3.1.1"
-  },
-  "devDependencies": {
     "@types/node": "^12.19.0",
     "del": "^6.0.0"
   },

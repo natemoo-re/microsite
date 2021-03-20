@@ -170,9 +170,11 @@ export const copyAssetToFinal = async (
   );
 
 const importPage = (filename: string) =>
-  import(resolve(process.cwd(), join(SSR_DIR, filename))).then(
-    (mod) => mod.default
-  );
+  import(resolve(process.cwd(), join(SSR_DIR, filename)))
+    .then((mod) => mod.default)
+    .catch((reason) => {
+      console.error(`Unable to import ${filename}!\n`, reason);
+    });
 
 let UserDocument = null;
 const getDocument = async (): Promise<typeof InternalDocument> => {
@@ -265,18 +267,23 @@ export const unwrapPage = (Page: any) => {
 let noop: any = () => Promise.resolve();
 
 export const importDataMethods = (path: string): Promise<DataHandlers> =>
-  import(path).then((mod) => {
-    const Page = mod.default;
-    let getStaticPaths = noop;
-    let getStaticProps = noop;
+  import(path)
+    .then((mod) => {
+      const Page = mod.default;
+      let getStaticPaths = noop;
+      let getStaticProps = noop;
 
-    if (Page.Component) {
-      getStaticPaths = Page.getStaticPaths ?? noop;
-      getStaticProps = Page.getStaticProps ?? noop;
-    }
+      if (Page.Component) {
+        getStaticPaths = Page.getStaticPaths ?? noop;
+        getStaticProps = Page.getStaticProps ?? noop;
+      }
 
-    return { getStaticPaths, getStaticProps };
-  });
+      return { getStaticPaths, getStaticProps };
+    })
+    .catch((reason) => {
+      console.error(`Unable to import ${path}!\n`, reason);
+      return { getStaticPaths: noop, getStaticProps: noop };
+    });
 
 interface DataHandlers {
   getStaticPaths?: (ctx?: any) => any;
