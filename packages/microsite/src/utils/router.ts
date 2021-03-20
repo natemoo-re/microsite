@@ -55,7 +55,7 @@ function getParamsFromPath(fileName: string, path: string): Params {
 
 const stripLeadingSlash = (str: string) => str.replace(/^\//, "");
 const stripTrailingExt = (str: string) => str.replace(/\..*$/, "");
-const normalizePathName = (str: string) =>
+export const normalizePathName = (str: string) =>
   stripTrailingExt(stripLeadingSlash(str));
 
 export function getPathFromParams(fileName: string, params: Params): string {
