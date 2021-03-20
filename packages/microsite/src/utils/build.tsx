@@ -70,12 +70,19 @@ export const preactImportTransformer = {
     }),
 };
 
-const PREACT_VERSION = require("preact/package.json").version;
+const PREACT_PKG = require("preact/package.json");
+const PREACT_VERSION = PREACT_PKG.version;
 
-const PREACT_CDN_LOOKUP = {
-  preact: `https://cdn.skypack.dev/preact@${PREACT_VERSION}`,
-  "preact/hooks": `https://cdn.skypack.dev/preact@${PREACT_VERSION}/hooks`,
-};
+const PREACT_CDN_LOOKUP = Object.keys(PREACT_PKG.exports).reduce((acc, key) => {
+  if (key !== "./package.json" && key !== "./") {
+    const sub = key.replace(/^\./, "");
+    return {
+      ...acc,
+      [`preact${sub}`]: `https://cdn.skypack.dev/preact@${PREACT_VERSION}${sub}`,
+    };
+  }
+  return acc;
+}, {});
 let PREACT_CDN_SOURCES = null;
 
 const resolvePreactCdnSources = async () => {
