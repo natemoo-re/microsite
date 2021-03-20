@@ -15,7 +15,7 @@ const Index: FunctionalComponent<any> = ({ renderedAt }) => {
         <ul>
           {Array.from({ length: 5 }, (_, i) => (
             <li>
-              <a href={`/posts/${i}`}>Page {i}</a>
+              <a href={`/posts/${i + 1}`}>Page {i + 1}</a>
             </li>
           ))}
         </ul>
