@@ -6,12 +6,15 @@ import module from "module";
 const { createRequire } = module;
 const require = createRequire(import.meta.url);
 
-import { Document as InternalDocument, __HeadContext, __InternalDocContext } from "../document.js";
+import {
+  Document as InternalDocument,
+  __HeadContext,
+  __InternalDocContext,
+} from "../document.js";
 import { FunctionalComponent, h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import { generateStaticPropsContext } from "./router.js";
-import fetch from 'node-fetch';
-// import { createPrefetch, getCacheEntry, getPreviousKey } from "./prefetch.js";
+import fetch from "node-fetch";
 
 export const CACHE_DIR = ".microsite/cache";
 export const STAGING_DIR = ".microsite/staging";
@@ -19,7 +22,11 @@ export const SSR_DIR = ".microsite/ssr";
 export const OUT_DIR_NO_BASE = "./dist";
 export let OUT_DIR = "./dist";
 
-export const setBasePath = (p: string) => OUT_DIR = p === '/' ? OUT_DIR : join(OUT_DIR, ...p.replace(/^\//, '').replace(/\/$/, '').split('/'));
+export const setBasePath = (p: string) =>
+  (OUT_DIR =
+    p === "/"
+      ? OUT_DIR
+      : join(OUT_DIR, ...p.replace(/^\//, "").replace(/\/$/, "").split("/")));
 
 export interface ManifestEntry {
   name: string;
@@ -75,17 +82,21 @@ const resolvePreactCdnSources = async () => {
   if (PREACT_CDN_SOURCES) return;
 
   const mdls = Object.keys(PREACT_CDN_LOOKUP);
-  const pinnedUrls = await Promise.all(mdls.map(mdl => {
-    const lookupUrl = PREACT_CDN_LOOKUP[mdl];
-    return fetch(lookupUrl).then(res => `https://cdn.skypack.dev${res.headers.get('x-pinned-url')}`);
-  }));
+  const pinnedUrls = await Promise.all(
+    mdls.map((mdl) => {
+      const lookupUrl = PREACT_CDN_LOOKUP[mdl];
+      return fetch(lookupUrl).then(
+        (res) => `https://cdn.skypack.dev${res.headers.get("x-pinned-url")}`
+      );
+    })
+  );
 
   PREACT_CDN_SOURCES = mdls.reduce((acc, curr, i) => {
     return { ...acc, [curr]: pinnedUrls[i] };
   }, {});
-  
+
   return;
-}
+};
 
 const PREACT_REGEX = /['"]preact([\/\w]+)?['"]/gm;
 
@@ -93,7 +104,7 @@ export const preactToCDN = async (code: string) => {
   if (!/preact/gm.test(code)) {
     return code;
   }
-  
+
   await resolvePreactCdnSources();
 
   return code.replace(PREACT_REGEX, (fullMatch, subpath) => {
@@ -167,20 +178,28 @@ let UserDocument = null;
 const getDocument = async (): Promise<typeof InternalDocument> => {
   if (UserDocument) return UserDocument;
   else if (UserDocument === false) return InternalDocument;
-  else if (await fileExists(resolve(process.cwd(), join(SSR_DIR, 'pages', '_document.js')))) {
-    UserDocument = await importPage(join('pages', '_document.js'));
+  else if (
+    await fileExists(
+      resolve(process.cwd(), join(SSR_DIR, "pages", "_document.js"))
+    )
+  ) {
+    UserDocument = await importPage(join("pages", "_document.js"));
     return UserDocument;
   }
   UserDocument = false;
   return InternalDocument;
-}
+};
 
 export const renderPage = async (
   data: RouteDataEntry | null,
   manifest: ManifestEntry,
-  { basePath = '/', debug = false, hasGlobalScript = false } = {}
+  { basePath = "/", debug = false, hasGlobalScript = false } = {}
 ): Promise<{ name: string; contents: string }> => {
-  let [Document, Page] = await Promise.all([getDocument(), importPage(manifest.name), resolvePreactCdnSources()]);
+  let [Document, Page] = await Promise.all([
+    getDocument(),
+    importPage(manifest.name),
+    resolvePreactCdnSources(),
+  ]);
   Page = unwrapPage(Page);
   const pageProps = data.props;
 
@@ -192,16 +211,20 @@ export const renderPage = async (
 
   const HeadProvider: FunctionalComponent = ({ children }) => {
     return (
-      <__HeadContext.Provider value={ headContext }>
-        { children }
+      <__HeadContext.Provider value={headContext}>
+        {children}
       </__HeadContext.Provider>
     );
   };
 
   const { __renderPageResult, ...docProps } = await Document.prepare({
     renderPage: async () => ({
-      __renderPageResult: renderToString(<HeadProvider><Page {...pageProps} /></HeadProvider>)
-    })
+      __renderPageResult: renderToString(
+        <HeadProvider>
+          <Page {...pageProps} />
+        </HeadProvider>
+      ),
+    }),
   });
 
   const docContext = {
@@ -209,23 +232,28 @@ export const renderPage = async (
     manifest,
     styles: manifest.hydrateStyleBindings,
     scripts: manifest.hydrateBindings,
-    preload: manifest.hydrateBindings
-        ? Object.values(PREACT_CDN_SOURCES)
-        : [],
+    preload: manifest.hydrateBindings ? Object.values(PREACT_CDN_SOURCES) : [],
     preconnect: [],
     debug,
     hasGlobalScript,
     basePath,
     __renderPageResult,
-    __renderPageHead: headContext.head.current
+    __renderPageHead: headContext.head.current,
   };
 
-  let contents = renderToString(<__InternalDocContext.Provider value={docContext}><Document {...(docProps as any)} /></__InternalDocContext.Provider>);
-  contents = contents.replace(/<hydrate-marker>(\?h[\s\S]*?\?)<\/hydrate-marker>/g, '<$1>\n');
-  contents = '<!DOCTYPE html>\n<!-- Generated by microsite -->\n' + contents;
+  let contents = renderToString(
+    <__InternalDocContext.Provider value={docContext}>
+      <Document {...(docProps as any)} />
+    </__InternalDocContext.Provider>
+  );
+  contents = contents.replace(
+    /<hydrate-marker>(\?h[\s\S]*?\?)<\/hydrate-marker>/g,
+    "<$1>\n"
+  );
+  contents = "<!DOCTYPE html>\n<!-- Generated by microsite -->\n" + contents;
 
   return {
-    name: `${data.route.replace(/\.js$/, '')}.html`,
+    name: `${data.route.replace(/\.js$/, "")}.html`,
     contents,
   };
 };

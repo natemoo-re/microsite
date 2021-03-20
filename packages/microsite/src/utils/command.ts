@@ -4,17 +4,11 @@ const { createRequire } = module;
 const require = createRequire(import.meta.url);
 
 import { fileExists } from "./fs.js";
-import { createConfiguration } from "snowpack";
-import cc from "cosmiconfig";
-import { yellow } from "kleur/colors";
-const { cosmiconfig } = cc;
-const _config = require("microsite/assets/snowpack.config.cjs");
+import { loadConfiguration as loadUserConfiguration } from "snowpack";
 
 const pkg = require(resolve(process.cwd(), "package.json"));
-// const deps = Object.keys(
-//   pkg.dependencies || {}
-// );
 const DEFAULT_BASE_PATH = pkg.homepage || "/";
+const _config = require("microsite/assets/snowpack.config.cjs");
 
 export function resolveNormalizedBasePath(args: {
   ["--base-path"]?: string;
@@ -26,116 +20,64 @@ export function resolveNormalizedBasePath(args: {
     : `/${basePath.replace(/^\//, "").replace(/\/$/, "")}/`;
 }
 
-async function hasPostCSSConfig() {
-  try {
-    const explorer = cosmiconfig("postcss");
-    const result = await explorer.search();
-    if (result.filepath) return true;
-  } catch (e) {}
-  return false;
+export async function loadConfiguration(mode: "dev" | "build") {
+  const overrides = await getOverrides(mode);
+  return loadUserConfiguration(overrides);
 }
 
-export async function loadConfiguration(mode: "dev" | "build") {
-  const [snowpackconfigPath, tsconfigPath, usesPostCSS] = await Promise.all([
-    findSnowpackConfig(),
-    findTsOrJsConfig(),
-    hasPostCSSConfig(),
-  ]);
+export async function getOverrides(mode: "dev" | "build") {
+  const [tsconfigPath] = await Promise.all([findTsOrJsConfig()]);
   const aliases = tsconfigPath
     ? resolveTsconfigPathsToAlias({ tsconfigPath })
     : {};
-  const userConfig = snowpackconfigPath ? require(snowpackconfigPath) : {};
-
-  if (usesPostCSS) {
-    const missing = [];
-    const deps = ["@snowpack/plugin-postcss", "postcss", "postcss-cli"];
-    deps.forEach((dependency) => {
-      try {
-        require.resolve(dependency);
-      } catch (e) {
-        missing.push(dependency);
-      }
-    });
-    if (missing.length > 0) {
-      console.error(
-        yellow(
-          `It looks like you're trying to use PostCSS!\nMicrosite will automatically use your configuration, but requires some 'devDependencies' to do so.\n\nPlease run 'npm install --save-dev ${missing.join(
-            " "
-          )}'\n`
-        )
-      );
-      process.exit(1);
-    }
-  }
-  const additionalPlugins = usesPostCSS ? ["@snowpack/plugin-postcss"] : [];
 
   switch (mode) {
     case "dev":
-      return createConfiguration({
-        ...userConfig,
+      return {
         ..._config,
         buildOptions: {
-          ...userConfig.buildOptions,
           ..._config.buildOptions,
           ssr: true,
         },
         packageOptions: {
-          ...userConfig.packageOptions,
           ..._config.packageOptions,
-          external: [
-            ...(userConfig.packageOptions?.external ?? []),
-            ..._config.packageOptions.external,
-          ].filter((v) => !v.startsWith("microsite")),
+          external: [..._config.packageOptions.external].filter(
+            (v) => !v.startsWith("microsite")
+          ),
         },
-        plugins: [
-          ...additionalPlugins,
-          ..._config.plugins,
-          ...(userConfig.plugins ?? []),
-        ],
+        plugins: [..._config.plugins],
         alias: {
-          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
           "microsite/hydrate": "microsite/client/hydrate",
         },
-      });
+      };
     case "build":
-      return createConfiguration({
-        ...userConfig,
+      return {
         ..._config,
         devOptions: {
-          ...userConfig.devOptions,
           ..._config.devOptions,
           hmr: false,
           port: 0,
           hmrPort: 0,
         },
         buildOptions: {
-          ...userConfig.buildOptions,
           ..._config.buildOptions,
           ssr: true,
         },
-        plugins: [
-          ...additionalPlugins,
-          ..._config.plugins,
-          ...(userConfig.plugins ?? []),
-        ],
+        plugins: [..._config.plugins],
         alias: {
-          ...(userConfig.alias ?? {}),
           ...aliases,
           ...(_config.alias ?? {}),
         },
         packageOptions: {
           ..._config.packageOptions,
-          external: [
-            ...(userConfig.packageOptions?.external ?? []),
-            ..._config.packageOptions.external,
-          ].filter((v) => v !== "preact"),
+          external: [..._config.packageOptions.external].filter(
+            (v) => v !== "preact"
+          ),
           rollup: {
-            ...(userConfig.installOptions?.rollup ?? {}),
             ...(_config.installOptions?.rollup ?? {}),
             plugins: [
-              ...(userConfig.installOptions?.rollup?.plugins ?? []),
               {
                 name: "@microsite/auto-external",
                 options(opts) {
@@ -147,16 +89,9 @@ export async function loadConfiguration(mode: "dev" | "build") {
             ],
           },
         },
-      });
+      };
   }
 }
-
-const findSnowpackConfig = async () => {
-  const cwd = process.cwd();
-  const snowpack = resolve(cwd, "./snowpack.config.cjs");
-  if (await fileExists(snowpack)) return snowpack;
-  return null;
-};
 
 const findTsOrJsConfig = async () => {
   const cwd = process.cwd();
