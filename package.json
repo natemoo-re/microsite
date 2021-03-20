@@ -10,6 +10,7 @@
     "site"
   ],
   "scripts": {
+    "postinstall": "lerna link",
     "benchmark": "node scripts/benchmark",
     "benchmark:microsite": "node scripts/benchmark --suite microsite-simple",
     "bootstrap:ci": "npx lerna bootstrap --ci",
