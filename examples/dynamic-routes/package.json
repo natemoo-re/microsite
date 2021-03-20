@@ -1,0 +1,15 @@
+{
+  "name": "@example/dynamic-routes",
+  "homepage": "/dynamic-routes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "microsite",
+    "build": "microsite build -- --debug-hydration",
+    "serve": "microsite build -- --debug-hydration --serve"
+  },
+  "devDependencies": {
+    "microsite": "1.2.0"
+  }
+}
