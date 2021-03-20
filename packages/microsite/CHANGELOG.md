@@ -1,5 +1,12 @@
 # microsite
 
+## 1.2.1
+
+### Patch Changes
+
+- 7e7f215: Fix issue with dynamic routes in dev mode (#144)
+- faed63e: Fix #137 by not hardcoding Preact CDN sources
+
 ## 1.2.0
 
 ### Minor Changes

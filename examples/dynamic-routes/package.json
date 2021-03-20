@@ -10,6 +10,6 @@
     "serve": "microsite build -- --debug-hydration --serve"
   },
   "devDependencies": {
-    "microsite": "1.2.0"
+    "microsite": "1.2.1"
   }
 }
