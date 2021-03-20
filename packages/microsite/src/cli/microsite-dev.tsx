@@ -43,7 +43,7 @@ const loadErrorPage = async () => {
   return [ErrorPage, errorSrc];
 };
 
-const renderPage = async (page: string, initialProps?: any) => {
+const renderPage = async (componentPath: string, absoluteUrl: string, initialProps?: any) => {
   if (!renderToString) {
     const preactRenderToStringSrc = await devServer.getUrlForPackage('preact-render-to-string');
     renderToString = await runtime
@@ -69,7 +69,7 @@ const renderPage = async (page: string, initialProps?: any) => {
   }
 
   try {
-    let pathname = page.replace("/src/pages/", "");
+    let pathname = componentPath.replace("/src/pages/", "");
     let Component = null;
     let getStaticProps: any = noop;
     let getStaticPaths: any = noop;
@@ -79,7 +79,7 @@ const renderPage = async (page: string, initialProps?: any) => {
     try {
       let {
         exports: { default: Page }
-      } = await runtime.importModule(page);
+      } = await runtime.importModule(componentPath);
       if (typeof Page === "function") Component = Page;
 
       if (Page.Component) {
@@ -91,7 +91,7 @@ const renderPage = async (page: string, initialProps?: any) => {
       const [Page, errorSrc] = await loadErrorPage();
       Component = ErrorPage;
       pageProps = initialProps?.statusCode ? initialProps : { statusCode: 404 };
-      page = errorSrc;
+      componentPath = errorSrc;
       pathname = "/_error";
 
       if (typeof Page === "function") Component = Page;
@@ -112,14 +112,14 @@ const renderPage = async (page: string, initialProps?: any) => {
     const match =
       paths &&
       paths.find(
-        (ctx) => ctx.path === pathname || ctx.path === `${pathname}/index`
+        (ctx) => ctx.path === pathname || ctx.path === `${pathname}/index` || ctx.path === absoluteUrl
       );
 
     if (paths && !match) {
       const [ErrorPage, errorSrc] = await loadErrorPage();
       Component = ErrorPage;
       pageProps = { statusCode: 404 };
-      page = errorSrc;
+      componentPath = errorSrc;
     } else {
       let ctx = paths ? match : generateStaticPropsContext(pathname, pathname);
       pageProps = await getStaticProps(ctx).then((res) => res && res.props);
@@ -147,7 +147,7 @@ const renderPage = async (page: string, initialProps?: any) => {
     });
 
     const docContext = {
-      dev: page,
+      dev: componentPath,
       devProps: pageProps ?? {},
       __csrUrl: csrSrc,
       __renderPageHead: headContext.head.current,
@@ -211,7 +211,9 @@ export default async function dev(
   })
 
   const sendErr = async (res: ServerResponse, props?: ErrorProps) => {
-    const contents = await renderPage(`/_error`, props);
+    // Calling `renderPage` with a component and path that do not exist 
+    // triggers rendering of an error page. 
+    const contents = await renderPage(`/_error`, `/_error`, props);
     res.writeHead(props?.statusCode ?? 500, {
       "Content-Type": "text/html",
     });
@@ -247,17 +249,32 @@ export default async function dev(
       if (base.endsWith(".html")) base = base.slice(0, ".html".length * -1);
       if (base === "") base = "index";
 
-      const loadAndSSR = async (base: string) => {
-        try {
-          const url = `/src/pages/${base}.js`;
-          const result = await snowpack.loadUrl(url, { isSSR: true });
-          if (!result) throw new Error();
+      const findPageComponentPathForBaseUrl = async (base: string): Promise<string|null> => {
+        const possiblePagePaths = [
+          base,
+          `${base}/index`,
+        ].map(buildPageComponentPathForBaseUrl);
+        for (const pagePath of possiblePagePaths) {
+          if (await isPageComponentPresent(pagePath)) {
+            return pagePath;
+          }
+        }
+        const dynamicBaseUrl = await findPotentialMatch(base);
+        if (!dynamicBaseUrl) {
+          return null;
+        }
+        return buildPageComponentPathForBaseUrl(dynamicBaseUrl);
+      };
 
-          res.setHeader("Content-Type", "text/html");
-          res.end(await renderPage(url));
+      const buildPageComponentPathForBaseUrl = (base: string): string => `/src/pages/${base}.js`;
+      
+      const isPageComponentPresent = async (path: string): Promise<boolean> => {
+        try {
+          await snowpack.loadUrl(path, { isSSR: true });
           return true;
-        } catch (err) {}
-        return false;
+        } catch {
+          return false;
+        }
       };
 
       const findPotentialMatch = async (base: string) => {
@@ -296,19 +313,13 @@ export default async function dev(
         }
       };
 
-      const direct = await loadAndSSR(base);
-      if (direct) {
+      const pagePath = await findPageComponentPathForBaseUrl(base);
+      if (!pagePath) {
         return next();
       }
-      const index = await loadAndSSR(`${base}/index`);
-      if (index) {
-        return next();
-      }
-      const dynamic = await findPotentialMatch(base);
-      if (dynamic) {
-        await loadAndSSR(dynamic);
-      }
-      next();
+      const absoluteUrl = `/${base}`;
+      res.setHeader("Content-Type", "text/html");
+      res.end(await renderPage(pagePath, absoluteUrl));
     })
     .use(async (req: IncomingMessage, res: ServerResponse, next: any) => {
       try {
