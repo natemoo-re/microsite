@@ -3,7 +3,7 @@ import { definePage } from "microsite/page";
 import { Head, seo } from "microsite/head";
 
 const Index: FunctionalComponent<any> = ({ num }) => {
-  const nextPage = num === 4 ? 0 : num;
+  const nextPage = num === 5 ? 1 : num + 1;
   return (
     <>
       <Head>
@@ -11,7 +11,9 @@ const Index: FunctionalComponent<any> = ({ num }) => {
       </Head>
 
       <main>
-        <h1>Hello there!</h1>
+        <h1>
+          I'm generated with <code>getStaticPaths</code>!
+        </h1>
 
         <p>
           Head to{" "}
@@ -28,13 +30,13 @@ export default definePage(Index, {
   path: "/posts/[id]",
   async getStaticPaths() {
     return {
-      paths: Array.from({ length: 5 }, (_, i) => `/posts/${i}`),
+      paths: Array.from({ length: 5 }, (_, i) => `/posts/${i + 1}`),
     };
   },
   async getStaticProps(ctx) {
     return {
       props: {
-        num: ctx.params.id,
+        num: Number(ctx.params.id),
       },
     };
   },
