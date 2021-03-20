@@ -1,5 +1,3 @@
-import type { Prefetch } from "./prefetch";
-
 const DYNAMIC_ROUTE = /\[[^/]+?\](?=\/|$)/;
 function isDynamicRoute(route: string): boolean {
   return DYNAMIC_ROUTE.test(route);
@@ -32,12 +30,10 @@ export type StaticPath<P extends Params = Params> =
 export interface StaticPropsContext<P extends Params = Params> {
   path: string;
   params: P;
-  prefetch?: Prefetch;
 }
 
-export interface StaticPathsContext {
-  prefetch?: Prefetch;
-}
+// TODO: prefetch
+export interface StaticPathsContext {}
 
 function getParamsFromPath(fileName: string, path: string): Params {
   path = normalizePathName(path);
@@ -59,7 +55,8 @@ function getParamsFromPath(fileName: string, path: string): Params {
 
 const stripLeadingSlash = (str: string) => str.replace(/^\//, "");
 const stripTrailingExt = (str: string) => str.replace(/\..*$/, "");
-const normalizePathName = (str: string) => stripTrailingExt(stripLeadingSlash(str));
+const normalizePathName = (str: string) =>
+  stripTrailingExt(stripLeadingSlash(str));
 
 export function getPathFromParams(fileName: string, params: Params): string {
   const segments = pathToSegments(normalizePathName(fileName));
