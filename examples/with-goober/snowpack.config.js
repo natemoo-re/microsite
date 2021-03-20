@@ -1,5 +1,8 @@
-import { resolve } from 'path';
+import { resolve, join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const workspaceRoot = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
 
 export default {
-    workspaceRoot: resolve(__dirname, '../..')
+    workspaceRoot
 }
