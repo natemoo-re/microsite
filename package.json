@@ -18,7 +18,7 @@
     "build": "npx lerna run build --scope='microsite' --scope='create-microsite' --sort",
     "build:core": "npx lerna run build --scope='microsite'",
     "prebuild:examples": "yarn build:core && node scripts/generate-examples",
-    "build:examples": "yarn workspaces run build",
+    "build:examples": "yarn workspaces run build --scope='@example/*'",
     "postbuild:examples": "node scripts/copy-examples"
   },
   "devDependencies": {
