@@ -9,7 +9,7 @@
     "serve": "microsite build --serve"
   },
   "devDependencies": {
-    "microsite": "1.1.1"
+    "microsite": "1.2.0"
   },
   "dependencies": {
     "goober": "^2.0.29"
