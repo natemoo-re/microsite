@@ -13,10 +13,11 @@
     "benchmark": "node scripts/benchmark",
     "benchmark:microsite": "node scripts/benchmark --suite microsite-simple",
     "bootstrap:ci": "npx lerna bootstrap --ci",
+    "bootstrap:examples": "npx lerna bootstrap --scope='microsite' --scope='@example/*' --ci",
     "bootstrap:benchmark": "npx lerna bootstrap --scope='microsite' --scope='@benchmark/*' --ci",
     "build": "npx lerna run build --scope='microsite' --scope='create-microsite' --sort",
     "prebuild:examples": "node scripts/generate-examples",
-    "build:examples": "yarn build && npx lerna run build --scope='@example/*'",
+    "build:examples": "npx lerna run build --scope='@example/*'",
     "postbuild:examples": "node scripts/copy-examples"
   },
   "devDependencies": {
