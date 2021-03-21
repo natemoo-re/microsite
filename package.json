@@ -12,7 +12,9 @@
   ],
   "scripts": {
     "postinstall": "lerna link",
+    "prebenchmark": "yarn build:core",
     "benchmark": "node scripts/benchmark",
+    "prebenchmark:microsite": "yarn build:core",
     "benchmark:microsite": "node scripts/benchmark --suite microsite-simple",
     "bootstrap:ci": "npx lerna bootstrap --ci",
     "bootstrap:examples": "npx lerna bootstrap --scope='microsite' --scope='@example/*' --ci",
