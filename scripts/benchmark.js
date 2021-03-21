@@ -32,7 +32,7 @@ async function benchmark(name) {
     const [framework, benchmark] = name.split('/')
     const index = FRAMEWORKS.indexOf(framework);
     const samples = [];
-    const build = 'npm run build';
+    const build = 'yarn build --scripts-prepend-node-path';
     const dir = `./benchmark/${name}`;
     const cacheDir = join(dir, BENCHMARK_CACHEDIR[index]);
     const outDir = join(dir, BENCHMARK_OUTDIR[index]);
