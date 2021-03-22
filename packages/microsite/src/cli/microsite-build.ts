@@ -253,6 +253,7 @@ async function bundlePagesForSSR(paths: string[]) {
       );
     },
     plugins: [
+      rewriteSnowpackPreact(),
       rewriteCssProxies(),
       rewritePreact(),
       rewriteHydratedComponentDisplayNames(),
@@ -622,6 +623,21 @@ const rewriteHydratedComponentDisplayNames = (): Plugin => {
         name: "hydrateMap.json",
         source: JSON.stringify(withHydrateMap),
       });
+    },
+  };
+};
+
+/**
+ * Snowpack rewrites CSS to a `.css.proxy.js` file.
+ * Great for dev, but we need to revert to the actual CSS file
+ */
+const rewriteSnowpackPreact = () => {
+  return {
+    name: "@microsite/rollup-rewrite-snowpack-preact",
+    resolveId(source: string) {
+      if (source.indexOf("pkg/preact") > -1)
+        return source.slice(source.indexOf("preact"), -3);
+      return null;
     },
   };
 };
