@@ -1,9 +1,5 @@
 import type { ManifestEntry } from "./build";
 
-// This is an esbuild (?) bug where default exports are rewritten with a number appended
-// so we'll just remove any trailing numbers
-const cleanComponentName = (cmp: string) => cmp.replace(/[0-9]+$/, "");
-
 export function generateHydrateScript(
   hydrateBindings: ManifestEntry["hydrateBindings"],
   opts: { basePath?: string } = {}
@@ -12,9 +8,9 @@ export function generateHydrateScript(
   const entries = Object.fromEntries(
     Object.entries(hydrateBindings)
       .map(([file, exports]) =>
-        exports.map((cmp) => [
-          cleanComponentName(cmp),
-          [cmp, `${basePath}${file}`],
+        Object.entries(exports).map(([key, exportName]) => [
+          key,
+          [exportName, `${basePath}${file}`],
         ])
       )
       .flat(1)

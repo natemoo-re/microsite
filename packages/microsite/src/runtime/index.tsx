@@ -1,19 +1,20 @@
 import { h, hydrate as rehydrate, render } from "preact";
 
+const win = window as any;
 if (!("requestIdleCallback" in window)) {
-  window.requestIdleCallback = function (cb) {
-      return setTimeout(function () {
-        var start = Date.now();
-        cb({
-          didTimeout: false,
-          timeRemaining: function () {
-            return Math.max(0, 50 - (Date.now() - start));
-          },
-        });
-      }, 1);
-    };
+  win.requestIdleCallback = function (cb) {
+    return setTimeout(function () {
+      var start = Date.now();
+      cb({
+        didTimeout: false,
+        timeRemaining: function () {
+          return Math.max(0, 50 - (Date.now() - start));
+        },
+      });
+    }, 1);
+  };
 
-  window.cancelIdleCallback = function (id) {
+  win.cancelIdleCallback = function (id) {
     clearTimeout(id);
   };
 }
@@ -34,14 +35,18 @@ const createObserver = (hydrate) => {
   return io;
 };
 
-function attach(fragment, data, { key, name, source }, cb) {
-  const { p: { children = null, ...props } = {}, m: method = "idle", f: flush } = data;
+function attach(fragment, data, { name, source }, cb) {
+  const {
+    p: { children = null, ...props } = {},
+    m: method = "idle",
+    f: flush,
+  } = data;
 
   const hydrate = async () => {
-    if (window.__MICROSITE_DEBUG)
-      console.log(`[Hydrate] <${key} /> hydrated via "${method}"`);
+    if (win.__MICROSITE_DEBUG)
+      console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);
     const { [name]: Component } = await import(source);
-    
+
     if (flush) {
       render(h(Component, props, children), fragment);
     } else {
@@ -52,12 +57,9 @@ function attach(fragment, data, { key, name, source }, cb) {
 
   switch (method) {
     case "idle": {
-      if (
-        !("requestAnimationFrame" in window)
-      )
-        return setTimeout(hydrate, 0);
+      if (!("requestAnimationFrame" in window)) return setTimeout(hydrate, 0);
 
-      requestIdleCallback(
+      win.requestIdleCallback(
         () => {
           requestAnimationFrame(hydrate);
         },
@@ -99,7 +101,7 @@ function createPersistentFragment(parentNode, childNodes) {
   };
 }
 
-const ATTR_REGEX = /(:?\w+)=(\w+|[{[].*?[}\]])/g;
+const ATTR_REGEX = /(:?\w+)=([^\s]*)/g;
 function parseHydrateBoundary(node) {
   if (!node.textContent) return {};
   const text = node.textContent.slice("?h ".length, -1);
@@ -109,7 +111,7 @@ function parseHydrateBoundary(node) {
   while (result) {
     let [, attr, val] = result;
     if (attr === "p") {
-      props[attr] = JSON.parse(val);
+      props[attr] = JSON.parse(atob(val));
     } else {
       props[attr] = val;
     }
@@ -166,16 +168,18 @@ export default (manifest) => {
     const $cmps = findHydrationPoints();
 
     for (const [fragment, data, markers] of $cmps) {
-      const { c: Component } = data;
-      const [name, source] = manifest[Component];
+      const { c: key } = data;
+      const [name, source] = manifest[key];
       if (name && source) {
-        attach(fragment, data, { key: Component, name, source }, () => {
-          fragment.childNodes.forEach(child => child.tagName === 'HYDRATE-PLACEHOLDER' ? child.remove() : null);
-          markers.forEach((marker) => marker.remove())
+        attach(fragment, data, { name, source }, () => {
+          fragment.childNodes.forEach((child) =>
+            child.tagName === "HYDRATE-PLACEHOLDER" ? child.remove() : null
+          );
+          markers.forEach((marker) => marker.remove());
         });
       }
     }
   };
 
-  requestIdleCallback(init, { timeout: 1000 });
+  win.requestIdleCallback(init, { timeout: 1000 });
 };
