@@ -573,7 +573,7 @@ async function bundlePagesForSSR(paths: string[]) {
           const hydrated = hydrateMap[file.replace(/\.js$/, "")];
           entry.hydrateBindings[file] = Object.keys(exports).reduce(
             (acc, key) => {
-              return Object.assign(acc, { [hydrated[key]]: key });
+              return Object.assign(acc, { [hydrated[key] || key]: key });
             },
             {}
           );
@@ -594,7 +594,6 @@ const rewriteHydratedComponentDisplayNames = (): Plugin => {
           visitCallExpression(path) {
             if (path.get("callee").getValueProperty("name") === "withHydrate") {
               const exportName = path.parent.get("id").getValueProperty("name");
-
               const innerName = path.parent
                 .get("init", "arguments", 0)
                 .getValueProperty("name");
