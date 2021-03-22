@@ -256,7 +256,7 @@ async function bundlePagesForSSR(paths: string[]) {
       rewriteSnowpackPreact(),
       rewriteCssProxies(),
       rewritePreact(),
-      rewriteHydratedComponentDisplayNames(),
+      collecHydrateMap(),
       styles({
         config: true,
         mode: "extract",
@@ -584,10 +584,10 @@ async function bundlePagesForSSR(paths: string[]) {
     });
 }
 
-const rewriteHydratedComponentDisplayNames = (): Plugin => {
+const collecHydrateMap = (): Plugin => {
   let withHydrateMap: Record<string, Record<string, string>> = {};
   return {
-    name: "@microsite/rollup-rewrite-hydrated-component-display-names",
+    name: "@microsite/rollup-collec-hydrate-map",
     renderChunk(code: string, chunk: RenderedChunk) {
       if (chunk.name.startsWith("_hydrate/")) {
         const ast = this.parse(code);
