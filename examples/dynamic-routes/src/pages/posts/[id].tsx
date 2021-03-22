@@ -17,7 +17,7 @@ const Index: FunctionalComponent<any> = ({ num }) => {
 
         <p>
           Head to{" "}
-          <a href={`/posts/${nextPage}`}>
+          <a href={`./posts/${nextPage}`}>
             <code>/posts/{nextPage}</code>
           </a>
         </p>
