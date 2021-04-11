@@ -8,7 +8,8 @@ const shouldSantize = (node) => {
   return (
     node.type === "Literal" &&
     typeof node.value === "string" &&
-    node.value.indexOf("script") > -1
+    node.value.toLowerCase().indexOf("script") > -1 &&
+    node.value.indexOf("<") > -1
   );
 };
 
