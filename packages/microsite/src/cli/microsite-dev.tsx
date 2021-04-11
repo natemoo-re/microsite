@@ -9,6 +9,7 @@ import { readDir } from "../utils/fs.js";
 import { promises as fsp } from "fs";
 import { ErrorProps } from "error.js";
 import { loadConfiguration } from "../utils/command.js";
+import { serializeToJsString } from "../utils/serialize.js";
 import { h, FunctionalComponent } from "preact";
 import {
   generateStaticPropsContext,
@@ -23,6 +24,7 @@ let renderToString: any;
 let csrSrc: string;
 let Document: any;
 let __HeadContext: any;
+let __PageContext: any;
 let __InternalDocContext: any;
 let ErrorPage: any;
 let errorSrc: string;
@@ -69,10 +71,12 @@ const renderPage = async (
       exports: {
         Document: InternalDocument,
         __HeadContext: __Head,
+        __PageContext: __Page,
         __InternalDocContext: __Doc,
       },
     } = await runtime.importModule(documentSrc);
     __HeadContext = __Head;
+    __PageContext = __Page;
     __InternalDocContext = __Doc;
     try {
       const {
@@ -152,24 +156,40 @@ const renderPage = async (
       },
     };
 
+    const pageContext = {
+      props: {
+        current: {},
+      },
+    };
+
     const HeadProvider: FunctionalComponent = ({ children }) => {
       return <__HeadContext.Provider value={headContext} {...{ children }} />;
+    };
+
+    const PageProvider: FunctionalComponent = ({ children }) => {
+      return <__PageContext.Provider value={pageContext} {...{ children }} />;
     };
 
     const { __renderPageResult, ...docProps } = await Document.prepare({
       renderPage: async () => ({
         __renderPageResult: renderToString(
-          <HeadProvider>
-            <Component {...pageProps} />
-          </HeadProvider>
+          <PageProvider>
+            <HeadProvider>
+              <Component {...pageProps} />
+            </HeadProvider>
+          </PageProvider>
         ),
       }),
     });
 
     const docContext = {
       dev: componentPath,
-      devProps: pageProps ?? {},
+      devProps:
+        pageProps && Object.keys(pageProps).length > 0
+          ? serializeToJsString(pageProps)
+          : "{}",
       __csrUrl: csrSrc,
+      __renderPageProps: pageContext.props.current,
       __renderPageHead: headContext.head.current,
       __renderPageResult,
     };
@@ -351,8 +371,11 @@ export default async function dev(
           res.setHeader("Content-Type", result.contentType);
 
         const MIME_EXCLUDE = ["image", "font"];
+        const isMeta = req.url.indexOf("/_snowpack/") !== -1;
+        const isMicrosite = req.url.indexOf("/microsite/") !== -1;
         if (
-          req.url.indexOf("/_snowpack/pkg/microsite") === -1 &&
+          !isMeta &&
+          !isMicrosite &&
           result.contentType &&
           !MIME_EXCLUDE.includes(result.contentType.split("/")[0])
         ) {

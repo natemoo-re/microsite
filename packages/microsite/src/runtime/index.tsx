@@ -37,7 +37,7 @@ const createObserver = (hydrate) => {
 
 function attach(fragment, data, { name, source }, cb) {
   const {
-    p: { children = null, ...props } = {},
+    p: propKey,
     m: method = "idle",
     f: flush,
   } = data;
@@ -46,11 +46,12 @@ function attach(fragment, data, { name, source }, cb) {
     if (win.__MICROSITE_DEBUG)
       console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);
     const { [name]: Component } = await import(source);
+    const props = window.__MICROSITE_PROPS[propKey] || {};
 
     if (flush) {
-      render(h(Component, props, children), fragment);
+      render(h(Component, props), fragment);
     } else {
-      rehydrate(h(Component, props, children), fragment);
+      rehydrate(h(Component, props), fragment);
     }
     if (cb) cb();
   };
@@ -110,11 +111,7 @@ function parseHydrateBoundary(node) {
   let result = ATTR_REGEX.exec(text);
   while (result) {
     let [, attr, val] = result;
-    if (attr === "p") {
-      props[attr] = JSON.parse(atob(val));
-    } else {
-      props[attr] = val;
-    }
+    props[attr] = val;
     result = ATTR_REGEX.exec(text);
   }
   return props;

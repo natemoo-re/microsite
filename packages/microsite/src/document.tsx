@@ -14,6 +14,10 @@ export const __HeadContext = createContext({
   head: { current: [] },
 });
 
+export const __PageContext = createContext({
+  props: { current: {} },
+});
+
 /** @internal */
 export const __InternalDocContext = createContext<any>({});
 
@@ -58,10 +62,12 @@ export const Html: FunctionalComponent<JSX.HTMLAttributes<HTMLHtmlElement>> = ({
   ...props
 }) => <html lang={lang} dir={dir} {...props} />;
 
-export const Main: FunctionalComponent<Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "id" | "dangerouslySetInnerHTML" | "children"
->> = (props) => {
+export const Main: FunctionalComponent<
+  Omit<
+    JSX.HTMLAttributes<HTMLDivElement>,
+    "id" | "dangerouslySetInnerHTML" | "children"
+  >
+> = (props) => {
   const { __renderPageResult } = useContext(__InternalDocContext);
   return (
     <div
@@ -128,6 +134,7 @@ export const Head: FunctionalComponent<JSX.HTMLAttributes<HTMLHeadElement>> = ({
 export const MicrositeScript: FunctionalComponent = () => {
   const {
     __csrUrl,
+    __renderPageProps,
     debug,
     hasGlobalScript,
     basePath,
@@ -135,6 +142,8 @@ export const MicrositeScript: FunctionalComponent = () => {
     dev,
     devProps,
   } = useContext(__InternalDocContext);
+
+  const propsMap = __renderPageProps ? Object.entries(__renderPageProps) : [];
 
   return (
     <Fragment>
@@ -152,7 +161,7 @@ export const MicrositeScript: FunctionalComponent = () => {
             dangerouslySetInnerHTML={{
               __html: `import csr from '${__csrUrl}';
 import Page from '${dev}';
-csr(Page, ${JSON.stringify(devProps)});`,
+csr(Page, ${devProps});`,
             }}
           />
           <script
@@ -181,6 +190,17 @@ csr(Page, ${JSON.stringify(devProps)});`,
           type="module"
           dangerouslySetInnerHTML={{
             __html: `import global from '${basePath}_static/chunks/_global.js';\nglobal();`,
+          }}
+        />
+      )}
+      {scripts && propsMap.length > 0 && (
+        <script
+          type="module"
+          async
+          dangerouslySetInnerHTML={{
+            __html: `window.__MICROSITE_PROPS = {${propsMap
+              .map(([hash, props]) => `"${hash}":${props}`)
+              .join(", ")}}`,
           }}
         />
       )}

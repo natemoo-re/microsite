@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 import {
   Document as InternalDocument,
   __HeadContext,
+  __PageContext,
   __InternalDocContext,
 } from "../document.js";
 import { FunctionalComponent, h } from "preact";
@@ -216,6 +217,20 @@ export const renderPage = async (
     },
   };
 
+  const pageContext = {
+    props: {
+      current: {},
+    },
+  };
+
+  const PageProvider: FunctionalComponent = ({ children }) => {
+    return (
+      <__PageContext.Provider value={pageContext}>
+        {children}
+      </__PageContext.Provider>
+    );
+  };
+
   const HeadProvider: FunctionalComponent = ({ children }) => {
     return (
       <__HeadContext.Provider value={headContext}>
@@ -227,9 +242,11 @@ export const renderPage = async (
   const { __renderPageResult, ...docProps } = await Document.prepare({
     renderPage: async () => ({
       __renderPageResult: renderToString(
-        <HeadProvider>
-          <Page {...pageProps} />
-        </HeadProvider>
+        <PageProvider>
+          <HeadProvider>
+            <Page {...pageProps} />
+          </HeadProvider>
+        </PageProvider>
       ),
     }),
   });
@@ -246,6 +263,7 @@ export const renderPage = async (
     basePath,
     __renderPageResult,
     __renderPageHead: headContext.head.current,
+    __renderPageProps: pageContext.props.current,
   };
 
   let contents = renderToString(
