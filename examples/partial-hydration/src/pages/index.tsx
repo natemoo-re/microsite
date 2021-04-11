@@ -20,6 +20,8 @@ const Index: FunctionalComponent<any> = ({ renderedAt }) => {
         <Static renderedAt={renderedAt}>
           <Clock
             initialDate={renderedAt}
+            xss={"</script><script>alert();</script>"}
+            {...{ ["</script><script>alert();</script>"]: true }}
             autoplay
             playsinline
             sources={[

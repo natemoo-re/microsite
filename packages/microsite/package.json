@@ -49,6 +49,7 @@
     "astring": "^1.7.4",
     "esbuild": "^0.9.5",
     "estree-util-value-to-estree": "^1.2.0",
+    "estree-walker": "^3.0.0",
     "execa": "^4.0.3",
     "globby": "^11.0.1",
     "kleur": "^4.1.3",
