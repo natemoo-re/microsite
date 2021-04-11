@@ -1,0 +1,18 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@example/custom-document": "0.0.0",
+    "@example/custom-ssr-fallback": "0.0.0",
+    "@example/dynamic-routes": "0.0.0",
+    "@example/hello-world": "0.0.0",
+    "@example/partial-hydration": "0.0.0",
+    "@example/root": "0.0.0",
+    "@example/with-fela": "0.0.0",
+    "@example/with-goober": "0.0.0",
+    "create-microsite": "0.2.0",
+    "microsite": "1.2.1",
+    "site": "0.0.16"
+  },
+  "changesets": []
+}
