@@ -36,17 +36,13 @@ const createObserver = (hydrate) => {
 };
 
 function attach(fragment, data, { name, source }, cb) {
-  const {
-    p: propKey,
-    m: method = "idle",
-    f: flush,
-  } = data;
+  const { p: propKey, m: method = "idle", f: flush } = data;
 
   const hydrate = async () => {
     if (win.__MICROSITE_DEBUG)
       console.log(`[Hydrate] <${name} /> hydrated via "${method}"`);
     const { [name]: Component } = await import(source);
-    const props = window.__MICROSITE_PROPS[propKey] || {};
+    const props = win.__MICROSITE_PROPS[propKey] || {};
 
     if (flush) {
       render(h(Component, props), fragment);
