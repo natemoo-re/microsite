@@ -31,7 +31,7 @@ export const setBasePath = (p: string) =>
 export interface ManifestEntry {
   name: string;
   hydrateStyleBindings: string[] | null;
-  hydrateBindings: Record<string, string[]> | null;
+  hydrateBindings: Record<string, Record<string, string>> | null;
 }
 
 export interface RouteDataEntry {

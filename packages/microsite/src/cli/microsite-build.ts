@@ -2,7 +2,8 @@ import { build as buildProject } from "snowpack";
 import { dirname, resolve } from "path";
 import glob from "globby";
 import arg from "arg";
-import { GetModuleInfo, rollup } from "rollup";
+import { GetModuleInfo, rollup, RenderedChunk, Plugin } from "rollup";
+import { visit } from "recast";
 import { performance } from "perf_hooks";
 import { green, dim } from "kleur/colors";
 import styles from "rollup-plugin-styles";
@@ -175,7 +176,7 @@ async function copyHydrateAssets(
 
     tasks.push(
       copyFile(
-        require.resolve("microsite/assets/microsite-runtime.js"),
+        require.resolve("microsite/runtime"),
         resolve(OUT_DIR, "_static/vendor/microsite.js"),
         { transform: transformInit }
       )
@@ -246,13 +247,16 @@ async function bundlePagesForSSR(paths: string[]) {
     external: (source: string) => {
       return (
         builtins.includes(source) ||
-        source.startsWith("microsite") ||
+        (source.startsWith("microsite") &&
+          !source.startsWith("microsite/runtime")) ||
         source.startsWith("preact")
       );
     },
     plugins: [
+      rewriteSnowpackPreact(),
       rewriteCssProxies(),
       rewritePreact(),
+      collecHydrateMap(),
       styles({
         config: true,
         mode: "extract",
@@ -317,12 +321,12 @@ async function bundlePagesForSSR(paths: string[]) {
       let moduleInfoById: Record<string, ModuleInfo> = {};
 
       for (const moduleId of idsToHandle) {
-          const moduleInfo = getModuleInfo(moduleId);
+        const moduleInfo = getModuleInfo(moduleId);
 
-          moduleInfoById[moduleId] = moduleInfo;
+        moduleInfoById[moduleId] = moduleInfo;
 
-          for (const importerId of moduleInfo.importers)
-              idsToHandle.add(importerId);
+        for (const importerId of moduleInfo.importers)
+          idsToHandle.add(importerId);
       }
 
       for (const moduleId of idsToHandle) {
@@ -386,7 +390,7 @@ async function bundlePagesForSSR(paths: string[]) {
 
   const hydrationExports = output.reduce((acc, chunkOrAsset) => {
     if (
-      chunkOrAsset.type !== 'asset' &&
+      chunkOrAsset.type !== "asset" &&
       chunkOrAsset.name.startsWith("_hydrate/")
     ) {
       return {
@@ -398,6 +402,7 @@ async function bundlePagesForSSR(paths: string[]) {
   }, {});
 
   const manifest: ManifestEntry[] = [];
+  let hydrateMap: Record<string, Record<string, string>> = {};
 
   /**
    * Here we're manually emitting the files so we have a chance
@@ -409,6 +414,9 @@ async function bundlePagesForSSR(paths: string[]) {
   await Promise.all(
     output.map((chunkOrAsset) => {
       if (chunkOrAsset.type === "asset") {
+        if (chunkOrAsset.name === "hydrateMap.json") {
+          hydrateMap = JSON.parse(chunkOrAsset.source.toString());
+        }
         if (chunkOrAsset.name.startsWith("_hydrate")) {
           const finalAssetName = chunkOrAsset.name.replace(
             /\bchunks\b/,
@@ -501,7 +509,9 @@ async function bundlePagesForSSR(paths: string[]) {
           )) {
             if (file.startsWith("_hydrate/")) {
               hydrateBindings = Object.assign(hydrateBindings, {
-                [file]: exports,
+                [file]: exports.reduce((acc, name) => {
+                  return Object.assign(acc, { [name]: name });
+                }, {}),
               });
             }
           }
@@ -514,7 +524,9 @@ async function bundlePagesForSSR(paths: string[]) {
               const file = `${hydration}.js`;
 
               hydrateBindings = Object.assign(hydrateBindings, {
-                [file]: exports,
+                [file]: exports.reduce((acc, name) => {
+                  return Object.assign(acc, { [name]: name });
+                }, {}),
               });
             }
           }
@@ -557,9 +569,78 @@ async function bundlePagesForSSR(paths: string[]) {
         entry.hydrateBindings = null;
       if (entry.hydrateStyleBindings.length === 0)
         entry.hydrateStyleBindings = null;
+      if (entry.hydrateBindings) {
+        for (const [file, exports] of Object.entries(entry.hydrateBindings)) {
+          const hydrated = hydrateMap[file.replace(/\.js$/, "")];
+          entry.hydrateBindings[file] = Object.keys(exports).reduce(
+            (acc, key) => {
+              return Object.assign(acc, { [hydrated[key] || key]: key });
+            },
+            {}
+          );
+        }
+      }
       return entry;
     });
 }
+
+const collecHydrateMap = (): Plugin => {
+  let withHydrateMap: Record<string, Record<string, string>> = {};
+  return {
+    name: "@microsite/rollup-collec-hydrate-map",
+    renderChunk(code: string, chunk: RenderedChunk) {
+      if (chunk.name.startsWith("_hydrate/")) {
+        const ast = this.parse(code);
+        visit(ast, {
+          visitCallExpression(path) {
+            if (path.get("callee").getValueProperty("name") === "withHydrate") {
+              const exportName = path.parent.get("id").getValueProperty("name");
+              const innerName = path.parent
+                .get("init", "arguments", 0)
+                .getValueProperty("name");
+              if (withHydrateMap[chunk.name]) {
+                withHydrateMap[chunk.name] = Object.assign(
+                  withHydrateMap[chunk.name],
+                  { [exportName]: innerName }
+                );
+              } else {
+                withHydrateMap[chunk.name] = { [exportName]: innerName };
+              }
+
+              return false;
+            }
+            this.traverse(path);
+          },
+        });
+        return null;
+      }
+      return null;
+    },
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "hydrateMap.json",
+        name: "hydrateMap.json",
+        source: JSON.stringify(withHydrateMap),
+      });
+    },
+  };
+};
+
+/**
+ * Snowpack rewrites CSS to a `.css.proxy.js` file.
+ * Great for dev, but we need to revert to the actual CSS file
+ */
+const rewriteSnowpackPreact = () => {
+  return {
+    name: "@microsite/rollup-rewrite-snowpack-preact",
+    resolveId(source: string) {
+      if (source.indexOf("pkg/preact") > -1)
+        return source.slice(source.indexOf("preact"), -3);
+      return null;
+    },
+  };
+};
 
 /**
  * Snowpack rewrites CSS to a `.css.proxy.js` file.

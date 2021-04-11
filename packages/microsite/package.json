@@ -20,6 +20,7 @@
   "exports": {
     "./base": "./base.json",
     "./base.json": "./base.json",
+    "./runtime": "./dist/runtime/index.js",
     "./client/csr": "./dist/client/csr.js",
     "./client/hooks": "./dist/client/hooks.js",
     "./client/hydrate": "./dist/client/hydrate.js",
@@ -33,7 +34,6 @@
     "./assets/snowpack-plugin.cjs": "./assets/snowpack-plugin.cjs",
     "./assets/snowpack.config.cjs": "./assets/snowpack.config.cjs",
     "./assets/types/*": "./assets/types/*.d.ts",
-    "./assets/microsite-runtime.js": "./assets/microsite-runtime.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -56,6 +56,7 @@
     "polka": "^0.5.2",
     "preact": "^10.5.13",
     "preact-render-to-string": "^5.1.16",
+    "recast": "^0.20.4",
     "rollup": "^2.32.1",
     "rollup-plugin-styles": "^3.11.0",
     "sirv": "^1.0.10",
