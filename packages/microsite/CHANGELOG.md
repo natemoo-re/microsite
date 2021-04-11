@@ -1,5 +1,12 @@
 # microsite
 
+## 1.2.2-next.0
+
+### Patch Changes
+
+- 0a408eb: Fix an issue where named exports would not be properly hydrated
+- 0a408eb: Fix bug where useGlobalState would cause builds to fail
+
 ## 1.2.1
 
 ### Patch Changes

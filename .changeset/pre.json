@@ -12,7 +12,11 @@
     "@example/with-goober": "0.0.0",
     "create-microsite": "0.2.0",
     "microsite": "1.2.1",
-    "site": "0.0.16"
+    "site": "0.0.16",
+    "@example/named-exports": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "cool-geckos-thank",
+    "smooth-eyes-count"
+  ]
 }
