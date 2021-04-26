@@ -1,6 +1,6 @@
 {
   "name": "site",
-  "version": "0.0.16",
+  "version": "0.0.17-next.0",
   "private": true,
   "volta": {
     "node": "12.20.1"
@@ -13,6 +13,6 @@
     "serve": "microsite build --serve"
   },
   "dependencies": {
-    "microsite": "1.2.1"
+    "microsite": "1.2.2-next.0"
   }
 }

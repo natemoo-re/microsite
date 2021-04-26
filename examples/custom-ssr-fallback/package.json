@@ -9,6 +9,6 @@
     "serve": "microsite build --serve"
   },
   "devDependencies": {
-    "microsite": "1.2.1"
+    "microsite": "1.2.2-next.0"
   }
 }
