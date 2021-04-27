@@ -14,6 +14,7 @@ import {
   generateStaticPropsContext,
   normalizePathName,
 } from "../utils/router.js";
+import fetch from "../server/fetch.js";
 
 const noop = () => Promise.resolve();
 
@@ -26,6 +27,9 @@ let __HeadContext: any;
 let __InternalDocContext: any;
 let ErrorPage: any;
 let errorSrc: string;
+
+declare var global: NodeJS.Global & { fetch: typeof fetch };
+global.fetch = fetch;
 
 const loadErrorPage = async () => {
   if (!ErrorPage) {
