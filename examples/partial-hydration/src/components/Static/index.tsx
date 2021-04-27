@@ -1,12 +1,12 @@
 import { h, FunctionalComponent } from "preact";
 
-const Static: FunctionalComponent<{ renderedAt: string }> = ({
+const Static: FunctionalComponent<{ renderedAt: Date }> = ({
   renderedAt,
   children,
 }) => {
   return (
     <section>
-      <h3>Page rendered on {renderedAt}</h3>
+      <h3>Page rendered on {(renderedAt || new Date()).toLocaleString()}</h3>
 
       {children}
 

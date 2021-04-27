@@ -18,7 +18,23 @@ const Index: FunctionalComponent<any> = ({ renderedAt }) => {
 
       <main>
         <Static renderedAt={renderedAt}>
-          <Clock initialDate={renderedAt} />
+          <Clock
+            initialDate={renderedAt}
+            xss={"</script><script>alert();</script>"}
+            {...{ ["</script><script>alert();</script>"]: true }}
+            autoplay
+            playsinline
+            sources={[
+              {
+                src: "/home/background-desktop.webm",
+                type: "video/webm",
+              },
+              {
+                src: "/home/background-desktop.mp4",
+                type: "video/mp4",
+              },
+            ]}
+          />
         </Static>
         <Idle />
         <Visible />
@@ -37,7 +53,7 @@ export default definePage(Index, {
   async getStaticProps() {
     return {
       props: {
-        renderedAt: new Date().toLocaleString().replace(", ", " at "),
+        renderedAt: new Date(),
       },
     };
   },

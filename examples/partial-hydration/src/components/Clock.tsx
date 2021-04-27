@@ -2,10 +2,10 @@ import { FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { withHydrate } from "microsite/hydrate";
 
-const Clock: FunctionalComponent<{ initialDate: string }> = ({
-  initialDate,
-}) => {
-  const [date, setDate] = useState(initialDate);
+const Clock: FunctionalComponent<{ initialDate: Date }> = ({ initialDate }) => {
+  const [date, setDate] = useState(
+    (initialDate || new Date()).toLocaleString().replace(", ", " at ")
+  );
 
   useEffect(() => {
     let id = setInterval(() => {

@@ -1,5 +1,7 @@
 import { h, FunctionComponent, createContext, VNode } from "preact";
 import { useContext } from "preact/hooks";
+import { serializeToJsString, hashString } from "./utils/serialize.js";
+import { __PageContext } from "./document.js";
 
 const isServer = typeof window === "undefined";
 export const HydrateContext = createContext<string | false>(false);
@@ -10,8 +12,6 @@ export interface HydrationProps {
   fallback?: VNode<any> | null;
 }
 
-const encode = (str: string) => Buffer.from(str).toString("base64");
-
 export function withHydrate<T extends FunctionComponent<any>>(
   Component: T,
   hydrationProps: HydrationProps = {}
@@ -21,6 +21,8 @@ export function withHydrate<T extends FunctionComponent<any>>(
 
   return (function (props: any, ref: any) {
     const hydrateParent = useContext(HydrateContext);
+    const pageCtx = useContext(__PageContext);
+    const hasProps = Object.keys(props).length > 0;
     if (hydrateParent)
       throw new Error(
         `withHydrate() should only be called at the top-level of a Component tree. <${innerName} /> should not be nested within <${hydrateParent} />`
@@ -31,7 +33,13 @@ export function withHydrate<T extends FunctionComponent<any>>(
         `withHydrate() is unable to serialize complex \`children\`. Please inline these children into <${innerName} />.`
       );
 
-    const p = isServer ? `p=${encode(JSON.stringify(props))}` : "";
+    const serialized = hasProps ? serializeToJsString(props) : "";
+    const hash = hasProps ? hashString(serialized) : "";
+    if (hasProps) {
+      pageCtx.props.current[hash] = serialized;
+    }
+
+    const p = isServer && hasProps ? `p=${hash}` : "";
     const m = isServer && method ? `m=${method}` : "";
     const f = isServer && typeof Fallback !== "undefined" ? "f=1" : "";
     const Marker = "hydrate-marker" as any;
