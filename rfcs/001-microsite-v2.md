@@ -67,6 +67,10 @@ Switching the majority of JSX compilation to a custom compiler would also open t
 
 > I'm not interested in supporting React unless it is aliased to `preact/compat`.
 
+### Open Questions
+- Framework detection
+- Framework JSX compilation
+
 ## Custom Rendering
 
 Microsite would have its own internal `renderToString` that resolves everything to a string of HTML.
