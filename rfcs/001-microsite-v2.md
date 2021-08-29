@@ -12,6 +12,8 @@ The core of Microsite v2.0.0 would be built around a custom JSX compiler. Concep
 
 Instead of the `withHydrate` HOC, this compiler would be able to leverage a hydration directive directly inside of JSX. The compiler output would be highly optimized for SSR speed, relying on strings rather than a server-side VDOM.
 
+It's possible that hydration directives wouldn't even be necessary if we can detect whether a component uses `on*` event listeners or `use*` hooks. In that case, I'd default to `method: visible` hydration.
+
 ```tsx
 // Input
 /* imports */
