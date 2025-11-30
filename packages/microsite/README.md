@@ -1,3 +1,10 @@
+> [!CAUTION]
+> Microsite is no longer maintained. The partial hydration techniques pioneered in this project served as a precursor to [Astro](https://astro.build/), which [@natemoo-re](https://github.com/natemoo-re) co-created, and a number of other islands architecture-based frameworks like [Fresh](https://fresh.deno.dev/).
+> 
+> Consider this archive a reference implementation for islands architecture—may it inspire you to _do more with less JavaScript_.
+
+</div>
+
 <br />
 <br />
 
@@ -21,10 +28,6 @@
 ```bash
 npm init microsite
 ```
-
----
-
-Microsite's public API is quite stable, but I caution **professional users** to consider this a WIP! There are plenty of quirks and bugs (especially with `dev` mode) that are being ironed out until Microsite reaches a more stable v2.0.0!
 
 ---
 
